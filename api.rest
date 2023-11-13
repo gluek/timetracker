@@ -1,0 +1,49 @@
+@host = localhost:8080
+
+// Create Entry
+POST http://{{host}}/api/timeframes HTTP/1.1
+content-type: application/json
+    
+{
+    "id": "200001010001",
+    "year": 2000,
+    "month": 1,
+    "day": 1,
+    "start": "08h00m",
+    "end": "12h00m",
+    "total": "04h00m",
+    "project": "testProject"
+}
+
+###
+
+// Get Entries
+GET http://{{host}}/api/timeframes HTTP/1.1
+content-type: application/json
+
+###
+
+// Get Entry by ID
+GET http://{{host}}/api/timeframes/200001010001 HTTP/1.1
+content-type: application/json
+###
+
+// Update Entry
+PUT http://{{host}}/api/timeframes/200001010001 HTTP/1.1
+content-type: application/json
+
+{
+    "id": "200001010001",
+    "year": 2000,
+    "month": 1,
+    "day": 1,
+    "start": "10h00m",
+    "end": "13h00m",
+    "total": "03h00m",
+    "project": "testProject2"
+}
+###
+
+// Delete Entry
+DELETE http://{{host}}/api/timeframes/200001010001 HTTP/1.1
+content-type: application/json
