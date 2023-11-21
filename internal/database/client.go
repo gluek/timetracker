@@ -30,7 +30,7 @@ type Config struct {
 }
 
 func Connect() {
-	Instance, err = gorm.Open(sqlite.Open("timetrack.sqlite"), &gorm.Config{})
+	Instance, err = gorm.Open(sqlite.Open("./timetrack.sqlite"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 		panic("Cannot connect to DB")
