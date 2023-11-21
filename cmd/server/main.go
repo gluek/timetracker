@@ -21,7 +21,6 @@ func main() {
 
 	// Windows may be missing this
 	mime.AddExtensionType(".js", "application/javascript")
-	//mime.AddExtensionType(".css", "text/css")
 
 	log.Fatal(http.ListenAndServe("127.0.0.1:34115", nil))
 }
