@@ -23,7 +23,7 @@ func main() {
 	mime.AddExtensionType(".js", "application/javascript")
 	//mime.AddExtensionType(".css", "text/css")
 
-	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
+	log.Fatal(http.ListenAndServe("127.0.0.1:34115", nil))
 }
 
 func RegisterEntryRoutes(router *mux.Router) {
