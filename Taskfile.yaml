@@ -17,3 +17,7 @@ tasks:
     desc: Run the application
     cmds:
       - go run ./cmd/server/...
+  build:
+    desc: Run the application
+    cmds:
+      - go build -ldflags -H=windowsgui ./cmd/server/...

@@ -7,7 +7,37 @@
     <link rel="stylesheet" href="/tailwind.css"/>
 </head>
 <body>
-    <h1 class="text-3xl font-bold text-teal-500">Hello World!</h1>
-    <button class="btn btn-primary">Button</button>
-</body>
+    <div class="navbar bg-base-100">
+        <div class="flex-1">
+            <a class="text-3xl font-bold px-3">TimeTracker</a>
+            <a class="btn btn-ghost text-xl">Days</a>
+            <a class="btn btn-ghost text-xl">Projects</a>
+            <a class="btn btn-ghost text-xl" href="/layout">Template Test</a>
+        </div>
+    </div>
+    <div class="container p-5">
+        <form>
+            <div class="join p-2 border-2 border-slate-500">
+                <div class="join-item px-2">
+                    <a class="text-xl">Start</a>
+                    <input type="time" id="start" name="start" min="06:00" max="20:00" required />
+                </div>
+                <div class="join-item px-2">
+                    <a class="text-xl">End</a>
+                    <input type="time" id="end" name="end" min="06:00" max="20:00" required />
+                </div>
+                <select class="join-item select w-full max-w-xs" name="project">
+                    <option disabled selected>Pick your project</option>
+                    <option>Homer</option>
+                    <option>Marge</option>
+                    <option>Bart</option>
+                    <option>Lisa</option>
+                    <option>Maggie</option>
+                </select>
+                <button class="btn join-item">Add</button>
+            </div>  
+        </form>
+        
+    </div>
+    </body>
 </html>

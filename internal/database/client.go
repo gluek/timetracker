@@ -2,17 +2,22 @@ package database
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/gorilla/mux"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"database/sql"
+
+	_ "modernc.org/sqlite"
 )
 
-var Instance *gorm.DB
+var DB *sql.DB
 var err error
+var (
+	pwd, _ = os.Getwd()
+)
 
 type Timeframe struct {
 	ID       string `json:"id"`
@@ -30,7 +35,7 @@ type Config struct {
 }
 
 func Connect() {
-	Instance, err = gorm.Open(sqlite.Open("./internal/database/timetrack.sqlite"), &gorm.Config{})
+	DB, err = sql.Open("sqlite", pwd+"/timetrack.sqlite")
 	if err != nil {
 		log.Fatal(err)
 		panic("Cannot connect to DB")
@@ -38,68 +43,53 @@ func Connect() {
 	log.Println("Connected to Database...")
 }
 
-func Migrate() {
-	Instance.AutoMigrate(&Timeframe{})
-	log.Println("Database Migration Completed...")
-}
-
 func checkIfEntryExists(entryID string) bool {
-	var entry Timeframe
-	Instance.First(&entry, entryID)
-	return entry.ID != ""
+	return true
 }
 
 func CreateEntry(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var entry Timeframe
-	json.NewDecoder(r.Body).Decode(&entry)
-	Instance.Create(&entry)
-	json.NewEncoder(w).Encode(entry)
+
 }
 
 func GetEntryByID(w http.ResponseWriter, r *http.Request) {
-	entryID := mux.Vars(r)["id"]
-	if !checkIfEntryExists(entryID) {
-		json.NewEncoder(w).Encode("Entry Not Found!")
-		return
-	}
-	var entry Timeframe
-	Instance.First(&entry, entryID)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entry)
+
 }
 
 func GetEntries(w http.ResponseWriter, r *http.Request) {
-	var entries []Timeframe
-	Instance.Find(&entries)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(entries)
+	var timeframes []Timeframe = []Timeframe{}
+	var timef Timeframe
+
+	rows, _ := DB.Query("SELECT * FROM timeframes")
+
+	for rows.Next() {
+		timef = Timeframe{}
+		rows.Scan(&timef.ID, &timef.Year, &timef.Month, &timef.Day,
+			&timef.Start, &timef.End, &timef.Duration, &timef.Project)
+		timeframes = append(timeframes, timef)
+		log.Printf("ID: %s", timef.ID)
+	}
+
+	err = json.NewEncoder(w).Encode(&timeframes)
+	if err != nil {
+		fmt.Print(err)
+	}
+}
+
+func GetVersion() {
+	var version string
+	err = DB.QueryRow("SELECT SQLITE_VERSION()").Scan(&version)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(version)
 }
 
 func UpdateEntry(w http.ResponseWriter, r *http.Request) {
-	entryID := mux.Vars(r)["id"]
-	if !checkIfEntryExists(entryID) {
-		json.NewEncoder(w).Encode("Entry Not Found!")
-		return
-	}
-	var entry Timeframe
-	Instance.First(&entry, entryID)
-	json.NewDecoder(r.Body).Decode(&entry)
-	Instance.Save(&entry)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entry)
+
 }
 
 func DeleteEntry(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	entryID := mux.Vars(r)["id"]
-	if !checkIfEntryExists(entryID) {
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode("Entry Not Found!")
-		return
-	}
-	var entry Timeframe
-	Instance.Delete(&entry, entryID)
-	json.NewEncoder(w).Encode("Entry Deleted Succesfully!")
+
 }
