@@ -29,6 +29,7 @@ func main() {
 
 func webServer() {
 	database.Connect()
+	defer database.Close()
 
 	router := mux.NewRouter()
 
@@ -41,25 +42,6 @@ func webServer() {
 	mime.AddExtensionType(".js", "application/javascript")
 
 	log.Fatal(http.ListenAndServe("127.0.0.1:34115", nil))
-}
-
-func RegisterEntryRoutes(router *mux.Router) {
-	router.HandleFunc("/api/timeframes", database.CreateEntry).Methods("POST")
-	router.HandleFunc("/api/timeframes", database.GetEntries).Methods("GET")
-	router.HandleFunc("/api/timeframes/{id}", database.GetEntryByID).Methods("GET")
-	router.HandleFunc("/api/timeframes/{id}", database.UpdateEntry).Methods("PUT")
-	router.HandleFunc("/api/timeframes/{id}", database.DeleteEntry).Methods("DELETE")
-}
-
-func TemplateHandler(w http.ResponseWriter, r *http.Request) {
-	var entries []database.Timeframe
-	//database.Instance.Find(&entries)
-	tmpl := template.Must(template.ParseFiles(pwd + "/internal/templates/templtest.html"))
-	data := PageData{
-		Title:   "My Title",
-		Entries: entries,
-	}
-	tmpl.Execute(w, data)
 }
 
 func webView() {
@@ -82,4 +64,24 @@ func webView() {
 	w.SetSize(600, 600, webview2.HintNone)
 	w.Navigate("http://localhost:34115/")
 	w.Run()
+}
+
+func RegisterEntryRoutes(router *mux.Router) {
+	router.HandleFunc("/api/timeframes", database.GetEntries).Methods("GET")
+
+	router.HandleFunc("/api/timeframes", database.CreateEntry).Methods("POST")
+	router.HandleFunc("/api/timeframes/{id}", database.GetEntryByID).Methods("GET")
+	router.HandleFunc("/api/timeframes/{id}", database.UpdateEntry).Methods("PUT")
+	router.HandleFunc("/api/timeframes/{id}", database.DeleteEntry).Methods("DELETE")
+}
+
+func TemplateHandler(w http.ResponseWriter, r *http.Request) {
+	var entries []database.Timeframe
+	//database.Instance.Find(&entries)
+	tmpl := template.Must(template.ParseFiles(pwd + "/internal/templates/templtest.html"))
+	data := PageData{
+		Title:   "My Title",
+		Entries: entries,
+	}
+	tmpl.Execute(w, data)
 }

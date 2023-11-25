@@ -24,7 +24,7 @@ content-type: application/json
 ###
 
 // Get Entry by ID
-GET http://{{host}}/api/timeframes/200001010001 HTTP/1.1
+GET http://{{host}}/api/timeframes/200001010008 HTTP/1.1
 content-type: application/json
 ###
 

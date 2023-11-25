@@ -10,6 +10,7 @@ import (
 
 	"database/sql"
 
+	"github.com/gorilla/mux"
 	_ "modernc.org/sqlite"
 )
 
@@ -41,38 +42,132 @@ func Connect() {
 		panic("Cannot connect to DB")
 	}
 	log.Println("Connected to Database...")
+
+	tableVars := "(id string, year int, month int, day int, start string, end string, duration string, project string)"
+	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = statement.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func checkIfEntryExists(entryID string) bool {
-	return true
+func Close() {
+	err = DB.Close()
+	if err != nil {
+		log.Fatal(err)
+		log.Println("Could not close database")
+	}
+	log.Println("Database closed")
 }
 
 func CreateEntry(w http.ResponseWriter, r *http.Request) {
+	var timefr Timeframe
+	json.NewDecoder(r.Body).Decode(&timefr)
 
+	statement, err := DB.Prepare("INSERT INTO timeframes " +
+		"(id, year, month, day, start, end, duration, project) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(timefr.ID, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.Project)
+	if err != nil {
+		http.Error(w, "Failed to create timeframe", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintln(w, "Timeframe created succesfully")
 }
 
 func GetEntryByID(w http.ResponseWriter, r *http.Request) {
+	var timefr Timeframe = Timeframe{}
 
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+
+	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = statement.QueryRow(idStr).Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
+		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.Project)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Could not find timeframe with id=%s", idStr), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(&timefr)
+	if err != nil {
+		fmt.Print(err)
+	}
 }
 
 func GetEntries(w http.ResponseWriter, r *http.Request) {
 	var timeframes []Timeframe = []Timeframe{}
-	var timef Timeframe
+	var timefr Timeframe
 
-	rows, _ := DB.Query("SELECT * FROM timeframes")
+	statement, err := DB.Prepare("SELECT * FROM timeframes")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, _ := statement.Query()
 
 	for rows.Next() {
-		timef = Timeframe{}
-		rows.Scan(&timef.ID, &timef.Year, &timef.Month, &timef.Day,
-			&timef.Start, &timef.End, &timef.Duration, &timef.Project)
-		timeframes = append(timeframes, timef)
-		log.Printf("ID: %s", timef.ID)
+		timefr = Timeframe{}
+		rows.Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.Project)
+		timeframes = append(timeframes, timefr)
 	}
 
 	err = json.NewEncoder(w).Encode(&timeframes)
 	if err != nil {
 		fmt.Print(err)
 	}
+}
+
+func UpdateEntry(w http.ResponseWriter, r *http.Request) {
+	var timefr Timeframe
+	json.NewDecoder(r.Body).Decode(&timefr)
+
+	vars := mux.Vars(r)
+	idStr := timefr.ID
+	if vars["id"] != idStr {
+		http.Error(w, "ID in request and provided data do not match", http.StatusBadRequest)
+		return
+	}
+
+	statement, err := DB.Prepare("UPDATE timeframes SET " +
+		"year=?, month=?, day=?, start=?, end=?, duration=?, project=? WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.Project, timefr.ID)
+	if err != nil {
+		http.Error(w, "Failed to update timeframe", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Timeframe updated succesfully")
+}
+
+func DeleteEntry(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+
+	statement, err := DB.Prepare("DELETE FROM timeframes WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(idStr)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Could not delete timeframe with id=%s", idStr), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Timeframe deleted succesfully")
 }
 
 func GetVersion() {
@@ -84,12 +179,4 @@ func GetVersion() {
 	}
 
 	fmt.Println(version)
-}
-
-func UpdateEntry(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func DeleteEntry(w http.ResponseWriter, r *http.Request) {
-
 }
