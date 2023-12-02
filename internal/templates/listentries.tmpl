@@ -1,0 +1,23 @@
+{{define "test"}}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/tailwind.css"/>
+    <title>Document</title>
+</head>
+<body>
+    {{template "nav" .}}
+    {{range .Entries}}
+        <li>
+            <form name="{{.ID}}" action="/api/form/{{.ID}}" method="Put">
+                <input class="form-input" type="time" value="{{.Start}}" name="start"/>
+                <input class="form-input" type="time" value="{{.End}}" name="end"/>
+                <span>| {{.Project}} <a class="button text-error">&cross;</a></span>
+            </form> 
+        </li>
+    {{end}}
+</body>
+</html>
+{{end}}
