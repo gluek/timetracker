@@ -1,23 +1,29 @@
 ---
 # https://taskfile.dev
-version: '3'
+version: "3"
 
 tasks:
   css:
     dir: ./internal
     desc: Build the assets
     cmds:
-      - tailwindcss.exe -i ./assets/tailwind.css -o ./templates/tailwind.css
+      - tailwindcss.exe -i ./assets/css/tailwind.css -o ./assets/css/input.css
   css-watch:
     dir: ./internal
     desc: Build the assets
     cmds:
-      - tailwindcss.exe -i ./assets/tailwind.css -o ./templates/tailwind.css --watch
+      - tailwindcss.exe -i ./assets/css/tailwind.css -o ./assets/css/input.css --watch
+  gen:
+    desc: Generate templ templates
+    cmds:
+      - templ generate
   run:
     desc: Run the application
+    deps: [css, gen]
     cmds:
-      - go run ./cmd/server/...
+      - go run .
   build:
     desc: Run the application
+    deps: [css, gen]
     cmds:
-      - go build -ldflags -H=windowsgui ./cmd/server/...
+      - go build -ldflags -H=windowsgui .

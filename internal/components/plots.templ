@@ -1,0 +1,25 @@
+package components
+
+script xyPlotScript(xydata []float64) {
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    var option;
+
+    option = {
+    xAxis: {
+        type: 'category',
+        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    },
+    yAxis: {
+        type: 'value'
+    },
+    series: [
+        {
+        data: xydata,
+        type: 'line'
+        }
+    ]
+    };
+
+    option && myChart.setOption(option);
+}

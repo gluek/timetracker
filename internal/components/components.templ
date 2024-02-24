@@ -1,0 +1,94 @@
+package components
+
+import "strconv"
+
+templ Counts(global, user int) {
+	<div class="flex justify-center w-full gap-5">
+		<form id="countsFormGlobal" action="/" method="POST" hx-post="/" hx-select="#countsFormGlobal" hx-swap="outerHTML">
+			<div class="card w-[150px] bg-secondary text-center border-2 border-secondary-content">
+				<h1 class="text-5xl text-secondary-content">{ strconv.Itoa(global) }</h1>
+				<p class="text text-secondary-content">Global</p>
+				<div class="pb-1"><button class="btn btn-secondary-content" type="submit" name="global" value="global">+1</button></div>
+			</div>
+		</form>
+		<form id="countsFormUser" action="/" method="POST" hx-post="/" hx-select="#countsFormUser" hx-swap="outerHTML">
+			<div class="card w-[150px] bg-secondary text-center border-2 border-secondary-content">
+				<h1 class="text-5xl text-secondary-content">{ strconv.Itoa(user) }</h1>
+				<p class="text text-secondary-content">User</p>
+				<div class="pb-1"><button class="btn btn-secondary-content" type="submit" name="user" value="user">+1</button></div>
+			</div>
+		</form>
+	</div>
+}
+
+templ loginModal() {
+	<dialog id="idModalLogin" class="absolute top-0 left-0 grid justify-center backdrop-blur-sm bg-white/30 z-50 w-full h-full" style="visibility: hidden;">
+		<div class="modal-box bg-info w-[300px] h-[300px]">
+			<button onclick="document.getElementById('idModalLogin').style.visibility='hidden'" class="btn btn-sm btn-circle absolute right-2 top-2">&times;</button>
+			<h3 class="font-bold text-lg text-info-content">Login</h3>
+			<form id="loginForm" action="/" method="PUT">
+				<div class="grid">
+					<label class="text-info-content" for="username">Username:</label>
+					<input class="input" type="text" name="username"/>
+					<label class="text-info-content" for="password">Password:</label>
+					<input class="input" type="text" name="password"/>
+					<div class="pt-2 justify-self-end"><button class="btn btn-sm" type="submit">Submit</button></div>
+				</div>
+			</form>
+		</div>
+	</dialog>
+}
+
+templ Page(xydata []float64) {
+	<!DOCTYPE html>
+	<html data-theme="dark">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Counts</title>
+			<link rel="stylesheet" href="/static/internal/assets/css/input.css"/>
+			<script src="/static/internal/assets/js/htmx.min.js"></script>
+			<script src="/static/internal/assets/js/echarts.js"></script>
+		</head>
+		<body onload={ xyPlotScript(xydata) }>
+			<header class="hero primary">
+				<div class="hero-content text-center h-20">
+					<h1 class="text-5xl primary-content font-bold">Counts</h1>
+				</div>
+			</header>
+			<div class="flex justify-center p-5">
+				<div class="grow max-w-[1000px]">
+					<div class="navbar bg-base-300 rounded-lg shadow">
+						<div class="flex-1">
+							<a class="btn btn-ghost text-xl" href="#date">TestNav</a>
+						</div>
+						<div class="flex-none">
+							<button
+								onclick="document.getElementById('idModalLogin').style.visibility='visible'"
+								class="btn btn-ghost text-xl justify-self-end"
+							>
+								Login
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			@loginModal()
+			<section class="section h-[1000px]">
+				<div class="grid justify-center p-5">
+					<div id="main" class="card w-[600px] h-[400px] bg-white"></div>
+				</div>
+				@datepicker()
+			</section>
+		</body>
+	</html>
+}
+
+templ datepicker() {
+	<div id="date" class="grid justify-center p-5">
+		<div class="flex flex-row justify-center w-[350px] space-x-1">
+			<input class="rounded" type="time" name="currenttime" id="currenttime"/>
+			<input class="w-[200px] rounded" type="date" name="dateofbirth" id="dateofbirth"/>
+		</div>
+	</div>
+}
