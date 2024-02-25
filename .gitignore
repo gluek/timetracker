@@ -2,3 +2,5 @@
 /webview
 /tmp
 *.exe
+/.vscode
+*.code-workspace
