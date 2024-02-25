@@ -21,8 +21,6 @@ import (
 var content embed.FS
 
 var (
-	pwd, _   = os.Getwd()
-	err      error
 	tfList   []database.Timeframe
 	globalID int
 )
@@ -58,7 +56,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", rootHandler)
-	mux.HandleFunc("/api/timeframes", TestHandler)
+	RegisterMockEntryRoutes(mux)
+
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 
 	mime.AddExtensionType(".js", "application/javascript")
@@ -69,12 +68,19 @@ func main() {
 	}
 }
 
-func RegisterEntryRoutes(mux http.ServeMux) {
+func RegisterEntryRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/timeframes", database.GetEntries)
 	mux.HandleFunc("POST /api/timeframes", database.CreateEntry)
 	mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
 	mux.HandleFunc("PUT /api/timeframes/{id}", database.UpdateEntry)
 	mux.HandleFunc("DELETE /api/timeframes/{id}", database.DeleteEntry)
+}
+
+func RegisterMockEntryRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("POST /api/timeframes", MockCreateEntry)
+	mux.HandleFunc("DELETE /api/timeframes/{id}/", MockDeleteEntry)
+	mux.HandleFunc("PUT /api/timeframes/{id}", MockUpdateEntry)
+	//mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
 }
 
 func atoi(s string) int {
@@ -89,8 +95,16 @@ func parseDate(date string) (int, int, int) {
 	return atoi(year), atoi(month), atoi(day)
 }
 
-func TestHandler(w http.ResponseWriter, r *http.Request) {
-	// var timeframe database.Timeframe
+func findID(id string) int {
+	for index, timeframe := range tfList {
+		if timeframe.ID == id {
+			return index
+		}
+	}
+	return -1
+}
+
+func MockCreateEntry(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
@@ -107,6 +121,33 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 	globalID += 1
 	tfList = append(tfList, timeframe)
 	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.Project, len(tfList))
-	//getHandler(w, r)
+	components.Records(tfList).Render(r.Context(), w)
+}
+
+func MockUpdateEntry(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	year, month, day := parseDate(r.FormValue("dateofrecord"))
+	id := r.PathValue("id")
+	index := findID(id)
+	tfList[index] = database.Timeframe{
+		ID:       id,
+		Date:     r.FormValue("dateofrecord"),
+		Year:     year,
+		Month:    month,
+		Day:      day,
+		Start:    r.FormValue("start"),
+		End:      r.FormValue("end"),
+		Duration: "",
+		Project:  r.FormValue("project"),
+	}
+	fmt.Printf("Entry with ID %s updated\n", id)
+	components.Records(tfList).Render(r.Context(), w)
+}
+
+func MockDeleteEntry(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	index := findID(id)
+	tfList = append(tfList[:index], tfList[index+1:]...)
+	fmt.Printf("Remove ID: %v\n", id)
 	components.Records(tfList).Render(r.Context(), w)
 }

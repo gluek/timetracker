@@ -14,60 +14,66 @@ templ Page(tfList []database.Timeframe) {
 			<script src="/static/internal/assets/js/echarts.js"></script>
 		</head>
 		<body>
-			<header class="hero primary">
-				<div class="hero-content text-center h-20">
-					<h1 class="text-5xl primary-content font-bold">TimeTracker</h1>
-				</div>
-			</header>
 			<div class="flex justify-center p-5">
 				<div class="grow max-w-[1000px]">
-					<div class="navbar bg-base-300 rounded-lg shadow">
-						<div class="flex-1">
+					<div class="navbar rounded-lg shadow border">
+						<div class="hero-content h-20">
+							<a class="text-5xl primary-content font-bold" href="/">TimeTracker</a>
+						</div>
+						<div class="">
 							<a class="btn btn-ghost text-xl" href="#date">TestNav</a>
 						</div>
+						<div class="">
+							<a class="btn btn-ghost text-xl" href="/projects">Projects</a>
+						</div>
 					</div>
+					<section>
+						@Records(tfList)
+					</section>
 				</div>
 			</div>
-			<section class="section h-[1000px]">
-				@Records(tfList)
-			</section>
 		</body>
 	</html>
 }
 
 templ Records(tfList []database.Timeframe) {
-	<div id="records">
-		@Datepicker()
-		@DatepickerList(tfList)
+	<div class="grid justify-center py-5 space-y-5" id="records">
+		@CreateRecord()
+		@RecordList(tfList)
 	</div>
 }
 
-templ Datepicker() {
-	<div id="timetracker">
-		<form id="defaultRecord" class="grid justify-center p-5" hx-post="/api/timeframes" hx-select="#records" hx-target="#records" hx-swap="outerHTML">
-			<div class="flex flex-row justify-center w-[350px] space-x-1">
-				<input class="rounded" type="time" name="start" id="start" value="08:00"/>
-				<input class="rounded" type="time" name="end" id="end" value="17:00"/>
-				<input class="w-[200px] rounded" type="date" name="dateofrecord" id="dateofrecord" value="1970-01-01"/>
-				<input class="rounded" type="text" id="project" name="project" value="Project1"/>
-				<input class="btn btn-sm" type="submit" form="defaultRecord" value="✔"/>
+templ CreateRecord() {
+	<div class="card bg-base-content w-min justify-self-center" id="timetracker">
+		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#records" hx-swap="outerHTML">
+			<div class="flex flex-row justify-center space-x-1">
+				<input class="rounded bg-neutral text-neutral-content" type="date" name="dateofrecord" id="dateofrecord" value="1970-01-01"/>
+				<input class="rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
+				<input class="rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
+				<input class="rounded bg-neutral text-neutral-content" type="text" id="project" name="project" value="Project1"/>
+				<button class="btn btn-success btn-sm" type="submit" form="defaultRecord">&#x2713;</button>
 			</div>
 		</form>
 	</div>
 }
 
-templ DatepickerList(tfList []database.Timeframe) {
-	<div id="timetrackerList">
-		for _, timeframe := range tfList {
-			<form id={ "record" + timeframe.ID } class="grid justify-center p-5" hx-post="/api/timeframes" hx-target="#records" hx-swap="outerHTML">
-				<div class="flex flex-row justify-center w-[350px] space-x-1">
-					<input class="rounded" type="time" name="start" id="start" value={ timeframe.Start }/>
-					<input class="rounded" type="time" name="end" id="end" value={ timeframe.End }/>
-					<input class="w-[200px] rounded" type="date" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
-					<input class="rounded" type="text" id="project" name="project" value={ timeframe.Project }/>
-					<input class="btn btn-sm" type="submit" form={ "record" + timeframe.ID } value="✔"/>
-				</div>
-			</form>
-		}
-	</div>
+templ RecordList(tfList []database.Timeframe) {
+	if len(tfList) > 0 {
+		<div class="card bg-base-content" id="timetrackerList">
+			<div class="card-body">
+				for _, timeframe := range tfList {
+					<form id={ "record" + timeframe.ID } hx-post="/api/timeframes" hx-target="#records" hx-swap="outerHTML">
+						<div class="flex flex-row justify-center space-x-1">
+							<input class="rounded bg-neutral text-neutral-content" type="date" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
+							<input class="rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value={ timeframe.Start }/>
+							<input class="rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value={ timeframe.End }/>
+							<input class="rounded bg-neutral text-neutral-content" type="text" id="project" name="project" value={ timeframe.Project }/>
+							<button class="btn btn-sm btn-success" hx-put={ "/api/timeframes/" + timeframe.ID } hx-target="#records" hx-swap="outerHTML">&#x2713;</button>
+							<button class="btn btn-sm btn-error" hx-delete={ "/api/timeframes/" + timeframe.ID } hx-target="#records" hx-swap="outerHTML">&#x2717;</button>
+						</div>
+					</form>
+				}
+			</div>
+		</div>
+	}
 }

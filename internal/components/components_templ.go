@@ -25,7 +25,7 @@ func Page(tfList []database.Timeframe) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Counts</title><link rel=\"stylesheet\" href=\"/static/internal/assets/css/input.css\"><script src=\"/static/internal/assets/js/htmx.min.js\"></script><script src=\"/static/internal/assets/js/echarts.js\"></script></head><body><header class=\"hero primary\"><div class=\"hero-content text-center h-20\"><h1 class=\"text-5xl primary-content font-bold\">TimeTracker</h1></div></header><div class=\"flex justify-center p-5\"><div class=\"grow max-w-[1000px]\"><div class=\"navbar bg-base-300 rounded-lg shadow\"><div class=\"flex-1\"><a class=\"btn btn-ghost text-xl\" href=\"#date\">TestNav</a></div></div></div></div><section class=\"section h-[1000px]\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Counts</title><link rel=\"stylesheet\" href=\"/static/internal/assets/css/input.css\"><script src=\"/static/internal/assets/js/htmx.min.js\"></script><script src=\"/static/internal/assets/js/echarts.js\"></script></head><body><div class=\"flex justify-center p-5\"><div class=\"grow max-w-[1000px]\"><div class=\"navbar rounded-lg shadow border\"><div class=\"hero-content h-20\"><a class=\"text-5xl primary-content font-bold\" href=\"/\">TimeTracker</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"#date\">TestNav</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"/projects\">Projects</a></div></div><section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -33,7 +33,7 @@ func Page(tfList []database.Timeframe) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</section></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</section></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,15 +57,15 @@ func Records(tfList []database.Timeframe) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"records\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grid justify-center py-5 space-y-5\" id=\"records\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Datepicker().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = CreateRecord().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = DatepickerList(tfList).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RecordList(tfList).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -80,7 +80,7 @@ func Records(tfList []database.Timeframe) templ.Component {
 	})
 }
 
-func Datepicker() templ.Component {
+func CreateRecord() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -93,7 +93,7 @@ func Datepicker() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"timetracker\"><form id=\"defaultRecord\" class=\"grid justify-center p-5\" hx-post=\"/api/timeframes\" hx-select=\"#records\" hx-target=\"#records\" hx-swap=\"outerHTML\"><div class=\"flex flex-row justify-center w-[350px] space-x-1\"><input class=\"rounded\" type=\"time\" name=\"start\" id=\"start\" value=\"08:00\"> <input class=\"rounded\" type=\"time\" name=\"end\" id=\"end\" value=\"17:00\"> <input class=\"w-[200px] rounded\" type=\"date\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"1970-01-01\"> <input class=\"rounded\" type=\"text\" id=\"project\" name=\"project\" value=\"Project1\"> <input class=\"btn btn-sm\" type=\"submit\" form=\"defaultRecord\" value=\"✔\"></div></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card bg-base-content w-min justify-self-center\" id=\"timetracker\"><form id=\"defaultRecord\" class=\"card-body\" hx-post=\"/api/timeframes\" hx-target=\"#records\" hx-swap=\"outerHTML\"><div class=\"flex flex-row justify-center space-x-1\"><input class=\"rounded bg-neutral text-neutral-content\" type=\"date\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"1970-01-01\"> <input class=\"rounded bg-neutral text-neutral-content\" type=\"time\" name=\"start\" id=\"start\" value=\"08:00\"> <input class=\"rounded bg-neutral text-neutral-content\" type=\"time\" name=\"end\" id=\"end\" value=\"17:00\"> <input class=\"rounded bg-neutral text-neutral-content\" type=\"text\" id=\"project\" name=\"project\" value=\"Project1\"> <button class=\"btn btn-success btn-sm\" type=\"submit\" form=\"defaultRecord\">&#x2713;</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -104,7 +104,7 @@ func Datepicker() templ.Component {
 	})
 }
 
-func DatepickerList(tfList []database.Timeframe) templ.Component {
+func RecordList(tfList []database.Timeframe) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -117,67 +117,77 @@ func DatepickerList(tfList []database.Timeframe) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"timetrackerList\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, timeframe := range tfList {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form id=\"")
+		if len(tfList) > 0 {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card bg-base-content\" id=\"timetrackerList\"><div class=\"card-body\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("record" + timeframe.ID))
+			for _, timeframe := range tfList {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form id=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("record" + timeframe.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-post=\"/api/timeframes\" hx-target=\"#records\" hx-swap=\"outerHTML\"><div class=\"flex flex-row justify-center space-x-1\"><input class=\"rounded bg-neutral text-neutral-content\" type=\"date\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.Date))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"rounded bg-neutral text-neutral-content\" type=\"time\" name=\"start\" id=\"start\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.Start))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"rounded bg-neutral text-neutral-content\" type=\"time\" name=\"end\" id=\"end\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.End))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"rounded bg-neutral text-neutral-content\" type=\"text\" id=\"project\" name=\"project\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.Project))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button class=\"btn btn-sm btn-success\" hx-put=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("/api/timeframes/" + timeframe.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#records\" hx-swap=\"outerHTML\">&#x2713;</button> <button class=\"btn btn-sm btn-error\" hx-delete=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("/api/timeframes/" + timeframe.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#records\" hx-swap=\"outerHTML\">&#x2717;</button></div></form>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"grid justify-center p-5\" hx-post=\"/api/timeframes\" hx-target=\"#records\" hx-swap=\"outerHTML\"><div class=\"flex flex-row justify-center w-[350px] space-x-1\"><input class=\"rounded\" type=\"time\" name=\"start\" id=\"start\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.Start))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"rounded\" type=\"time\" name=\"end\" id=\"end\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.End))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"w-[200px] rounded\" type=\"date\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.Date))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"rounded\" type=\"text\" id=\"project\" name=\"project\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(timeframe.Project))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"btn btn-sm\" type=\"submit\" form=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("record" + timeframe.ID))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" value=\"✔\"></div></form>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
 		}
 		if !templ_7745c5c3_IsBuffer {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)

@@ -17,6 +17,11 @@ tasks:
     desc: Generate templ templates
     cmds:
       - templ generate
+
+  assets:
+    desc: Build assets for project
+    deps: [css, gen]
+
   run:
     desc: Run the application
     deps: [css, gen]
