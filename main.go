@@ -10,6 +10,8 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,8 +21,10 @@ import (
 var content embed.FS
 
 var (
-	pwd, _ = os.Getwd()
-	err    error
+	pwd, _   = os.Getwd()
+	err      error
+	tfList   []database.Timeframe
+	globalID int
 )
 
 type PageData struct {
@@ -39,7 +43,7 @@ func randomFloats() []float64 {
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	component := components.Page(randomFloats())
+	component := components.Page(tfList)
 	component.Render(r.Context(), w)
 }
 
@@ -54,6 +58,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/api/timeframes", TestHandler)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 
 	mime.AddExtensionType(".js", "application/javascript")
@@ -70,4 +75,38 @@ func RegisterEntryRoutes(mux http.ServeMux) {
 	mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
 	mux.HandleFunc("PUT /api/timeframes/{id}", database.UpdateEntry)
 	mux.HandleFunc("DELETE /api/timeframes/{id}", database.DeleteEntry)
+}
+
+func atoi(s string) int {
+	value, _ := strconv.Atoi(s)
+	return value
+}
+
+func parseDate(date string) (int, int, int) {
+
+	splitString := strings.Split(date, "-")
+	year, month, day := splitString[0], splitString[1], splitString[2]
+	return atoi(year), atoi(month), atoi(day)
+}
+
+func TestHandler(w http.ResponseWriter, r *http.Request) {
+	// var timeframe database.Timeframe
+	r.ParseForm()
+	year, month, day := parseDate(r.FormValue("dateofrecord"))
+	var timeframe = database.Timeframe{
+		ID:       strconv.Itoa(globalID),
+		Date:     r.FormValue("dateofrecord"),
+		Year:     year,
+		Month:    month,
+		Day:      day,
+		Start:    r.FormValue("start"),
+		End:      r.FormValue("end"),
+		Duration: "",
+		Project:  r.FormValue("project"),
+	}
+	globalID += 1
+	tfList = append(tfList, timeframe)
+	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.Project, len(tfList))
+	//getHandler(w, r)
+	components.Records(tfList).Render(r.Context(), w)
 }

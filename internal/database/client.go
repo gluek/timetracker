@@ -22,6 +22,7 @@ var (
 
 type Timeframe struct {
 	ID       string `json:"id"`
+	Date     string `json:"date"`
 	Year     int    `json:"year"`
 	Month    int    `json:"month"`
 	Day      int    `json:"day"`
