@@ -1,3 +1,4 @@
+// Copyright 2024 Gerrit Lükens. All rights reserved.
 package components
 
 import "local/timetracker/internal/database"
@@ -8,8 +9,9 @@ templ PageHeader(contents templ.Component) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Counts</title>
+			<title>Time Tracker</title>
 			<link rel="stylesheet" href="/static/internal/assets/css/input.css"/>
+			<link rel="icon" type="image/x-icon" href="/static/internal/assets/favicon.png"/>
 			<script src="/static/internal/assets/js/htmx.min.js"></script>
 			<script src="/static/internal/assets/js/echarts.js"></script>
 		</head>
@@ -26,6 +28,9 @@ templ PageHeader(contents templ.Component) {
 						<div class="">
 							<a class="btn btn-ghost text-xl" href="/projects">Projects</a>
 						</div>
+						<div class="">
+							<a class="btn btn-ghost text-xl" href="/projects">Templates</a>
+						</div>
 					</div>
 					<section>
 						@contents
@@ -36,36 +41,40 @@ templ PageHeader(contents templ.Component) {
 	</html>
 }
 
-templ HomePage(tfList []database.Timeframe) {
-	@PageHeader(Records(tfList))
+templ HomePage(tfList []database.Timeframe, projectList []database.Project) {
+	@PageHeader(Records(tfList, projectList))
 }
 
 templ ProjectsPage(projectList []database.Project) {
 	@PageHeader(Projects(projectList))
 }
 
-templ Records(tfList []database.Timeframe) {
+templ Records(tfList []database.Timeframe, projectList []database.Project) {
 	<div class="grid justify-center py-5 space-y-5" id="records">
-		@CreateRecord()
-		@RecordList(tfList)
+		@CreateRecord(projectList)
+		@RecordList(tfList, projectList)
 	</div>
 }
 
-templ CreateRecord() {
+templ CreateRecord(projectList []database.Project) {
 	<div class="card bg-base-content w-min justify-self-center" id="timetracker">
 		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#records" hx-swap="outerHTML">
 			<div class="flex flex-row justify-center space-x-1">
 				<input class="rounded bg-neutral text-neutral-content" type="date" name="dateofrecord" id="dateofrecord" value="1970-01-01"/>
 				<input class="rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
 				<input class="rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
-				<input class="rounded bg-neutral text-neutral-content" type="text" id="project" name="project" value="Project1"/>
+				<select class="rounded bg-neutral text-neutral-content" id="project" name="project">
+					for _, project := range projectList {
+						<option value={ project.ID }>{ project.Name }</option>
+					}
+				</select>
 				<button class="btn btn-success btn-sm" type="submit" form="defaultRecord">&#x2713;</button>
 			</div>
 		</form>
 	</div>
 }
 
-templ RecordList(tfList []database.Timeframe) {
+templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 	if len(tfList) > 0 {
 		<div class="card bg-base-content" id="timetrackerList">
 			<div class="card-body">
@@ -75,7 +84,15 @@ templ RecordList(tfList []database.Timeframe) {
 							<input class="rounded bg-neutral text-neutral-content" type="date" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
 							<input class="rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value={ timeframe.Start }/>
 							<input class="rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value={ timeframe.End }/>
-							<input class="rounded bg-neutral text-neutral-content" type="text" id="project" name="project" value={ timeframe.Project }/>
+							<select class="rounded bg-neutral text-neutral-content" id="project" name="project">
+								for _, project := range projectList {
+									if timeframe.ProjectID == project.ID {
+										<option value={ project.ID } selected>{ project.Name }</option>
+									} else {
+										<option value={ project.ID }>{ project.Name }</option>
+									}
+								}
+							</select>
 							<button class="btn btn-sm btn-success" hx-put={ "/api/timeframes/" + timeframe.ID } hx-target="#records" hx-swap="outerHTML">&#x2713;</button>
 							<button class="btn btn-sm btn-error" hx-delete={ "/api/timeframes/" + timeframe.ID } hx-target="#records" hx-swap="outerHTML">&#x2717;</button>
 						</div>

@@ -1,3 +1,4 @@
+// Copyright 2024 Gerrit Lükens. All rights reserved.
 package database
 
 import (
@@ -21,15 +22,15 @@ var (
 )
 
 type Timeframe struct {
-	ID       string `json:"id"`
-	Date     string `json:"date"`
-	Year     int    `json:"year"`
-	Month    int    `json:"month"`
-	Day      int    `json:"day"`
-	Start    string `json:"start"`
-	End      string `json:"end"`
-	Duration string `json:"duration"`
-	Project  string `json:"project"`
+	ID        string `json:"id"`
+	Date      string `json:"date"`
+	Year      int    `json:"year"`
+	Month     int    `json:"month"`
+	Day       int    `json:"day"`
+	Start     string `json:"start"`
+	End       string `json:"end"`
+	Duration  string `json:"duration"`
+	ProjectID string `json:"project"`
 }
 
 type Project struct {
@@ -81,7 +82,7 @@ func CreateEntry(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(timefr.ID, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.Project)
+	_, err = statement.Exec(timefr.ID, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID)
 	if err != nil {
 		http.Error(w, "Failed to create timeframe", http.StatusInternalServerError)
 		return
@@ -101,7 +102,7 @@ func GetEntryByID(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	err = statement.QueryRow(idStr).Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
-		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.Project)
+		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not find timeframe with id=%s", idStr), http.StatusInternalServerError)
 		return
@@ -126,7 +127,7 @@ func GetEntries(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		timefr = Timeframe{}
 		rows.Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
-			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.Project)
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
 		timeframes = append(timeframes, timefr)
 	}
 
@@ -152,7 +153,7 @@ func UpdateEntry(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.Project, timefr.ID)
+	_, err = statement.Exec(timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.ID)
 	if err != nil {
 		http.Error(w, "Failed to update timeframe", http.StatusInternalServerError)
 		return

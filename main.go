@@ -1,3 +1,4 @@
+// Copyright 2024 Gerrit Lükens. All rights reserved.
 package main
 
 import (
@@ -16,6 +17,7 @@ import (
 )
 
 //go:embed internal/assets/css/input.css
+//go:embed internal/assets/favicon.png
 //go:embed internal/assets/js/htmx.min.js
 //go:embed internal/assets/js/echarts.js
 var content embed.FS
@@ -24,7 +26,7 @@ var (
 	tfList      []database.Timeframe
 	projectList = []database.Project{{
 		ID:       "0",
-		Name:     "",
+		Name:     "NotAssigned",
 		Activity: "",
 		Details:  "",
 	}}
@@ -68,8 +70,8 @@ func randomFloats() []float64 {
 	return floatSlice
 }
 
-func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	component := components.HomePage(tfList)
+func homePageHandler(w http.ResponseWriter, r *http.Request) {
+	component := components.HomePage(tfList, projectList)
 	component.Render(r.Context(), w)
 }
 
@@ -79,7 +81,7 @@ func projectsPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func recordsHandler(w http.ResponseWriter, r *http.Request) {
-	components.Records(tfList).Render(r.Context(), w)
+	components.Records(tfList, projectList).Render(r.Context(), w)
 }
 
 func projectsHandler(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +89,7 @@ func projectsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	homepageHandler(w, r)
+	homePageHandler(w, r)
 }
 
 func RegisterEntryRoutes(mux *http.ServeMux) {
@@ -102,13 +104,11 @@ func RegisterMockRecordRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/timeframes", MockCreateRecord)
 	mux.HandleFunc("DELETE /api/timeframes/{id}/", MockDeleteRecord)
 	mux.HandleFunc("PUT /api/timeframes/{id}", MockUpdateRecord)
-	//mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
 }
 func RegisterMockProjectRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/projects", MockCreateProject)
 	mux.HandleFunc("DELETE /api/projects/{id}/", MockDeleteProject)
 	mux.HandleFunc("PUT /api/projects/{id}", MockUpdateProject)
-	//mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
 }
 
 func atoi(s string) int {
@@ -145,19 +145,19 @@ func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
-		ID:       strconv.Itoa(globalID),
-		Date:     r.FormValue("dateofrecord"),
-		Year:     year,
-		Month:    month,
-		Day:      day,
-		Start:    r.FormValue("start"),
-		End:      r.FormValue("end"),
-		Duration: "",
-		Project:  r.FormValue("project"),
+		ID:        strconv.Itoa(globalID),
+		Date:      r.FormValue("dateofrecord"),
+		Year:      year,
+		Month:     month,
+		Day:       day,
+		Start:     r.FormValue("start"),
+		End:       r.FormValue("end"),
+		Duration:  "",
+		ProjectID: r.FormValue("project"),
 	}
 	globalID += 1
 	tfList = append(tfList, timeframe)
-	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.Project, len(tfList))
+	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, len(tfList))
 	recordsHandler(w, r)
 }
 
@@ -167,15 +167,15 @@ func MockUpdateRecord(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	index := findIDTimeframe(id)
 	tfList[index] = database.Timeframe{
-		ID:       id,
-		Date:     r.FormValue("dateofrecord"),
-		Year:     year,
-		Month:    month,
-		Day:      day,
-		Start:    r.FormValue("start"),
-		End:      r.FormValue("end"),
-		Duration: "",
-		Project:  r.FormValue("project"),
+		ID:        id,
+		Date:      r.FormValue("dateofrecord"),
+		Year:      year,
+		Month:     month,
+		Day:       day,
+		Start:     r.FormValue("start"),
+		End:       r.FormValue("end"),
+		Duration:  "",
+		ProjectID: r.FormValue("project"),
 	}
 	fmt.Printf("Record with ID %s updated\n", id)
 	recordsHandler(w, r)
