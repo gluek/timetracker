@@ -18,7 +18,7 @@ var (
 )
 
 type Timeframe struct {
-	ID        string `json:"id"`
+	ID        int    `json:"id"`
 	Date      string `json:"date"`
 	Year      int    `json:"year"`
 	Month     int    `json:"month"`
@@ -30,7 +30,7 @@ type Timeframe struct {
 }
 
 type Project struct {
-	ID       string `json:"id"`
+	ID       int    `json:"id"`
 	Name     string `json:"name"`
 	Activity string `json:"activity"`
 	Details  string `json:"details"`
@@ -48,7 +48,7 @@ func Connect() {
 	}
 	log.Println("Connected to Database...")
 
-	tableVars := "(id string, year int, month int, day int, start string, end string, duration string, projectid string)"
+	tableVars := "(id int, date string, year int, month int, day int, start string, end string, duration string, projectid string)"
 	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +60,7 @@ func Connect() {
 	}
 	log.Println("Created timesframes Table...")
 
-	tableVars = "(id string, name string, activity string, details string)"
+	tableVars = "(id int, name string, activity string, details string)"
 	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS projects " + tableVars)
 	if err != nil {
 		log.Fatal(err)
@@ -72,13 +72,13 @@ func Connect() {
 	}
 	log.Println("Created projects Table...")
 
-	_, err = GetProjectByID("0")
+	_, err = GetProjectByID(0)
 	if err != nil {
 		statement, err = DB.Prepare("INSERT INTO projects (id, name, activity, details) VALUES (?, ?, ?, ?)")
 		if err != nil {
 			log.Fatal(err)
 		}
-		defaultProject := Project{ID: "0", Name: "NotAssigned", Activity: "", Details: ""}
+		defaultProject := Project{ID: 0, Name: "NotAssigned", Activity: "", Details: ""}
 		_, err = statement.Exec(defaultProject.ID, defaultProject.Name, defaultProject.Activity, defaultProject.Details)
 		if err != nil {
 			log.Fatal(err)
@@ -98,25 +98,25 @@ func Close() {
 
 func CreateRecord(timefr Timeframe) error {
 	statement, err := DB.Prepare("INSERT INTO timeframes " +
-		"(id, year, month, day, start, end, duration, projectid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+		"(id, date, year, month, day, start, end, duration, projectid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(timefr.ID, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID)
+	_, err = statement.Exec(timefr.ID, timefr.Date, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetRecordByID(id string) error {
+func GetRecordByID(id int) error {
 	var timefr Timeframe = Timeframe{}
 
 	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = statement.QueryRow(id).Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
+	err = statement.QueryRow(id).Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
 	if err != nil {
 		return err
@@ -136,28 +136,43 @@ func GetRecords() []Timeframe {
 
 	for rows.Next() {
 		timefr = Timeframe{}
-		rows.Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
+		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
 		timeframes = append(timeframes, timefr)
 	}
 	return timeframes
 }
 
-func UpdateRecord(timefr Timeframe) error {
-
-	statement, err := DB.Prepare("UPDATE timeframes SET " +
-		"year=?, month=?, day=?, start=?, end=?, duration=?, projectid=? WHERE id=?")
+func GetRecordsMaxID() int {
+	var maxID int
+	statement, err := DB.Prepare("SELECT MAX(id) FROM timeframes")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.ID)
+	row := statement.QueryRow()
+	if err != nil {
+		log.Fatal(err)
+	}
+	row.Scan(&maxID)
+
+	return maxID
+}
+
+func UpdateRecord(timefr Timeframe) error {
+
+	statement, err := DB.Prepare("UPDATE timeframes SET " +
+		"date=?, year=?, month=?, day=?, start=?, end=?, duration=?, projectid=? WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(timefr.Date, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.ID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteRecord(id string) error {
+func DeleteRecord(id int) error {
 	statement, err := DB.Prepare("DELETE FROM timeframes WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
@@ -182,7 +197,7 @@ func CreateProject(project Project) error {
 	return nil
 }
 
-func GetProjectByID(id string) (Project, error) {
+func GetProjectByID(id int) (Project, error) {
 	var project Project = Project{}
 
 	statement, err := DB.Prepare("SELECT * FROM projects WHERE id=?")
@@ -214,6 +229,18 @@ func GetProjects() []Project {
 	return projects
 }
 
+func GetProjectsMaxID() int {
+	var maxID int
+	statement, err := DB.Prepare("SELECT MAX(id) FROM projects")
+	if err != nil {
+		log.Fatal(err)
+	}
+	row := statement.QueryRow()
+	row.Scan(&maxID)
+
+	return maxID
+}
+
 func UpdateProject(project Project) error {
 
 	statement, err := DB.Prepare("UPDATE projects SET " +
@@ -228,7 +255,7 @@ func UpdateProject(project Project) error {
 	return nil
 }
 
-func DeleteProject(id string) error {
+func DeleteProject(id int) error {
 	statement, err := DB.Prepare("DELETE FROM projects WHERE id=?")
 	if err != nil {
 		log.Fatal(err)

@@ -14,8 +14,9 @@ import (
 //go:embed internal/assets/css/input.css
 //go:embed internal/assets/favicon.png
 //go:embed internal/assets/js/htmx.min.js
-//go:embed internal/assets/js/echarts.js
 var content embed.FS
+
+//internal/assets/js/echarts.js
 
 func main() {
 	// Init session
@@ -24,8 +25,7 @@ func main() {
 	defer database.Close()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handlers.Root)
-	mux.HandleFunc("/projects", handlers.ProjectsPage)
+	mux.HandleFunc("/", handlers.HomePage)
 	RegisterRecordRoutes(mux)
 	RegisterProjectRoutes(mux)
 
@@ -40,11 +40,13 @@ func main() {
 }
 
 func RegisterRecordRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /timeframes", handlers.RecordsHandler)
 	mux.HandleFunc("POST /api/timeframes", handlers.CreateRecord)
 	mux.HandleFunc("DELETE /api/timeframes/{id}/", handlers.DeleteRecord)
 	mux.HandleFunc("PUT /api/timeframes/{id}", handlers.UpdateRecord)
 }
 func RegisterProjectRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /projects", handlers.ProjectsHandler)
 	mux.HandleFunc("POST /api/projects", handlers.CreateProject)
 	mux.HandleFunc("DELETE /api/projects/{id}/", handlers.DeleteProject)
 	mux.HandleFunc("PUT /api/projects/{id}", handlers.UpdateProject)

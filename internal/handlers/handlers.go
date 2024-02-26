@@ -14,7 +14,7 @@ var (
 	err         error
 	tfList      []database.Timeframe
 	projectList = []database.Project{{
-		ID:       "0",
+		ID:       0,
 		Name:     "NotAssigned",
 		Activity: "",
 		Details:  "",
@@ -24,25 +24,16 @@ var (
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	component := components.HomePage(tfList, projectList)
+	component := components.HomePage(database.GetRecords(), database.GetProjects())
 	component.Render(r.Context(), w)
 }
 
-func ProjectsPage(w http.ResponseWriter, r *http.Request) {
-	component := components.ProjectsPage(projectList)
-	component.Render(r.Context(), w)
+func RecordsHandler(w http.ResponseWriter, r *http.Request) {
+	components.Records(database.GetRecords(), database.GetProjects()).Render(r.Context(), w)
 }
 
-func Root(w http.ResponseWriter, r *http.Request) {
-	HomePage(w, r)
-}
-
-func recordsHandler(w http.ResponseWriter, r *http.Request) {
-	components.Records(database.GetRecords(), projectList).Render(r.Context(), w)
-}
-
-func projectsHandler(w http.ResponseWriter, r *http.Request) {
-	components.Projects(projectList).Render(r.Context(), w)
+func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
+	components.Projects(database.GetProjects()).Render(r.Context(), w)
 }
 
 func atoi(s string) int {
@@ -57,7 +48,7 @@ func parseDate(date string) (int, int, int) {
 	return atoi(year), atoi(month), atoi(day)
 }
 
-func findIDTimeframe(id string) int {
+func findIDTimeframe(id int) int {
 	for index, timeframe := range tfList {
 		if timeframe.ID == id {
 			return index
@@ -66,7 +57,7 @@ func findIDTimeframe(id string) int {
 	return -1
 }
 
-func findIDProject(id string) int {
+func findIDProject(id int) int {
 	for index, project := range projectList {
 		if project.ID == id {
 			return index
@@ -79,7 +70,7 @@ func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
-		ID:        strconv.Itoa(globalID),
+		ID:        globalID,
 		Date:      r.FormValue("dateofrecord"),
 		Year:      year,
 		Month:     month,
@@ -92,16 +83,16 @@ func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
 	globalID += 1
 	tfList = append(tfList, timeframe)
 	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, len(tfList))
-	recordsHandler(w, r)
+	RecordsHandler(w, r)
 }
 
 func MockUpdateRecord(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	id := r.PathValue("id")
-	index := findIDTimeframe(id)
+	index := findIDTimeframe(atoi(id))
 	tfList[index] = database.Timeframe{
-		ID:        id,
+		ID:        atoi(id),
 		Date:      r.FormValue("dateofrecord"),
 		Year:      year,
 		Month:     month,
@@ -112,21 +103,21 @@ func MockUpdateRecord(w http.ResponseWriter, r *http.Request) {
 		ProjectID: r.FormValue("project"),
 	}
 	fmt.Printf("Record with ID %s updated\n", id)
-	recordsHandler(w, r)
+	RecordsHandler(w, r)
 }
 
 func MockDeleteRecord(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	index := findIDTimeframe(id)
+	index := findIDTimeframe(atoi(id))
 	tfList = append(tfList[:index], tfList[index+1:]...)
 	fmt.Printf("Remove Record with ID: %v\n", id)
-	recordsHandler(w, r)
+	RecordsHandler(w, r)
 }
 
 func MockCreateProject(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	var project = database.Project{
-		ID:       strconv.Itoa(globalIDProject),
+		ID:       globalIDProject,
 		Name:     r.FormValue("projectName"),
 		Activity: r.FormValue("activity"),
 		Details:  r.FormValue("details"),
@@ -134,36 +125,36 @@ func MockCreateProject(w http.ResponseWriter, r *http.Request) {
 	globalIDProject += 1
 	projectList = append(projectList, project)
 	fmt.Printf("%s %s %s Len of projectList: %d\n", project.Activity, project.Details, project.Name, len(projectList)-1)
-	projectsHandler(w, r)
+	ProjectsHandler(w, r)
 }
 
 func MockUpdateProject(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	id := r.PathValue("id")
-	index := findIDProject(id)
+	index := findIDProject(atoi(id))
 	projectList[index] = database.Project{
-		ID:       strconv.Itoa(globalIDProject),
+		ID:       globalIDProject,
 		Name:     r.FormValue("projectName"),
 		Activity: r.FormValue("activity"),
 		Details:  r.FormValue("details"),
 	}
 	fmt.Printf("Project with ID %s updated\n", id)
-	projectsHandler(w, r)
+	ProjectsHandler(w, r)
 }
 
 func MockDeleteProject(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	index := findIDProject(id)
+	index := findIDProject(atoi(id))
 	projectList = append(projectList[:index], projectList[index+1:]...)
 	fmt.Printf("Remove Project with ID: %v\n", id)
-	projectsHandler(w, r)
+	ProjectsHandler(w, r)
 }
 
 func CreateRecord(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
-		ID:        strconv.Itoa(globalID),
+		ID:        database.GetRecordsMaxID() + 1,
 		Date:      r.FormValue("dateofrecord"),
 		Year:      year,
 		Month:     month,
@@ -180,7 +171,7 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Created Record %s %s %s\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
-	recordsHandler(w, r)
+	RecordsHandler(w, r)
 }
 
 func UpdateRecord(w http.ResponseWriter, r *http.Request) {
@@ -188,7 +179,7 @@ func UpdateRecord(w http.ResponseWriter, r *http.Request) {
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	id := r.PathValue("id")
 	timefr := database.Timeframe{
-		ID:        id,
+		ID:        atoi(id),
 		Date:      r.FormValue("dateofrecord"),
 		Year:      year,
 		Month:     month,
@@ -203,23 +194,23 @@ func UpdateRecord(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	fmt.Printf("Update Record with ID %s\n", id)
-	recordsHandler(w, r)
+	RecordsHandler(w, r)
 }
 
 func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	err = database.DeleteRecord(id)
+	err = database.DeleteRecord(atoi(id))
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Remove Record with ID: %v\n", id)
-	recordsHandler(w, r)
+	RecordsHandler(w, r)
 }
 
 func CreateProject(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	var project = database.Project{
-		ID:       strconv.Itoa(globalIDProject),
+		ID:       database.GetProjectsMaxID() + 1,
 		Name:     r.FormValue("projectName"),
 		Activity: r.FormValue("activity"),
 		Details:  r.FormValue("details"),
@@ -230,26 +221,26 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	fmt.Printf("Create Project %s %s %s\n", project.Activity, project.Details, project.Name)
-	projectsHandler(w, r)
+	ProjectsHandler(w, r)
 }
 
 func UpdateProject(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	id := r.PathValue("id")
 	project := database.Project{
-		ID:       strconv.Itoa(globalIDProject),
+		ID:       atoi(id),
 		Name:     r.FormValue("projectName"),
 		Activity: r.FormValue("activity"),
 		Details:  r.FormValue("details"),
 	}
 	err = database.UpdateProject(project)
 	fmt.Printf("Update Project with ID %s\n", id)
-	projectsHandler(w, r)
+	ProjectsHandler(w, r)
 }
 
 func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	err = database.DeleteProject(id)
+	err = database.DeleteProject(atoi(id))
 	fmt.Printf("Remove Project with ID: %v\n", id)
-	projectsHandler(w, r)
+	ProjectsHandler(w, r)
 }
