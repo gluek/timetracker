@@ -21,13 +21,41 @@ import (
 var content embed.FS
 
 var (
-	tfList   []database.Timeframe
-	globalID int
+	tfList      []database.Timeframe
+	projectList = []database.Project{{
+		ID:       "0",
+		Name:     "",
+		Activity: "",
+		Details:  "",
+	}}
+	globalID        int
+	globalIDProject int = 1
 )
 
 type PageData struct {
 	Title   string
 	Entries []database.Timeframe
+}
+
+func main() {
+	// Init session
+	pwd, _ := os.Getwd()
+	fmt.Printf("%s\n", pwd)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/projects", projectsPageHandler)
+	RegisterMockRecordRoutes(mux)
+	RegisterMockProjectRoutes(mux)
+
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
+
+	mime.AddExtensionType(".js", "application/javascript")
+
+	fmt.Println("Listening on http://localhost:34115")
+	if err := http.ListenAndServe("localhost:34115", mux); err != nil {
+		log.Printf("error listening: %v", err)
+	}
 }
 
 func randomFloats() []float64 {
@@ -40,32 +68,26 @@ func randomFloats() []float64 {
 	return floatSlice
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	component := components.Page(tfList)
+func homepageHandler(w http.ResponseWriter, r *http.Request) {
+	component := components.HomePage(tfList)
 	component.Render(r.Context(), w)
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
-	getHandler(w, r)
+func projectsPageHandler(w http.ResponseWriter, r *http.Request) {
+	component := components.ProjectsPage(projectList)
+	component.Render(r.Context(), w)
 }
 
-func main() {
-	// Init session
-	pwd, _ := os.Getwd()
-	fmt.Printf("%s\n", pwd)
+func recordsHandler(w http.ResponseWriter, r *http.Request) {
+	components.Records(tfList).Render(r.Context(), w)
+}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", rootHandler)
-	RegisterMockEntryRoutes(mux)
+func projectsHandler(w http.ResponseWriter, r *http.Request) {
+	components.Projects(projectList).Render(r.Context(), w)
+}
 
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
-
-	mime.AddExtensionType(".js", "application/javascript")
-
-	fmt.Println("Listening on localhost:34115")
-	if err := http.ListenAndServe("localhost:34115", mux); err != nil {
-		log.Printf("error listening: %v", err)
-	}
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	homepageHandler(w, r)
 }
 
 func RegisterEntryRoutes(mux *http.ServeMux) {
@@ -76,10 +98,16 @@ func RegisterEntryRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/timeframes/{id}", database.DeleteEntry)
 }
 
-func RegisterMockEntryRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /api/timeframes", MockCreateEntry)
-	mux.HandleFunc("DELETE /api/timeframes/{id}/", MockDeleteEntry)
-	mux.HandleFunc("PUT /api/timeframes/{id}", MockUpdateEntry)
+func RegisterMockRecordRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("POST /api/timeframes", MockCreateRecord)
+	mux.HandleFunc("DELETE /api/timeframes/{id}/", MockDeleteRecord)
+	mux.HandleFunc("PUT /api/timeframes/{id}", MockUpdateRecord)
+	//mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
+}
+func RegisterMockProjectRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("POST /api/projects", MockCreateProject)
+	mux.HandleFunc("DELETE /api/projects/{id}/", MockDeleteProject)
+	mux.HandleFunc("PUT /api/projects/{id}", MockUpdateProject)
 	//mux.HandleFunc("GET /api/timeframes/{id}", database.GetEntryByID)
 }
 
@@ -95,7 +123,7 @@ func parseDate(date string) (int, int, int) {
 	return atoi(year), atoi(month), atoi(day)
 }
 
-func findID(id string) int {
+func findIDTimeframe(id string) int {
 	for index, timeframe := range tfList {
 		if timeframe.ID == id {
 			return index
@@ -104,7 +132,16 @@ func findID(id string) int {
 	return -1
 }
 
-func MockCreateEntry(w http.ResponseWriter, r *http.Request) {
+func findIDProject(id string) int {
+	for index, project := range projectList {
+		if project.ID == id {
+			return index
+		}
+	}
+	return -1
+}
+
+func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
@@ -121,14 +158,14 @@ func MockCreateEntry(w http.ResponseWriter, r *http.Request) {
 	globalID += 1
 	tfList = append(tfList, timeframe)
 	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.Project, len(tfList))
-	components.Records(tfList).Render(r.Context(), w)
+	recordsHandler(w, r)
 }
 
-func MockUpdateEntry(w http.ResponseWriter, r *http.Request) {
+func MockUpdateRecord(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	id := r.PathValue("id")
-	index := findID(id)
+	index := findIDTimeframe(id)
 	tfList[index] = database.Timeframe{
 		ID:       id,
 		Date:     r.FormValue("dateofrecord"),
@@ -140,14 +177,50 @@ func MockUpdateEntry(w http.ResponseWriter, r *http.Request) {
 		Duration: "",
 		Project:  r.FormValue("project"),
 	}
-	fmt.Printf("Entry with ID %s updated\n", id)
-	components.Records(tfList).Render(r.Context(), w)
+	fmt.Printf("Record with ID %s updated\n", id)
+	recordsHandler(w, r)
 }
 
-func MockDeleteEntry(w http.ResponseWriter, r *http.Request) {
+func MockDeleteRecord(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	index := findID(id)
+	index := findIDTimeframe(id)
 	tfList = append(tfList[:index], tfList[index+1:]...)
-	fmt.Printf("Remove ID: %v\n", id)
-	components.Records(tfList).Render(r.Context(), w)
+	fmt.Printf("Remove Record with ID: %v\n", id)
+	recordsHandler(w, r)
+}
+
+func MockCreateProject(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	var project = database.Project{
+		ID:       strconv.Itoa(globalIDProject),
+		Name:     r.FormValue("projectName"),
+		Activity: r.FormValue("activity"),
+		Details:  r.FormValue("details"),
+	}
+	globalIDProject += 1
+	projectList = append(projectList, project)
+	fmt.Printf("%s %s %s Len of projectList: %d\n", project.Activity, project.Details, project.Name, len(projectList)-1)
+	projectsHandler(w, r)
+}
+
+func MockUpdateProject(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	id := r.PathValue("id")
+	index := findIDProject(id)
+	projectList[index] = database.Project{
+		ID:       strconv.Itoa(globalIDProject),
+		Name:     r.FormValue("projectName"),
+		Activity: r.FormValue("activity"),
+		Details:  r.FormValue("details"),
+	}
+	fmt.Printf("Project with ID %s updated\n", id)
+	projectsHandler(w, r)
+}
+
+func MockDeleteProject(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	index := findIDProject(id)
+	projectList = append(projectList[:index], projectList[index+1:]...)
+	fmt.Printf("Remove Project with ID: %v\n", id)
+	projectsHandler(w, r)
 }

@@ -4,3 +4,5 @@
 *.exe
 /.vscode
 *.code-workspace
+*_templ.go
+*.json

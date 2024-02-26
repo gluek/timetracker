@@ -32,6 +32,13 @@ type Timeframe struct {
 	Project  string `json:"project"`
 }
 
+type Project struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Activity string `json:"activity"`
+	Details  string `json:"details"`
+}
+
 type Config struct {
 	DailyHours time.Duration
 }
