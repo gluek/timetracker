@@ -25,7 +25,7 @@ func PageHeader(contents templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Time Tracker</title><link rel=\"stylesheet\" href=\"/static/internal/assets/css/input.css\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/internal/assets/favicon2.png\"><script src=\"/static/internal/assets/js/htmx.min.js\"></script><script src=\"/static/internal/assets/js/echarts.js\"></script></head><body><div class=\"flex justify-center p-5\"><div class=\"grow max-w-[1000px]\"><div class=\"navbar rounded-lg shadow border\"><div class=\"hero-content h-20\"><a class=\"text-5xl primary-content font-bold\" href=\"/\">TimeTracker</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"/\">Records</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"/projects\">Projects</a></div></div><section>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Time Tracker</title><link rel=\"stylesheet\" href=\"/static/internal/assets/css/input.css\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/internal/assets/favicon.png\"><script src=\"/static/internal/assets/js/htmx.min.js\"></script><script src=\"/static/internal/assets/js/echarts.js\"></script></head><body><div class=\"flex justify-center p-5\"><div class=\"grow max-w-[1000px]\"><div class=\"navbar rounded-lg shadow border\"><div class=\"hero-content h-20\"><a class=\"text-5xl primary-content font-bold\" href=\"/\">TimeTracker</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"/\">Records</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"/projects\">Projects</a></div><div class=\"\"><a class=\"btn btn-ghost text-xl\" href=\"/projects\">Templates</a></div></div><section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -161,7 +161,7 @@ func CreateRecord(projectList []database.Project) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 63, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 67, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -255,7 +255,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 						var templ_7745c5c3_Var8 string
 						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 85, Col: 62}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 89, Col: 62}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
@@ -281,7 +281,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 87, Col: 53}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 91, Col: 53}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {

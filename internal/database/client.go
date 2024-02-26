@@ -2,16 +2,12 @@
 package database
 
 import (
-	"encoding/json"
+	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
-	"database/sql"
-
-	"github.com/gorilla/mux"
 	_ "modernc.org/sqlite"
 )
 
@@ -30,7 +26,7 @@ type Timeframe struct {
 	Start     string `json:"start"`
 	End       string `json:"end"`
 	Duration  string `json:"duration"`
-	ProjectID string `json:"project"`
+	ProjectID string `json:"projectid"`
 }
 
 type Project struct {
@@ -52,7 +48,7 @@ func Connect() {
 	}
 	log.Println("Connected to Database...")
 
-	tableVars := "(id string, year int, month int, day int, start string, end string, duration string, project string)"
+	tableVars := "(id string, year int, month int, day int, start string, end string, duration string, projectid string)"
 	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
 	if err != nil {
 		log.Fatal(err)
@@ -62,6 +58,33 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Created timesframes Table...")
+
+	tableVars = "(id string, name string, activity string, details string)"
+	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS projects " + tableVars)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = statement.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Created projects Table...")
+
+	_, err = GetProjectByID("0")
+	if err != nil {
+		statement, err = DB.Prepare("INSERT INTO projects (id, name, activity, details) VALUES (?, ?, ?, ?)")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defaultProject := Project{ID: "0", Name: "NotAssigned", Activity: "", Details: ""}
+		_, err = statement.Exec(defaultProject.ID, defaultProject.Name, defaultProject.Activity, defaultProject.Details)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 func Close() {
@@ -73,48 +96,35 @@ func Close() {
 	log.Println("Database closed")
 }
 
-func CreateEntry(w http.ResponseWriter, r *http.Request) {
-	var timefr Timeframe
-	json.NewDecoder(r.Body).Decode(&timefr)
-
+func CreateRecord(timefr Timeframe) error {
 	statement, err := DB.Prepare("INSERT INTO timeframes " +
-		"(id, year, month, day, start, end, duration, project) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+		"(id, year, month, day, start, end, duration, projectid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	_, err = statement.Exec(timefr.ID, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID)
 	if err != nil {
-		http.Error(w, "Failed to create timeframe", http.StatusInternalServerError)
-		return
+		return err
 	}
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, "Timeframe created succesfully")
+	return nil
 }
 
-func GetEntryByID(w http.ResponseWriter, r *http.Request) {
+func GetRecordByID(id string) error {
 	var timefr Timeframe = Timeframe{}
-
-	vars := mux.Vars(r)
-	idStr := vars["id"]
 
 	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = statement.QueryRow(idStr).Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
+	err = statement.QueryRow(id).Scan(&timefr.ID, &timefr.Year, &timefr.Month, &timefr.Day,
 		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Could not find timeframe with id=%s", idStr), http.StatusInternalServerError)
-		return
+		return err
 	}
-
-	err = json.NewEncoder(w).Encode(&timefr)
-	if err != nil {
-		fmt.Print(err)
-	}
+	return nil
 }
 
-func GetEntries(w http.ResponseWriter, r *http.Request) {
+func GetRecords() []Timeframe {
 	var timeframes []Timeframe = []Timeframe{}
 	var timefr Timeframe
 
@@ -130,53 +140,104 @@ func GetEntries(w http.ResponseWriter, r *http.Request) {
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
 		timeframes = append(timeframes, timefr)
 	}
-
-	err = json.NewEncoder(w).Encode(&timeframes)
-	if err != nil {
-		fmt.Print(err)
-	}
+	return timeframes
 }
 
-func UpdateEntry(w http.ResponseWriter, r *http.Request) {
-	var timefr Timeframe
-	json.NewDecoder(r.Body).Decode(&timefr)
-
-	vars := mux.Vars(r)
-	idStr := timefr.ID
-	if vars["id"] != idStr {
-		http.Error(w, "ID in request and provided data do not match", http.StatusBadRequest)
-		return
-	}
+func UpdateRecord(timefr Timeframe) error {
 
 	statement, err := DB.Prepare("UPDATE timeframes SET " +
-		"year=?, month=?, day=?, start=?, end=?, duration=?, project=? WHERE id=?")
+		"year=?, month=?, day=?, start=?, end=?, duration=?, projectid=? WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
 	_, err = statement.Exec(timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.ID)
 	if err != nil {
-		http.Error(w, "Failed to update timeframe", http.StatusInternalServerError)
-		return
+		return err
 	}
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Timeframe updated succesfully")
+	return nil
 }
 
-func DeleteEntry(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	idStr := vars["id"]
-
+func DeleteRecord(id string) error {
 	statement, err := DB.Prepare("DELETE FROM timeframes WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(idStr)
+	_, err = statement.Exec(id)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Could not delete timeframe with id=%s", idStr), http.StatusInternalServerError)
-		return
+		return err
 	}
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Timeframe deleted succesfully")
+	return nil
+}
+
+func CreateProject(project Project) error {
+	statement, err := DB.Prepare("INSERT INTO projects " +
+		"(id, name, activity, details) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(project.ID, project.Name, project.Activity, project.Details)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetProjectByID(id string) (Project, error) {
+	var project Project = Project{}
+
+	statement, err := DB.Prepare("SELECT * FROM projects WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = statement.QueryRow(id).Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+	if err != nil {
+		return Project{}, err
+	}
+	return project, nil
+}
+
+func GetProjects() []Project {
+	var projects []Project = []Project{}
+	var project Project
+
+	statement, err := DB.Prepare("SELECT * FROM projects")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, _ := statement.Query()
+
+	for rows.Next() {
+		project = Project{}
+		rows.Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+		projects = append(projects, project)
+	}
+	return projects
+}
+
+func UpdateProject(project Project) error {
+
+	statement, err := DB.Prepare("UPDATE projects SET " +
+		"name=?, activity=?, details=? WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(project.Name, project.Activity, project.Details, project.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteProject(id string) error {
+	statement, err := DB.Prepare("DELETE FROM projects WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetVersion() {
