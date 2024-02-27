@@ -1755,6 +1755,10 @@ html {
   flex-grow: 1;
 }
 
+.animate-none {
+  animation: none;
+}
+
 .flex-row {
   flex-direction: row;
 }

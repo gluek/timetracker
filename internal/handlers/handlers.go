@@ -31,11 +31,13 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
-	components.Records(database.GetRecordsForDate(activeDate), database.GetProjects(), activeDate).Render(r.Context(), w)
+	component := components.Records(database.GetRecordsForDate(activeDate), database.GetProjects(), activeDate)
+	component.Render(r.Context(), w)
 }
 
 func RecordsHandler(w http.ResponseWriter, r *http.Request) {
-	components.RecordList(database.GetRecordsForDate(activeDate), database.GetProjects()).Render(r.Context(), w)
+	component := components.RecordList(database.GetRecordsForDate(activeDate), database.GetProjects())
+	component.Render(r.Context(), w)
 }
 
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
