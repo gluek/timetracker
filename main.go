@@ -28,6 +28,7 @@ func main() {
 	mux.HandleFunc("/", handlers.HomePage)
 	RegisterRecordRoutes(mux)
 	RegisterProjectRoutes(mux)
+	mux.HandleFunc("POST /api/currentdate", handlers.ChangeDate)
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 
@@ -40,7 +41,7 @@ func main() {
 }
 
 func RegisterRecordRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /timeframes", handlers.RecordsHandler)
+	mux.HandleFunc("GET /timeframes", handlers.RecordsPageHandler)
 	mux.HandleFunc("POST /api/timeframes", handlers.CreateRecord)
 	mux.HandleFunc("DELETE /api/timeframes/{id}/", handlers.DeleteRecord)
 	mux.HandleFunc("PUT /api/timeframes/{id}", handlers.UpdateRecord)

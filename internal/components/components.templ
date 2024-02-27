@@ -31,6 +31,9 @@ templ PageHeader(contents templ.Component) {
 						<div class="">
 							<button class="btn btn-ghost text-xl">Templates</button>
 						</div>
+						<div class="">
+							<button class="btn btn-ghost text-xl">Config</button>
+						</div>
 					</div>
 					<section id="content-section">
 						@contents
@@ -41,64 +44,84 @@ templ PageHeader(contents templ.Component) {
 	</html>
 }
 
-templ HomePage(tfList []database.Timeframe, projectList []database.Project) {
-	@PageHeader(Records(tfList, projectList))
+templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string) {
+	@PageHeader(Records(tfList, projectList, currentDate))
 }
 
-templ Records(tfList []database.Timeframe, projectList []database.Project) {
+templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate string) {
 	<div id="records" class="grid justify-center py-5 space-y-5">
-		@CreateRecord(projectList)
+		@CreateRecord(projectList, currentDate)
 		@RecordList(tfList, projectList)
 	</div>
 }
 
-templ CreateRecord(projectList []database.Project) {
+templ CreateRecord(projectList []database.Project, currentDate string) {
 	<div class="card w-min justify-self-center border" id="timetracker">
-		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#records" hx-swap="outerHTML">
+		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#record-list" hx-swap="outerHTML">
 			<div class="flex justify-center">
-				<input class="rounded bg-neutral text-neutral-content" type="date" name="dateofrecord" id="dateofrecord" value="1970-01-01"/>
+				<input class="input-lg rounded bg-neutral text-neutral-content" hx-post="/api/currentdate" type="date" name="dateofrecord" id="dateofrecord" value={ currentDate }/>
 			</div>
-			<div class="flex flex-row justify-center space-x-1">
-				<input class="rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
-				<input class="rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
-				<select class="rounded bg-neutral text-neutral-content" id="project" name="project">
-					for _, project := range projectList {
-						<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
-					}
-				</select>
-				<button class="btn btn-success btn-sm" type="submit" form="defaultRecord">&#x2713;</button>
+			<div class="flex flex-row justify-center content-center space-x-1">
+				<label class="form-control w-full max-w-xs">
+					<div class="label">
+						<span class="label-text">From:</span>
+					</div>
+					<input class="input rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
+				</label>
+				<label class="form-control w-full max-w-xs">
+					<div class="label">
+						<span class="label-text">To:</span>
+					</div>
+					<input class="input rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
+				</label>
+				<label class="form-control w-full max-w-xs">
+					<div class="label">
+						<span class="label-text">Project:</span>
+					</div>
+					<div class="flex flex-row">
+						<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
+							for _, project := range projectList {
+								<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+							}
+						</select>
+						<button class="btn btn-success" type="submit" form="defaultRecord">&#x2713;</button>
+					</div>
+				</label>
 			</div>
 		</form>
 	</div>
 }
 
 templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
-	if len(tfList) > 0 {
-		<div class="card border" id="timetrackerList">
-			<div class="card-body">
-				for _, timeframe := range tfList {
-					<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-target="#records" hx-swap="outerHTML">
-						<div class="flex flex-row justify-center space-x-1">
-							<input class="rounded bg-neutral text-neutral-content" type="hidden" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
-							<input class="rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value={ timeframe.Start }/>
-							<input class="rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value={ timeframe.End }/>
-							<select class="rounded bg-neutral text-neutral-content" id="project" name="project">
-								for _, project := range projectList {
-									if timeframe.ProjectID == strconv.Itoa(project.ID) {
-										<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
-									} else {
-										<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+	<div id="record-list">
+		if len(tfList) > 0 {
+			<script></script>
+			<div class="card border">
+				<div class="card-body">
+					for _, timeframe := range tfList {
+						<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-target="#record-list" hx-swap="outerHTML">
+							<div class="flex flex-row justify-center space-x-1">
+								<input class="input-sm rounded bg-neutral text-neutral-content" type="hidden" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
+								<input class="input-sm rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value={ timeframe.Start }/>
+								<input class="input-sm rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value={ timeframe.End }/>
+								<select class="select-sm rounded bg-neutral text-neutral-content" id="project" name="project">
+									for _, project := range projectList {
+										if timeframe.ProjectID == strconv.Itoa(project.ID) {
+											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
+										} else {
+											<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+										}
 									}
-								}
-							</select>
-							<button class="btn btn-sm btn-success" hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#records" hx-swap="outerHTML">&#x2713;</button>
-							<button class="btn btn-sm btn-error" hx-delete={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#records" hx-swap="outerHTML">&#x2717;</button>
-						</div>
-					</form>
-				}
+								</select>
+								<button class="btn btn-sm btn-success" hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#record-list" hx-swap="outerHTML">&#x2713;</button>
+								<button class="btn btn-sm btn-error" hx-delete={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#record-list" hx-swap="outerHTML">&#x2717;</button>
+							</div>
+						</form>
+					}
+				</div>
 			</div>
-		</div>
-	}
+		}
+	</div>
 }
 
 templ Projects(projectList []database.Project) {
@@ -111,11 +134,12 @@ templ Projects(projectList []database.Project) {
 templ CreateProject() {
 	<div class="card border w-min justify-self-center" id="projecttracker">
 		<form id="defaultProject" class="card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML">
+			<div class="text-xl">Add New Project:</div>
 			<div class="flex flex-row justify-center space-x-1">
-				<input class="rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" value="Activity"/>
-				<input class="rounded bg-neutral text-neutral-content" type="text" id="details" name="details" value="Details"/>
-				<input class="rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" value="Identifier"/>
-				<button class="btn btn-success btn-sm" type="submit" form="defaultProject">&#x2713;</button>
+				<input class="input rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" placeholder="Activity" required/>
+				<input class="input rounded bg-neutral text-neutral-content" type="text" id="details" name="details" placeholder="Details" required/>
+				<input class="input rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" placeholder="Identifier" required/>
+				<button class="btn btn-success" type="submit" form="defaultProject">&#x2713;</button>
 			</div>
 		</form>
 	</div>
@@ -128,9 +152,9 @@ templ ProjectsList(projectList []database.Project) {
 				for _, project := range projectList[1:] {
 					<form id={ "project" + strconv.Itoa(project.ID) } hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML">
 						<div class="flex flex-row justify-center space-x-1">
-							<input class="rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" value={ project.Activity }/>
-							<input class="rounded bg-neutral text-neutral-content" type="text" id="details" name="details" value={ project.Details }/>
-							<input class="rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" value={ project.Name }/>
+							<input class="input-sm rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" value={ project.Activity }/>
+							<input class="input-sm rounded bg-neutral text-neutral-content" type="text" id="details" name="details" value={ project.Details }/>
+							<input class="input-sm rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" value={ project.Name }/>
 							<button class="btn btn-sm btn-success" hx-put={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML">&#x2713;</button>
 							<button class="btn btn-sm btn-error" hx-delete={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML">&#x2717;</button>
 						</div>

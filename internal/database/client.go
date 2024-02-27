@@ -143,6 +143,25 @@ func GetRecords() []Timeframe {
 	return timeframes
 }
 
+func GetRecordsForDate(date string) []Timeframe {
+	var timeframes []Timeframe = []Timeframe{}
+	var timefr Timeframe
+
+	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE date=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, _ := statement.Query(date)
+
+	for rows.Next() {
+		timefr = Timeframe{}
+		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		timeframes = append(timeframes, timefr)
+	}
+	return timeframes
+}
+
 func GetRecordsMaxID() int {
 	var maxID int
 	statement, err := DB.Prepare("SELECT MAX(id) FROM timeframes")
