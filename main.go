@@ -9,6 +9,8 @@ import (
 	"log"
 	"mime"
 	"net/http"
+
+	"github.com/spf13/viper"
 )
 
 //go:embed internal/assets/css/input.css
@@ -20,6 +22,7 @@ var content embed.FS
 
 func main() {
 	// Init session
+	viperDefaults()
 
 	database.Connect()
 	defer database.Close()
@@ -34,8 +37,8 @@ func main() {
 
 	mime.AddExtensionType(".js", "application/javascript")
 
-	fmt.Println("Listening on http://localhost:34115")
-	if err := http.ListenAndServe("localhost:34115", mux); err != nil {
+	fmt.Printf("Listening on http://localhost:%d", viper.GetInt("port"))
+	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
 		log.Printf("error listening: %v", err)
 	}
 }
@@ -61,4 +64,22 @@ func RegisterMockProjectRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/projects", handlers.MockCreateProject)
 	mux.HandleFunc("DELETE /api/projects/{id}/", handlers.MockDeleteProject)
 	mux.HandleFunc("PUT /api/projects/{id}", handlers.MockUpdateProject)
+}
+
+func viperDefaults() {
+	viper.SetDefault("port", 34115)
+	viper.SetDefault("hours_per_week", 39.0)
+
+	viper.SetConfigName("timetracker")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			viper.SafeWriteConfig()
+			log.Println("Config file not found, creating...")
+		} else {
+			log.Fatal(err)
+		}
+	}
 }

@@ -26,7 +26,7 @@ func PageHeader(contents templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Time Tracker</title><link rel=\"stylesheet\" href=\"/static/internal/assets/css/input.css\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/internal/assets/favicon.png\"><script src=\"/static/internal/assets/js/htmx.min.js\"></script></head><body><div class=\"flex justify-center p-5\"><div class=\"grow max-w-[1000px]\"><div class=\"navbar rounded-lg shadow border\"><div class=\"hero-content h-20\"><a class=\"text-5xl primary-content font-bold\" href=\"/\">TimeTracker</a></div><div class=\"\"><button class=\"btn btn-ghost text-xl\" hx-get=\"/timeframes\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\">Records</button></div><div class=\"\"><button class=\"btn btn-ghost text-xl\" hx-get=\"/projects\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\">Projects</button></div><div class=\"\"><button class=\"btn btn-ghost text-xl\">Templates</button></div><div class=\"\"><button class=\"btn btn-ghost text-xl\">Config</button></div></div><section id=\"content-section\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html data-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Time Tracker</title><link rel=\"stylesheet\" href=\"/static/internal/assets/css/input.css\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/internal/assets/favicon.png\"><script src=\"/static/internal/assets/js/htmx.min.js\"></script></head><body><div class=\"flex justify-center p-5\"><div class=\"grow max-w-[1000px]\"><div class=\"navbar rounded-lg shadow border\"><div class=\"hero-content h-20\"><a class=\"text-5xl primary-content font-bold\" href=\"/\">TimeTracker</a></div><div class=\"\"><button class=\"btn btn-ghost text-xl\" hx-get=\"/timeframes\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\">Records</button></div><div class=\"\"><button class=\"btn btn-ghost text-xl\" hx-get=\"/projects\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\">Projects</button></div></div><section id=\"content-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -146,7 +146,7 @@ func CreateRecord(projectList []database.Project, currentDate string) templ.Comp
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 83, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 77, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -268,7 +268,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 						var templ_7745c5c3_Var7 string
 						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 136, Col: 77}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 130, Col: 77}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 						if templ_7745c5c3_Err != nil {
@@ -294,7 +294,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 						var templ_7745c5c3_Var8 string
 						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 138, Col: 68}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 132, Col: 68}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
@@ -384,7 +384,7 @@ func CreateProject() templ.Component {
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card border w-min justify-self-center\" id=\"projecttracker\"><form id=\"defaultProject\" class=\"card-body\" hx-post=\"/api/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML\"><div class=\"text-xl\">Add New Project:</div><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"activity\" name=\"activity\" placeholder=\"Activity\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"details\" name=\"details\" placeholder=\"Details\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"projectName\" name=\"projectName\" placeholder=\"Identifier\" required> <button class=\"btn btn-success\" type=\"submit\" form=\"defaultProject\">&#x2713;</button></div></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card border\" id=\"projecttracker\"><form id=\"defaultProject\" class=\"card-body\" hx-post=\"/api/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML settle:0ms\"><div class=\"text-xl\">Add New Project:</div><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"activity\" name=\"activity\" placeholder=\"Activity\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"details\" name=\"details\" placeholder=\"Details\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"projectName\" name=\"projectName\" placeholder=\"Identifier\" required> <button class=\"btn btn-success\" type=\"submit\" form=\"defaultProject\">&#x2713;</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -422,7 +422,7 @@ func ProjectsList(projectList []database.Project) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-post=\"/api/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML\"><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"text\" id=\"activity\" name=\"activity\" value=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-post=\"/api/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML settle:0ms\"><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"text\" id=\"activity\" name=\"activity\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -430,23 +430,7 @@ func ProjectsList(projectList []database.Project) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"text\" id=\"details\" name=\"details\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(project.Details))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"text\" id=\"projectName\" name=\"projectName\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(project.Name))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button class=\"btn btn-sm btn-success\" hx-put=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-put=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -454,7 +438,39 @@ func ProjectsList(projectList []database.Project) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#projects\" hx-swap=\"outerHTML\">&#x2713;</button> <button class=\"btn btn-sm btn-error\" hx-delete=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\"> <input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"text\" id=\"details\" name=\"details\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(project.Details))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-put=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("/api/projects/" + strconv.Itoa(project.ID)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\"> <input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"text\" id=\"projectName\" name=\"projectName\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(project.Name))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-put=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("/api/projects/" + strconv.Itoa(project.ID)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\"> <button class=\"btn btn-sm btn-error animate-none\" hx-delete=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

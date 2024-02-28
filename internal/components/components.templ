@@ -28,12 +28,6 @@ templ PageHeader(contents templ.Component) {
 						<div class="">
 							<button class="btn btn-ghost text-xl" hx-get="/projects" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Projects</button>
 						</div>
-						<div class="">
-							<button class="btn btn-ghost text-xl">Templates</button>
-						</div>
-						<div class="">
-							<button class="btn btn-ghost text-xl">Config</button>
-						</div>
 					</div>
 					<section id="content-section">
 						@contents
@@ -158,8 +152,8 @@ templ Projects(projectList []database.Project) {
 }
 
 templ CreateProject() {
-	<div class="card border w-min justify-self-center" id="projecttracker">
-		<form id="defaultProject" class="card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML">
+	<div class="card border" id="projecttracker">
+		<form id="defaultProject" class="card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
 			<div class="text-xl">Add New Project:</div>
 			<div class="flex flex-row justify-center space-x-1">
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" placeholder="Activity" required/>
@@ -176,13 +170,42 @@ templ ProjectsList(projectList []database.Project) {
 		<div class="card border" id="timetrackerList">
 			<div class="card-body">
 				for _, project := range projectList[1:] {
-					<form id={ "project" + strconv.Itoa(project.ID) } hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML">
+					<form id={ "project" + strconv.Itoa(project.ID) } hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
 						<div class="flex flex-row justify-center space-x-1">
-							<input class="input input-sm rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" value={ project.Activity }/>
-							<input class="input input-sm rounded bg-neutral text-neutral-content" type="text" id="details" name="details" value={ project.Details }/>
-							<input class="input input-sm rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" value={ project.Name }/>
-							<button class="btn btn-sm btn-success" hx-put={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML">&#x2713;</button>
-							<button class="btn btn-sm btn-error" hx-delete={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML">&#x2717;</button>
+							<input
+								class="input input-sm rounded bg-neutral text-neutral-content"
+								type="text"
+								id="activity"
+								name="activity"
+								value={ project.Activity }
+								hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+								hx-target="#record-list"
+								hx-swap="none"
+								hx-trigger="change delay:400ms"
+							/>
+							<input
+								class="input input-sm rounded bg-neutral text-neutral-content"
+								type="text"
+								id="details"
+								name="details"
+								value={ project.Details }
+								hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+								hx-target="#record-list"
+								hx-swap="none"
+								hx-trigger="change delay:400ms"
+							/>
+							<input
+								class="input input-sm rounded bg-neutral text-neutral-content"
+								type="text"
+								id="projectName"
+								name="projectName"
+								value={ project.Name }
+								hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+								hx-target="#record-list"
+								hx-swap="none"
+								hx-trigger="change delay:400ms"
+							/>
+							<button class="btn btn-sm btn-error animate-none" hx-delete={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML">&#x2717;</button>
 						</div>
 					</form>
 				}
