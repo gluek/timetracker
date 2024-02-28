@@ -7,8 +7,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 var (
@@ -26,17 +27,29 @@ var (
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	component := components.HomePage(database.GetRecordsForDate(activeDate), database.GetProjects(), activeDate)
+	component := components.HomePage(
+		database.GetRecordsForDate(activeDate),
+		database.GetProjects(),
+		activeDate,
+		workTotalByDate(activeDate).String(),
+		workDeltaWeek(workTotalWeek(activeDate)).String())
 	component.Render(r.Context(), w)
 }
 
 func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
-	component := components.Records(database.GetRecordsForDate(activeDate), database.GetProjects(), activeDate)
+	component := components.Records(
+		database.GetRecordsForDate(activeDate),
+		database.GetProjects(),
+		activeDate,
+		workTotalByDate(activeDate).String(),
+		workDeltaWeek(workTotalWeek(activeDate)).String())
 	component.Render(r.Context(), w)
 }
 
 func RecordsHandler(w http.ResponseWriter, r *http.Request) {
-	component := components.RecordList(database.GetRecordsForDate(activeDate), database.GetProjects())
+	component := components.RecordList(
+		database.GetRecordsForDate(activeDate),
+		database.GetProjects())
 	component.Render(r.Context(), w)
 }
 
@@ -51,9 +64,10 @@ func atoi(s string) int {
 
 func parseDate(date string) (int, int, int) {
 
-	splitString := strings.Split(date, "-")
-	year, month, day := splitString[0], splitString[1], splitString[2]
-	return atoi(year), atoi(month), atoi(day)
+	dateTime, _ := time.Parse("2006-01-02", date)
+	year, month, day := dateTime.Date()
+	monthInt := int(month)
+	return year, monthInt, day
 }
 
 func findIDTimeframe(id int) int {
@@ -74,11 +88,73 @@ func findIDProject(id int) int {
 	return -1
 }
 
+func workTotalByDate(date string) time.Duration {
+	timeTotal, err := time.ParseDuration("0s")
+	if err != nil {
+		log.Print(err)
+	}
+	records := database.GetRecordsForDate(date)
+	for _, record := range records {
+		timeStart, err := time.Parse("15:04", record.Start)
+		if err != nil {
+			log.Print(err)
+		}
+		timeEnd, err := time.Parse("15:04", record.End)
+		if err != nil {
+			log.Print(err)
+		}
+		diffTime := timeEnd.Sub(timeStart)
+		timeTotal += diffTime
+	}
+	return timeTotal
+}
+
+func weekDaysByDate(date string) []time.Time {
+	var weekDays []time.Time
+	daysInAWeek := []int{1, 2, 3, 4, 5, 6, 7}
+
+	dateTime, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		log.Print(err)
+	}
+	for _, weekday := range daysInAWeek {
+		dayOfWeek := int(dateTime.Weekday())
+		if dayOfWeek == 0 {
+			dayOfWeek = 7
+		}
+		weekdayOffset := weekday - dayOfWeek
+		weekDays = append(weekDays, dateTime.AddDate(0, 0, weekdayOffset))
+	}
+	return weekDays
+}
+
+func workTotalWeek(date string) time.Duration {
+	workTotalDuration, err := time.ParseDuration("0s")
+	if err != nil {
+		log.Print(err)
+	}
+	var daysInWeek []time.Time = weekDaysByDate(date)
+	for _, day := range daysInWeek {
+		dayDuration := workTotalByDate(day.Format("2006-01-02"))
+		workTotalDuration += dayDuration
+	}
+	return workTotalDuration
+}
+
+func workDeltaWeek(workTotalDuration time.Duration) time.Duration {
+	workTotalTarget, err := time.ParseDuration(viper.GetString("worktime_per_week"))
+	workDelta := workTotalDuration - workTotalTarget
+	if err != nil {
+		log.Println(err)
+	}
+	return workDelta
+}
+
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	activeDate = r.FormValue("dateofrecord")
 	fmt.Printf("Date changed to %s\n", activeDate)
-	RecordsHandler(w, r)
+	RecordsPageHandler(w, r)
 }
 
 func CreateRecord(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +178,7 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Created Record %s %s %s\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
-	RecordsHandler(w, r)
+	RecordsPageHandler(w, r)
 }
 
 func UpdateRecord(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +201,7 @@ func UpdateRecord(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	fmt.Printf("Update Record with ID %s\n", id)
-	RecordsHandler(w, r)
+	RecordsPageHandler(w, r)
 }
 
 func DeleteRecord(w http.ResponseWriter, r *http.Request) {
@@ -135,7 +211,7 @@ func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	fmt.Printf("Remove Record with ID: %v\n", id)
-	RecordsHandler(w, r)
+	RecordsPageHandler(w, r)
 }
 
 func CreateProject(w http.ResponseWriter, r *http.Request) {

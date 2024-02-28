@@ -45,7 +45,7 @@ func PageHeader(contents templ.Component) templ.Component {
 	})
 }
 
-func HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string) templ.Component {
+func HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -58,7 +58,7 @@ func HomePage(tfList []database.Timeframe, projectList []database.Project, curre
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = PageHeader(Records(tfList, projectList, currentDate)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = PageHeader(Records(tfList, projectList, currentDate, workDurationDaily, workDeltaWeek)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func HomePage(tfList []database.Timeframe, projectList []database.Project, curre
 	})
 }
 
-func Records(tfList []database.Timeframe, projectList []database.Project, currentDate string) templ.Component {
+func Records(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -91,6 +91,10 @@ func Records(tfList []database.Timeframe, projectList []database.Project, curren
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = RecordList(tfList, projectList).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = DaySummary(workDurationDaily, workDeltaWeek).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -118,7 +122,7 @@ func CreateRecord(projectList []database.Project, currentDate string) templ.Comp
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card w-min justify-self-center border\" id=\"timetracker\"><form id=\"defaultRecord\" class=\"card-body\" hx-post=\"/api/timeframes\" hx-target=\"#record-list\" hx-swap=\"outerHTML settle:0ms\"><div class=\"flex justify-center\"><input class=\"input input-lg bg-neutral text-neutral-content\" hx-post=\"/api/currentdate\" type=\"date\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card w-min justify-self-center border\" id=\"timetracker\"><form id=\"defaultRecord\" class=\"card-body\" hx-post=\"/api/timeframes\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\"><div class=\"flex justify-center\"><input class=\"input input-lg bg-neutral text-neutral-content\" hx-post=\"/api/currentdate\" hx-trigger=\"change delay:500ms\" type=\"date\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -126,7 +130,7 @@ func CreateRecord(projectList []database.Project, currentDate string) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"flex flex-row justify-center content-center space-x-1\"><label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">From:</span></div><input class=\"input rounded bg-neutral text-neutral-content\" type=\"time\" name=\"start\" id=\"start\" value=\"08:00\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">To:</span></div><input class=\"input rounded bg-neutral text-neutral-content\" type=\"time\" name=\"end\" id=\"end\" value=\"17:00\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">Project:</span></div><div class=\"flex flex-row\"><select class=\"select rounded bg-neutral text-neutral-content\" id=\"project\" name=\"project\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"flex flex-row justify-center content-center space-x-1\"><label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">From:</span></div><input class=\"input rounded bg-neutral text-neutral-content\" type=\"time\" name=\"start\" id=\"start\" value=\"08:00\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">To:</span></div><input class=\"input rounded bg-neutral text-neutral-content\" type=\"time\" name=\"end\" id=\"end\" value=\"17:00\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">Project:</span></div><div class=\"flex flex-row space-x-1\"><select class=\"select rounded bg-neutral text-neutral-content\" id=\"project\" name=\"project\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -146,7 +150,7 @@ func CreateRecord(projectList []database.Project, currentDate string) templ.Comp
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 77, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 86, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -157,7 +161,7 @@ func CreateRecord(projectList []database.Project, currentDate string) templ.Comp
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select> <button class=\"btn btn-success\" type=\"submit\" form=\"defaultRecord\">&#x2713;</button></div></label></div></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select> <button class=\"btn btn-success animate-none\" type=\"submit\" form=\"defaultRecord\">&#x2713;</button></div></label></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -199,7 +203,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-post=\"/api/timeframes\" hx-select=\"#record-list\" hx-target=\"#record-list\" hx-swap=\"outerHTML settle:0ms\"><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"hidden\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-post=\"/api/timeframes\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\"><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"hidden\" name=\"dateofrecord\" id=\"dateofrecord\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -223,7 +227,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\"> <input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"time\" name=\"end\" id=\"end\" value=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#summary-day\" hx-select=\"#summary-day\" hx-swap=\"outerHTML\" hx-trigger=\"change delay:400ms\"> <input class=\"input input-sm rounded bg-neutral text-neutral-content\" type=\"time\" name=\"end\" id=\"end\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -239,7 +243,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\"> <select class=\"select select-sm rounded bg-neutral text-neutral-content\" id=\"project\" name=\"project\" hx-put=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#summary-day\" hx-select=\"#summary-day\" hx-swap=\"outerHTML\" hx-trigger=\"change delay:400ms\"> <select class=\"select select-sm rounded bg-neutral text-neutral-content\" id=\"project\" name=\"project\" hx-put=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -247,7 +251,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#summary-day\" hx-select=\"#summary-day\" hx-swap=\"none\" hx-trigger=\"change delay:400ms\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -268,7 +272,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 						var templ_7745c5c3_Var7 string
 						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 130, Col: 77}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 142, Col: 77}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 						if templ_7745c5c3_Err != nil {
@@ -294,7 +298,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 						var templ_7745c5c3_Var8 string
 						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 132, Col: 68}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 144, Col: 68}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
@@ -314,7 +318,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#record-list\" hx-swap=\"outerHTML settle:0ms\">&#x2717;</button></div></form>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#content-section\" hx-swap=\"innerHTML settle:0ms\">&#x2717;</button></div></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -335,7 +339,7 @@ func RecordList(tfList []database.Timeframe, projectList []database.Project) tem
 	})
 }
 
-func Projects(projectList []database.Project) templ.Component {
+func DaySummary(workDurationDaily string, workDeltaWeek string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -346,6 +350,56 @@ func Projects(projectList []database.Project) templ.Component {
 		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
 		if templ_7745c5c3_Var9 == nil {
 			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"summary-day\"><div class=\"card border\"><div class=\"card-body\"><div class=\"flex flex-col\"><div class=\"text-xl\">Summary:</div><table class=\"table\"><thead></thead> <tbody><tr><td>Total Work:</td><td>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(workDurationDaily)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 169, Col: 31}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr><tr><td>Delta Week:</td><td>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(workDeltaWeek)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal\components\components.templ`, Line: 173, Col: 27}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr></tbody></table></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func Projects(projectList []database.Project) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"projects\" class=\"grid justify-center py-5 space-y-5\">")
@@ -379,12 +433,12 @@ func CreateProject() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var10 == nil {
-			templ_7745c5c3_Var10 = templ.NopComponent
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card border\" id=\"projecttracker\"><form id=\"defaultProject\" class=\"card-body\" hx-post=\"/api/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML settle:0ms\"><div class=\"text-xl\">Add New Project:</div><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"activity\" name=\"activity\" placeholder=\"Activity\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"details\" name=\"details\" placeholder=\"Details\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"projectName\" name=\"projectName\" placeholder=\"Identifier\" required> <button class=\"btn btn-success\" type=\"submit\" form=\"defaultProject\">&#x2713;</button></div></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card border\" id=\"projecttracker\"><form id=\"defaultProject\" class=\"card-body\" hx-post=\"/api/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML settle:0ms\"><div class=\"text-xl\">Add New Project:</div><div class=\"flex flex-row justify-center space-x-1\"><input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"activity\" name=\"activity\" placeholder=\"Activity\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"details\" name=\"details\" placeholder=\"Details\" required> <input class=\"input rounded bg-neutral text-neutral-content\" type=\"text\" id=\"projectName\" name=\"projectName\" placeholder=\"Identifier\" required> <button class=\"btn btn-success animate-none\" type=\"submit\" form=\"defaultProject\">&#x2713;</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -403,9 +457,9 @@ func ProjectsList(projectList []database.Project) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(projectList) > 1 {

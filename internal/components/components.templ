@@ -38,22 +38,31 @@ templ PageHeader(contents templ.Component) {
 	</html>
 }
 
-templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string) {
-	@PageHeader(Records(tfList, projectList, currentDate))
+templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string) {
+	@PageHeader(Records(tfList, projectList, currentDate, workDurationDaily, workDeltaWeek))
 }
 
-templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate string) {
+templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string) {
 	<div id="records" class="grid justify-center py-5 space-y-5">
 		@CreateRecord(projectList, currentDate)
 		@RecordList(tfList, projectList)
+		@dailySummary(workDurationDaily, workDeltaWeek)
 	</div>
 }
 
 templ CreateRecord(projectList []database.Project, currentDate string) {
 	<div class="card w-min justify-self-center border" id="timetracker">
-		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#record-list" hx-swap="outerHTML settle:0ms">
+		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 			<div class="flex justify-center">
-				<input class="input input-lg bg-neutral text-neutral-content" hx-post="/api/currentdate" type="date" name="dateofrecord" id="dateofrecord" value={ currentDate }/>
+				<input
+					class="input input-lg bg-neutral text-neutral-content"
+					hx-post="/api/currentdate"
+					hx-trigger="change delay:500ms"
+					type="date"
+					name="dateofrecord"
+					id="dateofrecord"
+					value={ currentDate }
+				/>
 			</div>
 			<div class="flex flex-row justify-center content-center space-x-1">
 				<label class="form-control w-full max-w-xs">
@@ -72,13 +81,13 @@ templ CreateRecord(projectList []database.Project, currentDate string) {
 					<div class="label">
 						<span class="label-text">Project:</span>
 					</div>
-					<div class="flex flex-row">
+					<div class="flex flex-row space-x-1">
 						<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
 							for _, project := range projectList {
 								<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
 							}
 						</select>
-						<button class="btn btn-success" type="submit" form="defaultRecord">&#x2713;</button>
+						<button class="btn btn-success animate-none" type="submit" form="defaultRecord">&#x2713;</button>
 					</div>
 				</label>
 			</div>
@@ -92,7 +101,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 			<div class="card border">
 				<div class="card-body">
 					for _, timeframe := range tfList {
-						<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-select="#record-list" hx-target="#record-list" hx-swap="outerHTML settle:0ms">
+						<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 							<div class="flex flex-row justify-center space-x-1">
 								<input class="input input-sm rounded bg-neutral text-neutral-content" type="hidden" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
 								<input
@@ -102,8 +111,9 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 									id="start"
 									value={ timeframe.Start }
 									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
-									hx-target="#record-list"
-									hx-swap="none"
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="outerHTML"
 									hx-trigger="change delay:400ms"
 								/>
 								<input
@@ -113,8 +123,9 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 									id="end"
 									value={ timeframe.End }
 									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
-									hx-target="#record-list"
-									hx-swap="none"
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="outerHTML"
 									hx-trigger="change delay:400ms"
 								/>
 								<select
@@ -122,7 +133,8 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 									id="project"
 									name="project"
 									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
-									hx-target="#record-list"
+									hx-target="#summary-day"
+									hx-select="#summary-day"
 									hx-swap="none"
 									hx-trigger="change delay:400ms"
 								>
@@ -134,13 +146,38 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 										}
 									}
 								</select>
-								<button class="btn btn-sm btn-error animate-none" hx-delete={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#record-list" hx-swap="outerHTML settle:0ms">&#x2717;</button>
+								<button class="btn btn-sm btn-error animate-none" hx-delete={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">&#x2717;</button>
 							</div>
 						</form>
 					}
 				</div>
 			</div>
 		}
+	</div>
+}
+
+templ dailySummary(workDurationDaily string, workDeltaWeek string) {
+	<div id="summary-day">
+		<div class="card border">
+			<div class="card-body">
+				<div class="flex flex-col">
+					<div class="text-xl">Summary:</div>
+					<table class="table">
+						<thead></thead>
+						<tbody>
+							<tr>
+								<td>Total Work:</td>
+								<td>{ workDurationDaily }</td>
+							</tr>
+							<tr>
+								<td>Delta Week:</td>
+								<td>{ workDeltaWeek }</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
 	</div>
 }
 
@@ -159,7 +196,7 @@ templ CreateProject() {
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" placeholder="Activity" required/>
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="details" name="details" placeholder="Details" required/>
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" placeholder="Identifier" required/>
-				<button class="btn btn-success" type="submit" form="defaultProject">&#x2713;</button>
+				<button class="btn btn-success animate-none" type="submit" form="defaultProject">&#x2713;</button>
 			</div>
 		</form>
 	</div>

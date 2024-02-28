@@ -37,7 +37,7 @@ func main() {
 
 	mime.AddExtensionType(".js", "application/javascript")
 
-	fmt.Printf("Listening on http://localhost:%d", viper.GetInt("port"))
+	fmt.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
 	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
 		log.Printf("error listening: %v", err)
 	}
@@ -68,7 +68,7 @@ func RegisterMockProjectRoutes(mux *http.ServeMux) {
 
 func viperDefaults() {
 	viper.SetDefault("port", 34115)
-	viper.SetDefault("hours_per_week", 39.0)
+	viper.SetDefault("worktime_per_week", "39h0m0s")
 
 	viper.SetConfigName("timetracker")
 	viper.SetConfigType("yaml")
