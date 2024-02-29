@@ -3,10 +3,24 @@ package components
 
 import "local/timetracker/internal/database"
 import "strconv"
+import "github.com/spf13/viper"
+import "fmt"
+
+func getTheme() string {
+	theme := viper.GetString("theme")
+	fmt.Println(theme)
+	if theme == "dark" {
+		return "dark"
+	}
+	if theme == "light" {
+		return "emerald"
+	}
+	return "dark"
+}
 
 templ PageHeader(contents templ.Component) {
 	<!DOCTYPE html>
-	<html data-theme="dark">
+	<html data-theme={ getTheme() }>
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>

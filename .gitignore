@@ -7,3 +7,4 @@
 *_templ.go
 *.json
 timetracker.yaml
+*.syso

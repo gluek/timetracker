@@ -10,6 +10,10 @@ import (
 	"mime"
 	"net/http"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/driver/desktop"
+	"github.com/pkg/browser"
 	"github.com/spf13/viper"
 )
 
@@ -37,10 +41,14 @@ func main() {
 
 	mime.AddExtensionType(".js", "application/javascript")
 
-	fmt.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
-	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
-		log.Printf("error listening: %v", err)
-	}
+	go func() {
+		fmt.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
+		if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
+			log.Printf("error listening: %v", err)
+		}
+	}()
+
+	fyneSysTray()
 }
 
 func RegisterRecordRoutes(mux *http.ServeMux) {
@@ -69,6 +77,7 @@ func RegisterMockProjectRoutes(mux *http.ServeMux) {
 func viperDefaults() {
 	viper.SetDefault("port", 34115)
 	viper.SetDefault("worktime_per_week", "39h0m0s")
+	viper.SetDefault("theme", "dark")
 
 	viper.SetConfigName("timetracker")
 	viper.SetConfigType("yaml")
@@ -82,4 +91,27 @@ func viperDefaults() {
 			log.Fatal(err)
 		}
 	}
+}
+
+func fyneSysTray() {
+	a := app.New()
+	iconBytes, err := content.ReadFile("internal/assets/favicon.png")
+	icon := fyne.NewStaticResource("icon", iconBytes)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if desk, ok := a.(desktop.App); ok {
+		m := fyne.NewMenu("TimeTracker",
+			fyne.NewMenuItem("Open Browser", func() {
+				err := browser.OpenURL(fmt.Sprintf("http://localhost:%d", viper.GetInt("port")))
+				if err != nil {
+					log.Println(err)
+				}
+			}))
+		desk.SetSystemTrayMenu(m)
+		desk.SetSystemTrayIcon(icon)
+	}
+
+	a.Run()
 }

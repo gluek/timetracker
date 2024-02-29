@@ -17,7 +17,10 @@ tasks:
     desc: Generate templ templates
     cmds:
       - templ generate
-
+  winres:
+    desc: Make windows manifest for icon
+    cmds:
+      - go-winres make
   assets:
     desc: Build assets for project
     deps: [css, gen]
@@ -29,6 +32,6 @@ tasks:
       - go run .
   build:
     desc: Run the application
-    deps: [css, gen]
+    deps: [css, gen, winres]
     cmds:
       - go build -ldflags -H=windowsgui .
