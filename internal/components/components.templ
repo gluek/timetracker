@@ -4,11 +4,9 @@ package components
 import "local/timetracker/internal/database"
 import "strconv"
 import "github.com/spf13/viper"
-import "fmt"
 
 func getTheme() string {
 	theme := viper.GetString("theme")
-	fmt.Println(theme)
 	if theme == "dark" {
 		return "dark"
 	}
@@ -41,6 +39,9 @@ templ PageHeader(contents templ.Component) {
 						</div>
 						<div class="">
 							<button class="btn btn-ghost text-xl" hx-get="/projects" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Projects</button>
+						</div>
+						<div class="">
+							<button class="btn btn-ghost text-xl" hx-get="/summary" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Summary</button>
 						</div>
 					</div>
 					<section id="content-section">
@@ -153,7 +154,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 									hx-trigger="change delay:400ms"
 								>
 									for _, project := range projectList {
-										if timeframe.ProjectID == strconv.Itoa(project.ID) {
+										if timeframe.ProjectID == project.ID {
 											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
 										} else {
 											<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
@@ -175,7 +176,7 @@ templ dailySummary(workDurationDaily string, workDeltaWeek string) {
 		<div class="card border">
 			<div class="card-body">
 				<div class="flex flex-col">
-					<div class="text-xl">Summary:</div>
+					<div class="text-xl">Daily Summary:</div>
 					<table class="table">
 						<thead></thead>
 						<tbody>
@@ -203,7 +204,7 @@ templ Projects(projectList []database.Project) {
 }
 
 templ CreateProject() {
-	<div class="card border" id="projecttracker">
+	<div id="projecttracker" class="card border">
 		<form id="defaultProject" class="card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
 			<div class="text-xl">Add New Project:</div>
 			<div class="flex flex-row justify-center space-x-1">
@@ -218,7 +219,7 @@ templ CreateProject() {
 
 templ ProjectsList(projectList []database.Project) {
 	if len(projectList) > 1 {
-		<div class="card border" id="timetrackerList">
+		<div id="timetrackerList" class="card border">
 			<div class="card-body">
 				for _, project := range projectList[1:] {
 					<form id={ "project" + strconv.Itoa(project.ID) } hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
@@ -263,4 +264,32 @@ templ ProjectsList(projectList []database.Project) {
 			</div>
 		</div>
 	}
+}
+
+templ MonthlySummary(projects []database.ProjectHours) {
+	<div id="monthly-summary" class="grid justify-center py-5 space-y-5">
+		<div class="card border py-5">
+			<div class="card-body">
+				<div class="text-xl">Monthly Summary:</div>
+				<table class="table">
+					<thead>
+						<td>Activity:</td>
+						<td>Details:</td>
+						<td>Name:</td>
+						<td>Work Hours:</td>
+					</thead>
+					<tbody>
+						for _, project := range projects {
+							<tr>
+								<td>{ project.Activity }</td>
+								<td>{ project.Details }</td>
+								<td>{ project.Name }</td>
+								<td>{ project.Hours }</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 }

@@ -57,8 +57,15 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	components.Projects(database.GetProjects()).Render(r.Context(), w)
 }
 
+func SummaryHandler(w http.ResponseWriter, r *http.Request) {
+	components.MonthlySummary(GetProjectHours()).Render(r.Context(), w)
+}
+
 func atoi(s string) int {
-	value, _ := strconv.Atoi(s)
+	value, err := strconv.Atoi(s)
+	if err != nil {
+		log.Println(err)
+	}
 	return value
 }
 
@@ -95,6 +102,26 @@ func workTotalByDate(date string) time.Duration {
 	}
 	records := database.GetRecordsForDate(date)
 	for _, record := range records {
+		timeStart, err := time.Parse("15:04", record.Start)
+		if err != nil {
+			log.Print(err)
+		}
+		timeEnd, err := time.Parse("15:04", record.End)
+		if err != nil {
+			log.Print(err)
+		}
+		diffTime := timeEnd.Sub(timeStart)
+		timeTotal += diffTime
+	}
+	return timeTotal
+}
+
+func workTotalForRecords(timeframes []database.Timeframe) time.Duration {
+	timeTotal, err := time.ParseDuration("0s")
+	if err != nil {
+		log.Print(err)
+	}
+	for _, record := range timeframes {
 		timeStart, err := time.Parse("15:04", record.Start)
 		if err != nil {
 			log.Print(err)
@@ -169,7 +196,7 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 		Start:     r.FormValue("start"),
 		End:       r.FormValue("end"),
 		Duration:  "",
-		ProjectID: r.FormValue("project"),
+		ProjectID: atoi(r.FormValue("project")),
 	}
 	globalID += 1
 	err = database.CreateRecord(timeframe)
@@ -177,7 +204,7 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Created Record %s %s %s\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
+	fmt.Printf("Created Record %s %s ID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
 	RecordsPageHandler(w, r)
 }
 
@@ -194,7 +221,7 @@ func UpdateRecord(w http.ResponseWriter, r *http.Request) {
 		Start:     r.FormValue("start"),
 		End:       r.FormValue("end"),
 		Duration:  "",
-		ProjectID: r.FormValue("project"),
+		ProjectID: atoi(r.FormValue("project")),
 	}
 	err = database.UpdateRecord(timefr)
 	if err != nil {
@@ -250,4 +277,20 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	err = database.DeleteProject(atoi(id))
 	fmt.Printf("Remove Project with ID: %v\n", id)
 	ProjectsHandler(w, r)
+}
+
+func GetProjectHours() []database.ProjectHours {
+	today := time.Now()
+	projectsList := []database.ProjectHours{}
+	projects := database.GetProjects()
+	for _, project := range projects {
+		records := database.GetRecordsForProjectAndTime(today.Year(), int(today.Month()), project.ID)
+		duration := workTotalForRecords(records)
+		projectHour := database.ProjectHours{
+			Project: project,
+			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
+		}
+		projectsList = append(projectsList, projectHour)
+	}
+	return projectsList
 }

@@ -18,11 +18,11 @@ func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
 		Start:     r.FormValue("start"),
 		End:       r.FormValue("end"),
 		Duration:  "",
-		ProjectID: r.FormValue("project"),
+		ProjectID: atoi(r.FormValue("project")),
 	}
 	globalID += 1
 	tfList = append(tfList, timeframe)
-	fmt.Printf("%s %s %s Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, len(tfList))
+	fmt.Printf("%s %s %d Len of tfList: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, len(tfList))
 	RecordsHandler(w, r)
 }
 
@@ -40,7 +40,7 @@ func MockUpdateRecord(w http.ResponseWriter, r *http.Request) {
 		Start:     r.FormValue("start"),
 		End:       r.FormValue("end"),
 		Duration:  "",
-		ProjectID: r.FormValue("project"),
+		ProjectID: atoi(r.FormValue("project")),
 	}
 	fmt.Printf("Record with ID %s updated\n", id)
 	RecordsHandler(w, r)

@@ -26,7 +26,7 @@ var content embed.FS
 
 func main() {
 	// Init session
-	viperDefaults()
+	viperInit()
 
 	database.Connect()
 	defer database.Close()
@@ -35,7 +35,7 @@ func main() {
 	mux.HandleFunc("/", handlers.HomePage)
 	RegisterRecordRoutes(mux)
 	RegisterProjectRoutes(mux)
-	mux.HandleFunc("POST /api/currentdate", handlers.ChangeDate)
+	RegisterOtherRoutes(mux)
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 
@@ -49,6 +49,11 @@ func main() {
 	}()
 
 	fyneSysTray()
+}
+
+func RegisterOtherRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("POST /api/currentdate", handlers.ChangeDate)
+	mux.HandleFunc("GET /summary", handlers.SummaryHandler)
 }
 
 func RegisterRecordRoutes(mux *http.ServeMux) {
@@ -74,7 +79,7 @@ func RegisterMockProjectRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/projects/{id}", handlers.MockUpdateProject)
 }
 
-func viperDefaults() {
+func viperInit() {
 	viper.SetDefault("port", 34115)
 	viper.SetDefault("worktime_per_week", "39h0m0s")
 	viper.SetDefault("theme", "dark")

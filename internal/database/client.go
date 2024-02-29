@@ -26,7 +26,7 @@ type Timeframe struct {
 	Start     string `json:"start"`
 	End       string `json:"end"`
 	Duration  string `json:"duration"`
-	ProjectID string `json:"projectid"`
+	ProjectID int    `json:"projectid"`
 }
 
 type Project struct {
@@ -34,6 +34,11 @@ type Project struct {
 	Name     string `json:"name"`
 	Activity string `json:"activity"`
 	Details  string `json:"details"`
+}
+
+type ProjectHours struct {
+	Hours string `json:"workhours"`
+	Project
 }
 
 type Config struct {
@@ -48,7 +53,7 @@ func Connect() {
 	}
 	log.Println("Connected to Database...")
 
-	tableVars := "(id int, date string, year int, month int, day int, start string, end string, duration string, projectid string)"
+	tableVars := "(id int, date string, year int, month int, day int, start string, end string, duration string, projectid int)"
 	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
 	if err != nil {
 		log.Fatal(err)
@@ -152,6 +157,25 @@ func GetRecordsForDate(date string) []Timeframe {
 		log.Fatal(err)
 	}
 	rows, _ := statement.Query(date)
+
+	for rows.Next() {
+		timefr = Timeframe{}
+		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		timeframes = append(timeframes, timefr)
+	}
+	return timeframes
+}
+
+func GetRecordsForProjectAndTime(year int, month int, projectid int) []Timeframe {
+	var timeframes []Timeframe = []Timeframe{}
+	var timefr Timeframe
+
+	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE year=? AND month=? AND projectid=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, _ := statement.Query(year, month, projectid)
 
 	for rows.Next() {
 		timefr = Timeframe{}
