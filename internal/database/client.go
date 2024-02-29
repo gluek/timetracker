@@ -79,12 +79,24 @@ func Connect() {
 
 	_, err = GetProjectByID(0)
 	if err != nil {
-		statement, err = DB.Prepare("INSERT INTO projects (id, name, activity, details) VALUES (?, ?, ?, ?)")
+		log.Println("Created default projects...")
+		defaultProject := Project{ID: 0, Name: "NotAssigned", Activity: "", Details: ""}
+		vacationProject := Project{ID: 1, Name: "Vacation", Activity: "Vacation", Details: "Vacation"}
+		sickdaysProject := Project{ID: 2, Name: "Sick", Activity: "Sick Days", Details: "Sick Days"}
+		parentalleaveProject := Project{ID: 3, Name: "Parental Leave", Activity: "Parental Leave", Details: "Parental Leave"}
+		err = CreateProject(defaultProject)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defaultProject := Project{ID: 0, Name: "NotAssigned", Activity: "", Details: ""}
-		_, err = statement.Exec(defaultProject.ID, defaultProject.Name, defaultProject.Activity, defaultProject.Details)
+		err = CreateProject(vacationProject)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = CreateProject(sickdaysProject)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = CreateProject(parentalleaveProject)
 		if err != nil {
 			log.Fatal(err)
 		}

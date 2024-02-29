@@ -54,6 +54,7 @@ func main() {
 func RegisterOtherRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/currentdate", handlers.ChangeDate)
 	mux.HandleFunc("GET /summary", handlers.SummaryHandler)
+	mux.HandleFunc("POST /clipboard", handlers.MonthlySummaryToClipboard)
 }
 
 func RegisterRecordRoutes(mux *http.ServeMux) {

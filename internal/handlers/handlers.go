@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"golang.design/x/clipboard"
 )
 
 var (
@@ -177,6 +178,31 @@ func workDeltaWeek(workTotalDuration time.Duration) time.Duration {
 	return workDelta
 }
 
+func GetProjectHours() []database.ProjectHours {
+	today := time.Now()
+	projectsList := []database.ProjectHours{}
+	projects := database.GetProjects()
+	total, err := time.ParseDuration("0s")
+	if err != nil {
+		log.Println(err)
+	}
+	for _, project := range projects {
+		records := database.GetRecordsForProjectAndTime(today.Year(), int(today.Month()), project.ID)
+		duration := workTotalForRecords(records)
+		total += duration
+		projectHour := database.ProjectHours{
+			Project: project,
+			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
+		}
+		projectsList = append(projectsList, projectHour)
+	}
+	projectsList = append(projectsList, database.ProjectHours{
+		Project: database.Project{Activity: "", Details: "", Name: "Total"},
+		Hours:   fmt.Sprintf("%.2f", total.Hours()),
+	})
+	return projectsList
+}
+
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	activeDate = r.FormValue("dateofrecord")
@@ -279,18 +305,16 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	ProjectsHandler(w, r)
 }
 
-func GetProjectHours() []database.ProjectHours {
-	today := time.Now()
-	projectsList := []database.ProjectHours{}
-	projects := database.GetProjects()
-	for _, project := range projects {
-		records := database.GetRecordsForProjectAndTime(today.Year(), int(today.Month()), project.ID)
-		duration := workTotalForRecords(records)
-		projectHour := database.ProjectHours{
-			Project: project,
-			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
-		}
-		projectsList = append(projectsList, projectHour)
+func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
+	projects := GetProjectHours()
+	out := ""
+	for _, project := range projects[1 : len(projects)-1] {
+		out += fmt.Sprintf("%s\t%s\t%s\n", project.Activity, project.Details, project.Hours)
 	}
-	return projectsList
+	// Init returns an error if the package is not ready for use.
+	err := clipboard.Init()
+	if err != nil {
+		panic(err)
+	}
+	clipboard.Write(clipboard.FmtText, []byte(out))
 }
