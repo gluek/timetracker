@@ -42,7 +42,7 @@ func main() {
 	mime.AddExtensionType(".js", "application/javascript")
 
 	go func() {
-		fmt.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
+		log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
 		if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
 			log.Printf("error listening: %v", err)
 		}
@@ -53,7 +53,8 @@ func main() {
 
 func RegisterOtherRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/currentdate", handlers.ChangeDate)
-	mux.HandleFunc("GET /summary", handlers.SummaryHandler)
+	mux.HandleFunc("GET /summary", handlers.MonthlySummaryHandler)
+	mux.HandleFunc("POST /api/monthlysummary", handlers.MonthlySummaryChangeMonth)
 	mux.HandleFunc("POST /clipboard", handlers.MonthlySummaryToClipboard)
 }
 

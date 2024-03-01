@@ -22,9 +22,10 @@ var (
 		Activity: "",
 		Details:  "",
 	}}
-	globalID        int
-	globalIDProject int    = 1
-	activeDate      string = time.Now().Format("2006-01-02")
+	globalID           int
+	globalIDProject    int       = 1
+	activeDate         string    = time.Now().Format("2006-01-02")
+	activeMonthSummary time.Time = time.Now()
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
@@ -58,8 +59,8 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	components.Projects(database.GetProjects()).Render(r.Context(), w)
 }
 
-func SummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.MonthlySummary(GetProjectHours()).Render(r.Context(), w)
+func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
+	components.MonthlySummary(activeMonthSummary, GetProjectHours(activeMonthSummary)).Render(r.Context(), w)
 }
 
 func atoi(s string) int {
@@ -178,8 +179,7 @@ func workDeltaWeek(workTotalDuration time.Duration) time.Duration {
 	return workDelta
 }
 
-func GetProjectHours() []database.ProjectHours {
-	today := time.Now()
+func GetProjectHours(month time.Time) []database.ProjectHours {
 	projectsList := []database.ProjectHours{}
 	projects := database.GetProjects()
 	total, err := time.ParseDuration("0s")
@@ -187,14 +187,16 @@ func GetProjectHours() []database.ProjectHours {
 		log.Println(err)
 	}
 	for _, project := range projects {
-		records := database.GetRecordsForProjectAndTime(today.Year(), int(today.Month()), project.ID)
+		records := database.GetRecordsForProjectAndTime(month.Year(), int(month.Month()), project.ID)
 		duration := workTotalForRecords(records)
 		total += duration
 		projectHour := database.ProjectHours{
 			Project: project,
 			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
 		}
-		projectsList = append(projectsList, projectHour)
+		if projectHour.ID < 4 || duration.Hours() > 0 {
+			projectsList = append(projectsList, projectHour)
+		}
 	}
 	projectsList = append(projectsList, database.ProjectHours{
 		Project: database.Project{Activity: "", Details: "", Name: "Total"},
@@ -206,7 +208,7 @@ func GetProjectHours() []database.ProjectHours {
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	activeDate = r.FormValue("dateofrecord")
-	fmt.Printf("Date changed to %s\n", activeDate)
+	log.Printf("Date changed to %s\n", activeDate)
 	RecordsPageHandler(w, r)
 }
 
@@ -305,8 +307,18 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	ProjectsHandler(w, r)
 }
 
+func MonthlySummaryChangeMonth(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	activeMonthSummary, err = time.Parse("2006-Jan", fmt.Sprintf("%s-%s", r.FormValue("year"), r.FormValue("month")[:3]))
+	log.Println("Month changed to:", activeMonthSummary.Format("2006-01"))
+	if err != nil {
+		log.Println(err)
+	}
+	MonthlySummaryHandler(w, r)
+}
+
 func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
-	projects := GetProjectHours()
+	projects := GetProjectHours(activeMonthSummary)
 	out := ""
 	for _, project := range projects[1 : len(projects)-1] {
 		out += fmt.Sprintf("%s\t%s\t%s\n", project.Activity, project.Details, project.Hours)

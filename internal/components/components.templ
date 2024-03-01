@@ -20,10 +20,26 @@ func getTheme() string {
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
 	years := []int{}
-	for i := range 20 {
+	for i := range 5 {
 		years = append(years, currentYear-i)
 	}
 	return years
+}
+
+func monthSelectList() []string {
+	months := []string{"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December"}
+	return months
 }
 
 templ PageHeader(contents templ.Component) {
@@ -276,33 +292,46 @@ templ ProjectsList(projectList []database.Project) {
 	}
 }
 
-templ MonthlySummary(projects []database.ProjectHours) {
+templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours) {
 	<div id="monthly-summary" class="grid justify-center py-5 space-y-5">
 		<div class="card border shadow py-5">
 			<div class="card-body">
-				<form class="flex flex-row space-x-1">
-					<select class="select" id="month" name="month">
-						<option selected>January</option>
-						<option>February</option>
-						<option>March</option>
-						<option>April</option>
-						<option>May</option>
-						<option>June</option>
-						<option>July</option>
-						<option>August</option>
-						<option>September</option>
-						<option>October</option>
-						<option>November</option>
-						<option>December</option>
+				<form class="flex flex-row space-x-1" hx-post="/api/monthlysummary" hx-target="#monthly-summary-table" hx-select="#monthly-summary-table" hx-swap="outerHTML">
+					<select
+						class="select rounded bg-neutral text-neutral-content"
+						id="month"
+						name="month"
+						hx-post="/api/monthlysummary"
+						hx-target="#monthly-summary-table"
+						hx-select="#monthly-summary-table"
+						hx-swap="outerHTML"
+						hx-trigger="change delay:100ms"
+					>
+						for _, month := range monthSelectList() {
+							if month == activeMonth.Month().String() {
+								<option selected>{ month }</option>
+							} else {
+								<option>{ month }</option>
+							}
+						}
 					</select>
-					<select class="select" id="year" name="year">
+					<select
+						class="select rounded bg-neutral text-neutral-content"
+						id="year"
+						name="year"
+						hx-post="/api/monthlysummary"
+						hx-target="#monthly-summary-table"
+						hx-select="#monthly-summary-table"
+						hx-swap="outerHTML"
+						hx-trigger="change delay:100ms"
+					>
 						for _, year := range yearSelectList() {
 							<option>{ strconv.Itoa(year) }</option>
 						}
 					</select>
 				</form>
 				<div class="text-xl">Monthly Summary:</div>
-				<table class="table">
+				<table id="monthly-summary-table" class="table">
 					<thead>
 						<td>Activity:</td>
 						<td>Details:</td>
@@ -328,7 +357,7 @@ templ MonthlySummary(projects []database.ProjectHours) {
 						}
 					</tbody>
 				</table>
-				<button type="button" class="btn" hx-post="/clipboard" hx-swap="none">Summary to Clipboard</button>
+				<button class="btn btn-success" type="button" hx-post="/clipboard" hx-swap="none">Summary to Clipboard</button>
 			</div>
 		</div>
 	</div>

@@ -1,4 +1,6 @@
+
 # Time Tracker
+
 Project to track time spend on different work projects.
 
 Tech Stack: Go, templ, htmx, SQLite, Tailwind+DaisyUI

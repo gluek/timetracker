@@ -34,4 +34,4 @@ tasks:
     desc: Run the application
     deps: [css, gen, winres]
     cmds:
-      - go build -ldflags -H=windowsgui .
+      - go build -ldflags "-w -s -H=windowsgui" .
