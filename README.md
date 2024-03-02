@@ -36,6 +36,12 @@ https://htmx.org/
 
 Provides means to create dynamic HTML webites with minimal javascript usage
 
+## Go-Winres
+
+https://github.com/tc-hib/go-winres
+
+Manifest/Icons for Windows
+
 ## Resources
 
 Go CRUD Tutorial:
