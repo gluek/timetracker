@@ -11,6 +11,9 @@ import (
 
 	"github.com/spf13/viper"
 	"golang.design/x/clipboard"
+
+	"github.com/rickar/cal/v2"
+	"github.com/rickar/cal/v2/de"
 )
 
 var (
@@ -205,6 +208,18 @@ func GetProjectHours(month time.Time) []database.ProjectHours {
 	return projectsList
 }
 
+func GetWorkDays(month time.Time) int {
+	calendar := cal.NewBusinessCalendar()
+	calendar.AddHoliday(de.HolidaysNW...)
+	day, _ := time.Parse("2006-01-02", month.Format("2006-01")+"-01")
+	workdays := calendar.WorkdaysRemain(day)
+	if calendar.IsWorkday(day) {
+		return workdays + 1
+	} else {
+		return workdays
+	}
+}
+
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	activeDate = r.FormValue("dateofrecord")
@@ -232,7 +247,7 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Created Record %s %s ID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
+	log.Printf("Created Record %s %s ID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
 	RecordsPageHandler(w, r)
 }
 
@@ -255,7 +270,7 @@ func UpdateRecord(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Update Record with ID %s\n", id)
+	log.Printf("Update Record with ID %s\n", id)
 	RecordsPageHandler(w, r)
 }
 
@@ -265,7 +280,7 @@ func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Remove Record with ID: %v\n", id)
+	log.Printf("Remove Record with ID: %v\n", id)
 	RecordsPageHandler(w, r)
 }
 
@@ -282,7 +297,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Create Project %s %s %s\n", project.Activity, project.Details, project.Name)
+	log.Printf("Create Project %s %s %s\n", project.Activity, project.Details, project.Name)
 	ProjectsHandler(w, r)
 }
 
@@ -296,14 +311,14 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		Details:  r.FormValue("details"),
 	}
 	err = database.UpdateProject(project)
-	fmt.Printf("Update Project with ID %s\n", id)
+	log.Printf("Update Project with ID %s\n", id)
 	ProjectsHandler(w, r)
 }
 
 func DeleteProject(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	err = database.DeleteProject(atoi(id))
-	fmt.Printf("Remove Project with ID: %v\n", id)
+	log.Printf("Remove Project with ID: %v\n", id)
 	ProjectsHandler(w, r)
 }
 
