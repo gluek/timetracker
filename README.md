@@ -12,9 +12,17 @@ Tech Stack: Go, templ, htmx, SQLite, Tailwind+DaisyUI
 Using task to ease testing/building
 https://taskfile.dev/
 
+``` bash
+go install github.com/go-task/task/v3/cmd/task@latest
+```
+
 ### Templ
 
 https://templ.guide/
+
+``` bash
+go install github.com/a-h/templ/cmd/templ@latest
+```
 
 Go templating package to generate HTML
 
@@ -39,6 +47,10 @@ Provides means to create dynamic HTML webites with minimal javascript usage
 ## Go-Winres
 
 https://github.com/tc-hib/go-winres
+
+``` bash
+go install github.com/tc-hib/go-winres@latest
+```
 
 Manifest/Icons for Windows
 
