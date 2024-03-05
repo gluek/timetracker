@@ -10,15 +10,13 @@ import (
 	"mime"
 	"net/http"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/driver/desktop"
+	"github.com/getlantern/systray"
 	"github.com/pkg/browser"
 	"github.com/spf13/viper"
 )
 
 //go:embed internal/assets/css/input.css
-//go:embed internal/assets/favicon.png
+//go:embed internal/assets/favicon.ico
 //go:embed internal/assets/js/htmx.min.js
 var content embed.FS
 
@@ -48,7 +46,8 @@ func main() {
 		}
 	}()
 
-	fyneSysTray()
+	//fyneSysTray()
+	getlanternSysTray()
 }
 
 func RegisterOtherRoutes(mux *http.ServeMux) {
@@ -100,25 +99,32 @@ func viperInit() {
 	}
 }
 
-func fyneSysTray() {
-	a := app.New()
-	iconBytes, err := content.ReadFile("internal/assets/favicon.png")
-	icon := fyne.NewStaticResource("icon", iconBytes)
-	if err != nil {
-		log.Println(err)
-	}
+func getlanternSysTray() {
+	systray.Run(func() {
+		iconBytes, err := content.ReadFile("internal/assets/favicon.ico")
+		if err != nil {
+			log.Println(err)
+		}
+		systray.SetIcon(iconBytes)
+		systray.SetTitle("TimeTracker")
+		systray.SetTooltip("TimeTracker")
+		mBrowser := systray.AddMenuItem("Open Browser", "Open TimeTracker in Browser")
+		mQuitOrig := systray.AddMenuItem("Quit", "Quit the whole app")
 
-	if desk, ok := a.(desktop.App); ok {
-		m := fyne.NewMenu("TimeTracker",
-			fyne.NewMenuItem("Open Browser", func() {
-				err := browser.OpenURL(fmt.Sprintf("http://localhost:%d", viper.GetInt("port")))
-				if err != nil {
-					log.Println(err)
-				}
-			}))
-		desk.SetSystemTrayMenu(m)
-		desk.SetSystemTrayIcon(icon)
-	}
+		go func() {
+			<-mQuitOrig.ClickedCh
+			fmt.Println("Requesting quit")
+			systray.Quit()
+			fmt.Println("Finished quitting")
+		}()
 
-	a.Run()
+		go func() {
+			<-mBrowser.ClickedCh
+			err := browser.OpenURL(fmt.Sprintf("http://localhost:%d", viper.GetInt("port")))
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+
+	}, nil)
 }
