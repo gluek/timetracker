@@ -110,6 +110,7 @@ func getlanternSysTray() {
 		systray.SetTooltip("TimeTracker")
 		mBrowser := systray.AddMenuItem("Open Browser", "Open TimeTracker in Browser")
 		mQuitOrig := systray.AddMenuItem("Quit", "Quit the whole app")
+		url := fmt.Sprintf("http://localhost:%d", viper.GetInt("port"))
 
 		go func() {
 			<-mQuitOrig.ClickedCh
@@ -119,10 +120,13 @@ func getlanternSysTray() {
 		}()
 
 		go func() {
-			<-mBrowser.ClickedCh
-			err := browser.OpenURL(fmt.Sprintf("http://localhost:%d", viper.GetInt("port")))
-			if err != nil {
-				log.Println(err)
+			var err error
+			for {
+				<-mBrowser.ClickedCh
+				err = browser.OpenURL(url)
+				if err != nil {
+					log.Println(err)
+				}
 			}
 		}()
 

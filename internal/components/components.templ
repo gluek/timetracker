@@ -67,6 +67,14 @@ func workHoursMonthDelta(workdays int, total database.ProjectHours) time.Duratio
 	return deltaDuration
 }
 
+func durationStrToFloat(duration string) float64 {
+	durFloat, err := time.ParseDuration(duration)
+	if err != nil {
+		log.Println(fmt.Errorf("durationStrToFloat: %w", err))
+	}
+	return durFloat.Hours()
+}
+
 templ PageHeader(contents templ.Component) {
 	<!DOCTYPE html>
 	<html data-theme={ getTheme() }>
@@ -237,7 +245,11 @@ templ dailySummary(workDurationDaily string, workDeltaWeek string) {
 							</tr>
 							<tr>
 								<td>Delta Week:</td>
-								<td>{ workDeltaWeek }</td>
+								if durationStrToFloat(workDeltaWeek) < 0 {
+									<td class="text-error">{ workDeltaWeek }</td>
+								} else {
+									<td class="text-success">{ workDeltaWeek }</td>
+								}
 							</tr>
 						</tbody>
 					</table>
