@@ -176,7 +176,7 @@ func MonthlySummaryChangeMonth(w http.ResponseWriter, r *http.Request) {
 func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
 	projects := GetProjectHours(activeMonthSummary)
 	out := ""
-	for _, project := range projects[1 : len(projects)-1] {
+	for _, project := range projects[4 : len(projects)-1] {
 		out += fmt.Sprintf("%s\t%s\t%s\n", project.Activity, project.Details, project.Hours)
 	}
 	// Init returns an error if the package is not ready for use.
