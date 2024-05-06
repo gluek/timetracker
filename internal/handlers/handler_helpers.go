@@ -107,6 +107,20 @@ func weekDaysByDate(date string) []time.Time {
 	return weekDays
 }
 
+func weekWorkdaysByDate(date string) float64 {
+	var workDays float64
+	weekDays := weekDaysByDate(date)
+	calendar := cal.NewBusinessCalendar()
+	calendar.AddHoliday(de.HolidaysNW...)
+
+	for _, day := range weekDays {
+		if calendar.IsWorkday(day) {
+			workDays++
+		}
+	}
+	return workDays
+}
+
 func workTotalWeek(date string) time.Duration {
 	workTotalDuration, err := time.ParseDuration("0s")
 	if err != nil {
@@ -120,8 +134,12 @@ func workTotalWeek(date string) time.Duration {
 	return workTotalDuration
 }
 
-func workDeltaWeek(workTotalDuration time.Duration) time.Duration {
+func workDeltaWeek(workTotalDuration time.Duration, date string) time.Duration {
 	workTotalTarget, err := time.ParseDuration(viper.GetString("worktime_per_week"))
+	if err != nil {
+		log.Println(err)
+	}
+	workTotalTarget, err = time.ParseDuration(fmt.Sprintf("%fh", workTotalTarget.Hours()/5.0*weekWorkdaysByDate(date)))
 	workDelta := workTotalDuration - workTotalTarget
 	if err != nil {
 		log.Println(err)

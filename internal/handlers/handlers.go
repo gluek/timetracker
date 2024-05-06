@@ -32,7 +32,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate)).String())
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
 	component.Render(r.Context(), w)
 }
 
@@ -42,7 +42,7 @@ func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate)).String())
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
 	component.Render(r.Context(), w)
 }
 
