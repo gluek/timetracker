@@ -8,17 +8,6 @@ import "time"
 import "fmt"
 import "log"
 
-func getTheme() string {
-	theme := viper.GetString("theme")
-	if theme == "dark" {
-		return "dark"
-	}
-	if theme == "light" {
-		return "emerald"
-	}
-	return "dark"
-}
-
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
 	years := []int{}
@@ -77,7 +66,7 @@ func durationStrToFloat(duration string) float64 {
 
 templ PageHeader(contents templ.Component) {
 	<!DOCTYPE html>
-	<html data-theme={ getTheme() }>
+	<html lang="en-US">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>

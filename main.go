@@ -83,7 +83,6 @@ func RegisterMockProjectRoutes(mux *http.ServeMux) {
 func viperInit() {
 	viper.SetDefault("port", 34115)
 	viper.SetDefault("worktime_per_week", "39h0m0s")
-	viper.SetDefault("theme", "dark")
 
 	viper.SetConfigName("timetracker")
 	viper.SetConfigType("yaml")
