@@ -7,6 +7,8 @@ package components
 
 import "github.com/a-h/templ"
 
+import "local/timetracker/internal/database"
+
 func xyPlotScript(xydata []float64) templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_xyPlotScript_50fc`,
@@ -34,5 +36,57 @@ func xyPlotScript(xydata []float64) templ.ComponentScript {
 }`,
 		Call:       templ.SafeScript(`__templ_xyPlotScript_50fc`, xydata),
 		CallInline: templ.SafeScriptInline(`__templ_xyPlotScript_50fc`, xydata),
+	}
+}
+
+func pieChart(projects []database.ProjectHours) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_pieChart_fffb`,
+		Function: `function __templ_pieChart_fffb(projects){var chartDom = document.getElementById('piechart');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // dark mode
+        var myChart = echarts.init(chartDom, 'dark');
+    } else {
+        var myChart = echarts.init(chartDom);
+    }
+    var option;
+    const dataArray = projects.slice(0,-1).map((project) => ({'value': parseFloat(project.workhours), 'name': project.name}))
+    option = {
+    backgroundColor: "transparent",
+    title: {
+        text: 'Projects',
+        left: 'center'
+    },
+    tooltip: {
+        trigger: 'item'
+    },
+    dataset: [{source: dataArray}], 
+    series: [
+        {
+            type: 'pie',
+            radius: '60%'
+        },
+        {
+        name: 'Project Hours',
+        type: 'pie',
+        radius: '60%',
+        label: {position: 'inside', formatter: '{d}%', color:'black',  fontSize:18},
+        percentPrecision: 0,
+        emphasis: {
+            label: {show: true},
+            itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+        } 
+        }
+    ]
+    };
+
+    option && myChart.setOption(option);
+}`,
+		Call:       templ.SafeScript(`__templ_pieChart_fffb`, projects),
+		CallInline: templ.SafeScriptInline(`__templ_pieChart_fffb`, projects),
 	}
 }

@@ -58,7 +58,11 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.MonthlySummary(activeMonthSummary, GetProjectHours(activeMonthSummary), GetWorkDays(activeMonthSummary)).Render(r.Context(), w)
+	components.MonthlySummary(activeMonthSummary, GetProjectHoursMonth(activeMonthSummary), GetWorkDays(activeMonthSummary)).Render(r.Context(), w)
+}
+
+func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
+	components.YearlySummary(time.Time{}, GetProjectHoursYear(time.Now()), 0).Render(r.Context(), w)
 }
 
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
@@ -174,7 +178,7 @@ func MonthlySummaryChangeMonth(w http.ResponseWriter, r *http.Request) {
 }
 
 func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
-	projects := GetProjectHours(activeMonthSummary)
+	projects := GetProjectHoursMonth(activeMonthSummary)
 	out := ""
 	for _, project := range projects[4 : len(projects)-1] {
 		out += fmt.Sprintf("%s\t%s\t%s\n", project.Activity, project.Details, project.Hours)

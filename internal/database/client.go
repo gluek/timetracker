@@ -198,6 +198,25 @@ func GetRecordsForProjectAndTime(year int, month int, projectid int) []Timeframe
 	return timeframes
 }
 
+func GetRecordsForProjectAndYear(year int, projectid int) []Timeframe {
+	var timeframes []Timeframe = []Timeframe{}
+	var timefr Timeframe
+
+	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE year=? AND projectid=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, _ := statement.Query(year, projectid)
+
+	for rows.Next() {
+		timefr = Timeframe{}
+		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		timeframes = append(timeframes, timefr)
+	}
+	return timeframes
+}
+
 func GetRecordsMaxID() int {
 	var maxID int
 	statement, err := DB.Prepare("SELECT MAX(id) FROM timeframes")

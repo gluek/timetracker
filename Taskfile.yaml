@@ -28,6 +28,8 @@ tasks:
   run:
     desc: Run the application
     deps: [css, gen]
+    env:
+      TIMETRACKER_DEV: 1
     cmds:
       - go run .
   build:

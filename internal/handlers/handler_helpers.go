@@ -147,7 +147,8 @@ func workDeltaWeek(workTotalDuration time.Duration, date string) time.Duration {
 	return workDelta
 }
 
-func GetProjectHours(month time.Time) []database.ProjectHours {
+// Returns duration in hours for all project in month, including base projects
+func GetProjectHoursMonth(month time.Time) []database.ProjectHours {
 	projectsList := []database.ProjectHours{}
 	projects := database.GetProjects()
 	total, err := time.ParseDuration("0s")
@@ -163,6 +164,33 @@ func GetProjectHours(month time.Time) []database.ProjectHours {
 			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
 		}
 		if projectHour.ID < 4 || duration.Hours() > 0 {
+			projectsList = append(projectsList, projectHour)
+		}
+	}
+	projectsList = append(projectsList, database.ProjectHours{
+		Project: database.Project{Activity: "", Details: "", Name: "Total"},
+		Hours:   fmt.Sprintf("%.2f", total.Hours()),
+	})
+	return projectsList
+}
+
+// Returns duration in hours for all custom projects in year, excluding base projects
+func GetProjectHoursYear(year time.Time) []database.ProjectHours {
+	projectsList := []database.ProjectHours{}
+	projects := database.GetProjects()
+	total, err := time.ParseDuration("0s")
+	if err != nil {
+		log.Println(err)
+	}
+	for _, project := range projects[4:] {
+		records := database.GetRecordsForProjectAndYear(year.Year(), project.ID)
+		duration := workTotalForRecords(records)
+		total += duration
+		projectHour := database.ProjectHours{
+			Project: project,
+			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
+		}
+		if duration.Hours() > 0 {
 			projectsList = append(projectsList, projectHour)
 		}
 	}

@@ -9,6 +9,7 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"os"
 
 	"github.com/getlantern/systray"
 	"github.com/pkg/browser"
@@ -18,6 +19,7 @@ import (
 //go:embed internal/assets/css/input.css
 //go:embed internal/assets/favicon.ico
 //go:embed internal/assets/js/htmx.min.js
+//go:embed internal/assets/js/echarts.min.js
 var content embed.FS
 
 //internal/assets/js/echarts.js
@@ -39,20 +41,27 @@ func main() {
 
 	mime.AddExtensionType(".js", "application/javascript")
 
-	go func() {
+	if os.Getenv("TIMETRACKER_DEV") != "1" {
+		go func() {
+			log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
+			if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
+				log.Printf("error listening: %v", err)
+			}
+		}()
+		//fyneSysTray()
+		getlanternSysTray()
+	} else {
 		log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
 		if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
 			log.Printf("error listening: %v", err)
 		}
-	}()
-
-	//fyneSysTray()
-	getlanternSysTray()
+	}
 }
 
 func RegisterOtherRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/currentdate", handlers.ChangeDate)
-	mux.HandleFunc("GET /summary", handlers.MonthlySummaryHandler)
+	mux.HandleFunc("GET /month", handlers.MonthlySummaryHandler)
+	mux.HandleFunc("GET /year", handlers.YearlySummaryHandler)
 	mux.HandleFunc("POST /api/monthlysummary", handlers.MonthlySummaryChangeMonth)
 	mux.HandleFunc("POST /api/clipboard", handlers.MonthlySummaryToClipboard)
 }
