@@ -24,7 +24,6 @@ tasks:
   assets:
     desc: Build assets for project
     deps: [css, gen]
-
   run:
     desc: Run the application
     deps: [css, gen]

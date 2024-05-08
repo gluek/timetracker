@@ -42,6 +42,19 @@ func workHoursMonth(workdays int) float64 {
 	return workHoursPerDay * float64(workdays)
 }
 
+func hoursToDays(hours string) string {
+	workHoursPerWeek, err := time.ParseDuration(viper.GetString("worktime_per_week"))
+	if err != nil {
+		log.Println(fmt.Errorf("hoursToDays: %w", err))
+	}
+	hoursTime, err := time.ParseDuration(hours+"h")
+	if err != nil {
+		log.Println(fmt.Errorf("hoursToDays: %w", err))
+	}
+	days := hoursTime.Hours() / workHoursPerWeek.Hours() * 5
+	return fmt.Sprintf("%.1f", days)
+}
+
 func workHoursMonthDelta(workdays int, total database.ProjectHours) time.Duration {
 	workHoursMonth := workHoursMonth(workdays)
 	totalDuration, err := time.ParseDuration(total.Hours + "h")
@@ -349,6 +362,7 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 						hx-select="#monthly-summary"
 						hx-swap="outerHTML"
 						hx-trigger="change delay:100ms"
+						hx-preserve="true"
 					>
 						for _, month := range monthSelectList() {
 							if month == activeMonth.Month().String() {
@@ -367,9 +381,14 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 						hx-select="#monthly-summary"
 						hx-swap="outerHTML"
 						hx-trigger="change delay:100ms"
+						hx-preserve="true"
 					>
 						for _, year := range yearSelectList() {
-							<option>{ strconv.Itoa(year) }</option>
+							if year == activeMonth.Year() {
+								<option selected>{ strconv.Itoa(year) }</option>
+							} else {
+								<option>{ strconv.Itoa(year) }</option>
+							}
 						}
 					</select>
 				</form>
@@ -439,17 +458,52 @@ templ WorkDays(workdays int, total database.ProjectHours) {
 }
 
 templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, workdaysYTD int) {
-	<div class="grid grid-cols-2 space-x-5 py-5">
-		@pieChart(projects)
-		<div class="card h-[500px] w-[500px] justify-self-end border shadow">
-			<div id="piechart" class="card-body">
-				HERE WILL BE A PIE CHART				
-			</div>
+	<div id="yearly-summary" class="grid grid-cols-2 gap-5 py-5">
+		@pieChart(projects[4:])
+		<div class="card h-[500px] w-full justify-self-end border shadow">
+			<div id="piechart" class="card-body"></div>
 		</div>
-		<div class="card justify-self-start border shadow">
+		<div class="card w-full justify-self-start border shadow">
 			<div class="card-body">
-				Here is some text!
+				<form class="flex justify-center" hx-post="/api/yearlysummary" hx-target="#yearly-summary" hx-select="#yearly-summary" hx-swap="outerHTML">
+					<select
+						class="select rounded bg-neutral text-xl text-neutral-content"
+						id="yearSummary"
+						name="year"
+						hx-post="/api/yearlysummary"
+						hx-target="#yearly-summary"
+						hx-select="#yearly-summary"
+						hx-swap="outerHTML"
+						hx-trigger="change delay:100ms"
+						hx-preserve="true"
+					>
+						for _, year := range yearSelectList() {
+							if year == activeYear.Year() {
+								<option selected>{ strconv.Itoa(year) }</option>
+							} else {
+								<option>{ strconv.Itoa(year) }</option>
+							}
+						}
+					</select>
+				</form>
+				<div class="text-xl">Yearly Summary:</div>
+				<table id="yearly-summary-table" class="table">
+					<thead>
+						<td>Name:</td>
+						<td>Hours:</td>
+						<td>Days:</td>
+					</thead>
+					<tbody>
+						for _, project := range projects[1:4] {
+							<tr class="bg-base-100">
+								<td>{ project.Name }</td>
+								<td>{ project.Hours }</td>
+								<td>{ hoursToDays(project.Hours) }</td>
+							</tr>
+						}
+					</tbody>
+				</table>
 			</div>
 		</div>
-	</div>:
+	</div>
 }

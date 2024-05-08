@@ -12,7 +12,6 @@ tmp_dir = "tmp"
   exclude_regex = ["_templ.go"]
   exclude_unchanged = false
   follow_symlink = false
-  full_bin = ""
   include_dir = []
   include_ext = ["go", "templ", "html"]
   include_file = []

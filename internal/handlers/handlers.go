@@ -24,6 +24,7 @@ var (
 	globalIDProject    int       = 1
 	activeDate         string    = time.Now().Format("2006-01-02")
 	activeMonthSummary time.Time = time.Now()
+	activeYearSummary  time.Time = time.Now()
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +63,7 @@ func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.YearlySummary(time.Time{}, GetProjectHoursYear(time.Now()), 0).Render(r.Context(), w)
+	components.YearlySummary(activeYearSummary, GetProjectHoursYear(activeYearSummary), 0).Render(r.Context(), w)
 }
 
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
@@ -175,6 +176,16 @@ func MonthlySummaryChangeMonth(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	MonthlySummaryHandler(w, r)
+}
+
+func YearlySummaryChangeYear(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	activeYearSummary, err = time.Parse("2006", r.FormValue("year"))
+	log.Println("Year changed to:", activeYearSummary.Format("2006"))
+	if err != nil {
+		log.Println(err)
+	}
+	YearlySummaryHandler(w, r)
 }
 
 func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {

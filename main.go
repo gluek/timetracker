@@ -51,6 +51,7 @@ func main() {
 		//fyneSysTray()
 		getlanternSysTray()
 	} else {
+		log.Printf("Running in DEBUG Mode")
 		log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
 		if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
 			log.Printf("error listening: %v", err)
@@ -63,6 +64,7 @@ func RegisterOtherRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /month", handlers.MonthlySummaryHandler)
 	mux.HandleFunc("GET /year", handlers.YearlySummaryHandler)
 	mux.HandleFunc("POST /api/monthlysummary", handlers.MonthlySummaryChangeMonth)
+	mux.HandleFunc("POST /api/yearlysummary", handlers.YearlySummaryChangeYear)
 	mux.HandleFunc("POST /api/clipboard", handlers.MonthlySummaryToClipboard)
 }
 

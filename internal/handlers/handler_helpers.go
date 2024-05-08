@@ -182,7 +182,7 @@ func GetProjectHoursYear(year time.Time) []database.ProjectHours {
 	if err != nil {
 		log.Println(err)
 	}
-	for _, project := range projects[4:] {
+	for _, project := range projects {
 		records := database.GetRecordsForProjectAndYear(year.Year(), project.ID)
 		duration := workTotalForRecords(records)
 		total += duration
@@ -190,7 +190,7 @@ func GetProjectHoursYear(year time.Time) []database.ProjectHours {
 			Project: project,
 			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
 		}
-		if duration.Hours() > 0 {
+		if project.ID < 4 || duration.Hours() > 0 {
 			projectsList = append(projectsList, projectHour)
 		}
 	}
