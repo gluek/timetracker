@@ -7,6 +7,7 @@ import "github.com/spf13/viper"
 import "time"
 import "fmt"
 import "log"
+import "strings"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -47,7 +48,7 @@ func hoursToDays(hours string) string {
 	if err != nil {
 		log.Println(fmt.Errorf("hoursToDays: %w", err))
 	}
-	hoursTime, err := time.ParseDuration(hours+"h")
+	hoursTime, err := time.ParseDuration(hours + "h")
 	if err != nil {
 		log.Println(fmt.Errorf("hoursToDays: %w", err))
 	}
@@ -348,7 +349,7 @@ templ ProjectsList(projectList []database.Project) {
 	}
 }
 
-templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int) {
+templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursDaily) {
 	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
 		<div class="card border shadow">
 			<div class="card-body">
@@ -423,6 +424,7 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 			</div>
 		</div>
 		@WorkDays(workdays, projects[len(projects)-1])
+		@OverviewRecords(entries)
 	</div>
 }
 
@@ -451,6 +453,29 @@ templ WorkDays(workdays int, total database.ProjectHours) {
 							<td class="text-success">{ fmt.Sprintf("%.2f", workHoursMonthDelta(workdays, total).Hours()) }</td>
 						}
 					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+templ OverviewRecords(entries []database.ProjectHoursDaily) {
+	<div id="overview-records" class="card border shadow">
+		<div class="card-body">
+			<table class="table table-xs">
+				<thead>
+					<td>Date:</td>
+					<td>Hours:</td>
+					<td>Projects:</td>
+				</thead>
+				<tbody>
+				for _, entry := range entries {
+					<tr>
+						<td>{ entry.Date }</td>
+						<td>{ entry.Hours }</td>
+						<td>{ strings.Join(entry.Projects, ", ") }</td>
+					</tr>
+				}
 				</tbody>
 			</table>
 		</div>

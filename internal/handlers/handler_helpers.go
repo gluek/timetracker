@@ -7,10 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/rickar/cal/v2"
-	"github.com/rickar/cal/v2/de"
+	"github.com/spf13/viper"
 )
 
 func atoi(s string) int {
@@ -110,8 +108,6 @@ func weekDaysByDate(date string) []time.Time {
 func weekWorkdaysByDate(date string) float64 {
 	var workDays float64
 	weekDays := weekDaysByDate(date)
-	calendar := cal.NewBusinessCalendar()
-	calendar.AddHoliday(de.HolidaysNW...)
 
 	for _, day := range weekDays {
 		if calendar.IsWorkday(day) {
@@ -201,9 +197,28 @@ func GetProjectHoursYear(year time.Time) []database.ProjectHours {
 	return projectsList
 }
 
+func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursDaily {
+	var dailyEntries []database.ProjectHoursDaily
+	lastDayMonth := cal.MonthEnd(month)
+	for day := range lastDayMonth.Day() {
+		dayTime, err := time.Parse("2006-01-02", fmt.Sprintf("%s-%02d", month.Format("2006-01"), day+1))
+		if err != nil {
+			log.Println(err)
+		}
+		entries := database.GetProjectsForDate(dayTime)
+		work_total := workTotalByDate(dayTime.Format("2006-01-02"))
+		projectStrings := []string{}
+		for _, entry := range entries {
+			projectStrings = append(projectStrings, entry)
+		}
+		dailyEntries = append(dailyEntries, database.ProjectHoursDaily{Date: dayTime.Format("Mon Jan 2"), Hours: fmt.Sprintf("%05.2f", work_total.Hours()), Projects: projectStrings})
+
+	}
+
+	return dailyEntries
+}
+
 func GetWorkDays(month time.Time) int {
-	calendar := cal.NewBusinessCalendar()
-	calendar.AddHoliday(de.HolidaysNW...)
 	day, _ := time.Parse("2006-01-02", month.Format("2006-01")+"-01")
 	workdays := calendar.WorkdaysRemain(day)
 	if calendar.IsWorkday(day) {

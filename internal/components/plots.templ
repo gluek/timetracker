@@ -3,30 +3,6 @@ package components
 
 import "local/timetracker/internal/database"
 
-script xyPlotScript(xydata []float64) {
-    var chartDom = document.getElementById('main');
-    var myChart = echarts.init(chartDom);
-    var option;
-
-    option = {
-    xAxis: {
-        type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [
-        {
-        data: xydata,
-        type: 'line'
-        }
-    ]
-    };
-
-    option && myChart.setOption(option);
-}
-
 script pieChart(projects []database.ProjectHours) {
     var chartDom = document.getElementById('piechart');
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

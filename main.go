@@ -27,6 +27,7 @@ var content embed.FS
 func main() {
 	// Init session
 	viperInit()
+	handlers.HandlerInit()
 
 	database.Connect()
 	defer database.Close()

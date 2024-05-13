@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rickar/cal/v2"
+	"github.com/rickar/cal/v2/de"
 	"golang.design/x/clipboard"
 )
 
@@ -21,11 +23,16 @@ var (
 		Details:  "",
 	}}
 	globalID           int
-	globalIDProject    int       = 1
-	activeDate         string    = time.Now().Format("2006-01-02")
-	activeMonthSummary time.Time = time.Now()
-	activeYearSummary  time.Time = time.Now()
+	globalIDProject    int                   = 1
+	activeDate         string                = time.Now().Format("2006-01-02")
+	activeMonthSummary time.Time             = time.Now()
+	activeYearSummary  time.Time             = time.Now()
+	calendar           *cal.BusinessCalendar = cal.NewBusinessCalendar()
 )
+
+func HandlerInit() {
+	calendar.AddHoliday(de.HolidaysNW...)
+}
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
 	component := components.HomePage(
@@ -59,7 +66,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.MonthlySummary(activeMonthSummary, GetProjectHoursMonth(activeMonthSummary), GetWorkDays(activeMonthSummary)).Render(r.Context(), w)
+	components.MonthlySummary(activeMonthSummary, GetProjectHoursMonth(activeMonthSummary), GetWorkDays(activeMonthSummary), GetProjectsHoursOverview(activeMonthSummary)).Render(r.Context(), w)
 }
 
 func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {

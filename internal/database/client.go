@@ -41,6 +41,12 @@ type ProjectHours struct {
 	Project
 }
 
+type ProjectHoursDaily struct {
+	Date     string   `json:"date"`
+	Hours    string   `json:"workhours"`
+	Projects []string `json:"projects"`
+}
+
 type Config struct {
 	DailyHours time.Duration
 }
@@ -63,7 +69,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created timesframes Table...")
+	log.Println("Created timeframes Table...")
 
 	tableVars = "(id int, name string, activity string, details string)"
 	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS projects " + tableVars)
@@ -339,6 +345,28 @@ func DeleteProject(id int) error {
 		return err
 	}
 	return nil
+}
+
+func GetProjectsForDate(date time.Time) map[int]string {
+	statement, err := DB.Prepare("SELECT projectid FROM timeframes WHERE date=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := statement.Query(date.Format("2006-01-02"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	projectids := map[int]string{}
+	for rows.Next() {
+		var id int
+		rows.Scan(&id)
+		projectName, err := GetProjectByID(id)
+		if err != nil {
+			log.Print(err)
+		}
+		projectids[id] = projectName.Name
+	}
+	return projectids
 }
 
 func GetVersion() {

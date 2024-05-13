@@ -9,36 +9,6 @@ import "github.com/a-h/templ"
 
 import "local/timetracker/internal/database"
 
-func xyPlotScript(xydata []float64) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_xyPlotScript_50fc`,
-		Function: `function __templ_xyPlotScript_50fc(xydata){var chartDom = document.getElementById('main');
-    var myChart = echarts.init(chartDom);
-    var option;
-
-    option = {
-    xAxis: {
-        type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [
-        {
-        data: xydata,
-        type: 'line'
-        }
-    ]
-    };
-
-    option && myChart.setOption(option);
-}`,
-		Call:       templ.SafeScript(`__templ_xyPlotScript_50fc`, xydata),
-		CallInline: templ.SafeScriptInline(`__templ_xyPlotScript_50fc`, xydata),
-	}
-}
-
 func pieChart(projects []database.ProjectHours) templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_pieChart_fffb`,
