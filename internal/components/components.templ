@@ -34,6 +34,14 @@ func monthSelectList() []string {
 	return months
 }
 
+func reformateDateString(date string) string {
+	dateParse, err := time.Parse("Mon Jan 2 2006", date)
+	if err != nil {
+		log.Println(fmt.Errorf("reformateDateString: %w", err))
+	}
+	return dateParse.Format("2006-01-02")
+}
+
 func workHoursMonth(workdays int) float64 {
 	workHoursPerWeek, err := time.ParseDuration(viper.GetString("worktime_per_week"))
 	if err != nil {
@@ -469,13 +477,13 @@ templ OverviewRecords(entries []database.ProjectHoursDaily) {
 					<td>Projects:</td>
 				</thead>
 				<tbody>
-				for _, entry := range entries {
-					<tr>
-						<td>{ entry.Date }</td>
-						<td>{ entry.Hours }</td>
-						<td>{ strings.Join(entry.Projects, ", ") }</td>
-					</tr>
-				}
+					for _, entry := range entries {
+						<tr>
+							<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
+							<td>{ entry.Hours }</td>
+							<td>{ strings.Join(entry.Projects, ", ") }</td>
+						</tr>
+					}
 				</tbody>
 			</table>
 		</div>

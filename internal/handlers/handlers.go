@@ -53,7 +53,17 @@ func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
 	component.Render(r.Context(), w)
 }
-
+func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	activeDate = r.PathValue("date")
+	component := components.Records(
+		database.GetRecordsForDate(activeDate),
+		database.GetProjects(),
+		activeDate,
+		workTotalByDate(activeDate).String(),
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
+	component.Render(r.Context(), w)
+}
 func RecordsHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.RecordList(
 		database.GetRecordsForDate(activeDate),

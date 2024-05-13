@@ -71,6 +71,7 @@ func RegisterOtherRoutes(mux *http.ServeMux) {
 
 func RegisterRecordRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /timeframes", handlers.RecordsPageHandler)
+	mux.HandleFunc("GET /timeframes/{date}", handlers.RecordsPageDateChangeHandler)
 	mux.HandleFunc("POST /api/timeframes", handlers.CreateRecord)
 	mux.HandleFunc("DELETE /api/timeframes/{id}/", handlers.DeleteRecord)
 	mux.HandleFunc("PUT /api/timeframes/{id}", handlers.UpdateRecord)
