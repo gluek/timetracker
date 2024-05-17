@@ -200,7 +200,7 @@ templ CreateRecord(projectList []database.Project, currentDate string) {
 templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 	<div id="record-list">
 		if len(tfList) > 0 {
-			<div class="card border">
+			<div class="card border shadow">
 				<div class="card-body">
 					for _, timeframe := range tfList {
 						<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
@@ -310,7 +310,7 @@ templ CreateProject() {
 
 templ ProjectsList(projectList []database.Project) {
 	if len(projectList) > 4 {
-		<div id="timetrackerList" class="card border">
+		<div id="timetrackerList" class="card border shadow">
 			<div class="card-body">
 				for _, project := range projectList[4:] {
 					<form id={ "project" + strconv.Itoa(project.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
