@@ -511,7 +511,6 @@ html {
 :root {
   color-scheme: light;
   --b2: 93% 0 0;
-  --b3: 86% 0 0;
   --in: 72.06% 0.191 231.6;
   --su: 64.8% 0.150 160;
   --wa: 84.71% 0.199 83.87;
@@ -539,6 +538,7 @@ html {
   --animation-btn: 0;
   --animation-input: 0;
   --btn-focus-scale: 1;
+  --b3: 100% 0 0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -579,7 +579,6 @@ html {
 [data-theme=emerald] {
   color-scheme: light;
   --b2: 93% 0 0;
-  --b3: 86% 0 0;
   --in: 72.06% 0.191 231.6;
   --su: 64.8% 0.150 160;
   --wa: 84.71% 0.199 83.87;
@@ -607,12 +606,12 @@ html {
   --animation-btn: 0;
   --animation-input: 0;
   --btn-focus-scale: 1;
+  --b3: 100% 0 0;
 }
 
 :root:has(input.theme-controller[value=emerald]:checked) {
   color-scheme: light;
   --b2: 93% 0 0;
-  --b3: 86% 0 0;
   --in: 72.06% 0.191 231.6;
   --su: 64.8% 0.150 160;
   --wa: 84.71% 0.199 83.87;
@@ -640,6 +639,7 @@ html {
   --animation-btn: 0;
   --animation-input: 0;
   --btn-focus-scale: 1;
+  --b3: 100% 0 0;
 }
 
 [data-theme=dark] {
@@ -2144,12 +2144,20 @@ html {
   height: 5rem;
 }
 
-.h-\[500px\] {
-  height: 500px;
+.h-\[400px\] {
+  height: 400px;
 }
 
 .w-10 {
   width: 2.5rem;
+}
+
+.w-\[400px\] {
+  width: 400px;
+}
+
+.w-\[500px\] {
+  width: 500px;
 }
 
 .w-full {
@@ -2175,10 +2183,6 @@ html {
 
 .animate-none {
   animation: none;
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .flex-row {
@@ -2213,12 +2217,8 @@ html {
   margin-bottom: calc(1.25rem * var(--tw-space-y-reverse));
 }
 
-.justify-self-start {
-  justify-self: start;
-}
-
-.justify-self-end {
-  justify-self: end;
+.self-center {
+  align-self: center;
 }
 
 .justify-self-center {
@@ -2229,10 +2229,6 @@ html {
   border-radius: 0.25rem;
 }
 
-.border {
-  border-width: 1px;
-}
-
 .bg-base-100 {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
@@ -2241,6 +2237,11 @@ html {
 .bg-base-200 {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity)));
+}
+
+.bg-base-300 {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
 }
 
 .bg-neutral {

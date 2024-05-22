@@ -156,7 +156,7 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, curre
 }
 
 templ CreateRecord(projectList []database.Project, currentDate string) {
-	<div class="card w-min justify-self-center border shadow" id="timetracker">
+	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
 		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 			<div class="flex justify-center">
 				<input
@@ -203,7 +203,7 @@ templ CreateRecord(projectList []database.Project, currentDate string) {
 templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 	<div id="record-list">
 		if len(tfList) > 0 {
-			<div class="card border shadow">
+			<div class="card bg-base-300 shadow">
 				<div class="card-body">
 					for _, timeframe := range tfList {
 						<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
@@ -263,7 +263,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 
 templ dailySummary(workDurationDaily string, workDeltaWeek string) {
 	<div id="summary-day">
-		<div class="card border shadow">
+		<div class="card bg-base-300 shadow">
 			<div class="card-body">
 				<div class="flex flex-col">
 					<div class="text-xl">Daily Summary:</div>
@@ -298,7 +298,7 @@ templ Projects(projectList []database.Project) {
 }
 
 templ CreateProject() {
-	<div id="projecttracker" class="card border shadow">
+	<div id="projecttracker" class="card bg-base-300 shadow">
 		<form id="defaultProject" class="card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
 			<div class="text-xl">Add New Project:</div>
 			<div class="flex flex-row justify-center space-x-1">
@@ -313,7 +313,7 @@ templ CreateProject() {
 
 templ ProjectsList(projectList []database.Project) {
 	if len(projectList) > 4 {
-		<div id="timetrackerList" class="card border shadow">
+		<div id="timetrackerList" class="card bg-base-300 shadow">
 			<div class="card-body">
 				for _, project := range projectList[4:] {
 					<form id={ "project" + strconv.Itoa(project.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
@@ -362,7 +362,7 @@ templ ProjectsList(projectList []database.Project) {
 
 templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursDaily) {
 	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
-		<div class="card border shadow">
+		<div class="card bg-base-300 shadow">
 			<div class="card-body">
 				<form class="flex flex-row justify-center space-x-1" hx-post="/api/monthlysummary" hx-target="#monthly-summary" hx-select="#monthly-summary" hx-swap="outerHTML">
 					<select
@@ -440,7 +440,7 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 }
 
 templ WorkDays(workdays int, total database.ProjectHours) {
-	<div id="work-days" class="card border shadow">
+	<div id="work-days" class="card bg-base-300 shadow">
 		<div class="card-body">
 			<table
 				id="work-days-table"
@@ -471,7 +471,7 @@ templ WorkDays(workdays int, total database.ProjectHours) {
 }
 
 templ OverviewRecords(entries []database.ProjectHoursDaily) {
-	<div id="overview-records" class="card border shadow">
+	<div id="overview-records" class="card bg-base-300 shadow">
 		<div class="card-body">
 			<table class="table table-xs">
 				<thead>
@@ -494,51 +494,51 @@ templ OverviewRecords(entries []database.ProjectHoursDaily) {
 }
 
 templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, workdaysYTD int) {
-	<div id="yearly-summary" class="grid grid-cols-2 gap-5 py-5">
+	<div id="yearly-summary" class="flex justify-center gap-5 py-5">
 		@pieChart(projects[4:])
-		<div class="card h-[500px] w-full justify-self-end border shadow">
-			<div id="piechart" class="card-body"></div>
-		</div>
-		<div class="card w-full justify-self-start border shadow">
-			<div class="card-body">
-				<form class="flex justify-center" hx-post="/api/yearlysummary" hx-target="#yearly-summary" hx-select="#yearly-summary" hx-swap="outerHTML">
-					<select
-						class="select rounded bg-neutral text-xl text-neutral-content"
-						id="yearSummary"
-						name="year"
-						hx-post="/api/yearlysummary"
-						hx-target="#yearly-summary"
-						hx-select="#yearly-summary"
-						hx-swap="outerHTML"
-						hx-trigger="change delay:100ms"
-						hx-preserve="true"
-					>
-						for _, year := range yearSelectList() {
-							if year == activeYear.Year() {
-								<option selected>{ strconv.Itoa(year) }</option>
-							} else {
-								<option>{ strconv.Itoa(year) }</option>
+		<div class="card w-full bg-base-300 shadow">
+			<div class="card-body flex-row">
+				<div id="piechart" class="h-[400px] w-[500px]"></div>
+				<div class="w-[400px] self-center">
+					<form class="flex justify-center" hx-post="/api/yearlysummary" hx-target="#yearly-summary" hx-select="#yearly-summary" hx-swap="outerHTML">
+						<select
+							class="select rounded bg-neutral text-xl text-neutral-content"
+							id="yearSummary"
+							name="year"
+							hx-post="/api/yearlysummary"
+							hx-target="#yearly-summary"
+							hx-select="#yearly-summary"
+							hx-swap="outerHTML"
+							hx-trigger="change delay:100ms"
+							hx-preserve="true"
+						>
+							for _, year := range yearSelectList() {
+								if year == activeYear.Year() {
+									<option selected>{ strconv.Itoa(year) }</option>
+								} else {
+									<option>{ strconv.Itoa(year) }</option>
+								}
 							}
-						}
-					</select>
-				</form>
-				<div class="text-xl">Yearly Summary:</div>
-				<table id="yearly-summary-table" class="table">
-					<thead>
-						<td>Name:</td>
-						<td>Hours:</td>
-						<td>Days:</td>
-					</thead>
-					<tbody>
-						for _, project := range projects[1:4] {
-							<tr class="bg-base-100">
-								<td>{ project.Name }</td>
-								<td>{ project.Hours }</td>
-								<td>{ hoursToDays(project.Hours) }</td>
-							</tr>
-						}
-					</tbody>
-				</table>
+						</select>
+					</form>
+					<div class="text-xl">Yearly Summary:</div>
+					<table id="yearly-summary-table" class="table">
+						<thead>
+							<td>Name:</td>
+							<td>Hours:</td>
+							<td>Days:</td>
+						</thead>
+						<tbody>
+							for _, project := range projects[1:4] {
+								<tr class="bg-base-100">
+									<td>{ project.Name }</td>
+									<td>{ project.Hours }</td>
+									<td>{ hoursToDays(project.Hours) }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
