@@ -99,12 +99,13 @@ templ PageHeader(contents templ.Component) {
 			<script src="/static/internal/assets/js/echarts.min.js"></script>
 		</head>
 		<body>
-			<div class="flex justify-center p-5">
-				<div class="max-w-[1000px] grow">
-					<div class="navbar rounded-lg border shadow">
+			<div class="flex flex-col">
+				<div class="navbar bg-neutral text-neutral-content shadow">
+					<div class="container mx-auto max-w-[1000px] grow">
 						<div class="hero-content h-20">
 							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
 						</div>
+						<div class="grow"></div>
 						<div class="">
 							<button class="btn btn-ghost text-xl" hx-get="/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Records</button>
 						</div>
@@ -118,6 +119,8 @@ templ PageHeader(contents templ.Component) {
 							<button class="btn btn-ghost text-xl" hx-get="/year" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Year</button>
 						</div>
 					</div>
+				</div>
+				<div class="container mx-auto max-w-[1000px] grow">
 					<section id="content-section">
 						@contents
 					</section>
