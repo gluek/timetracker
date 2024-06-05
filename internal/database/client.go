@@ -185,7 +185,7 @@ func GetRecordsForDate(date string) []Timeframe {
 	return timeframes
 }
 
-func GetRecordsForProjectAndTime(year int, month int, projectid int) []Timeframe {
+func GetRecordsForProjectAndMonth(year int, month int, projectid int) []Timeframe {
 	var timeframes []Timeframe = []Timeframe{}
 	var timefr Timeframe
 

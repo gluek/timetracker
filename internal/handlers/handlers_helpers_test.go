@@ -13,3 +13,9 @@ func TestGetWorkDays(t *testing.T) {
 		fmt.Printf("    Work Days %s: %d\n", day.Month().String(), GetWorkDays(day))
 	}
 }
+
+func TestGetWorkDaysUntilToday(t *testing.T) {
+	HandlerInit()
+	fmt.Println("Today:", time.Now().String())
+	fmt.Println("Days:", GetWorkDaysUntilToday())
+}

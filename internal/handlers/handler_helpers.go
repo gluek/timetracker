@@ -152,7 +152,7 @@ func GetProjectHoursMonth(month time.Time) []database.ProjectHours {
 		log.Println(err)
 	}
 	for _, project := range projects {
-		records := database.GetRecordsForProjectAndTime(month.Year(), int(month.Month()), project.ID)
+		records := database.GetRecordsForProjectAndMonth(month.Year(), int(month.Month()), project.ID)
 		duration := workTotalForRecords(records)
 		total += duration
 		projectHour := database.ProjectHours{
@@ -190,9 +190,18 @@ func GetProjectHoursYear(year time.Time) []database.ProjectHours {
 			projectsList = append(projectsList, projectHour)
 		}
 	}
+	workTotalTarget, err := time.ParseDuration(viper.GetString("worktime_per_week"))
+	if err != nil {
+		log.Println(err)
+	}
+	offsetOvertime, err := time.ParseDuration(viper.GetString("offset_overtime"))
+	if err != nil {
+		log.Println(err)
+	}
+	overTimeHours := offsetOvertime.Hours() + total.Hours() - float64(GetWorkDaysUntilToday())*workTotalTarget.Hours()/5
 	projectsList = append(projectsList, database.ProjectHours{
-		Project: database.Project{Activity: "", Details: "", Name: "Total"},
-		Hours:   fmt.Sprintf("%.2f", total.Hours()),
+		Project: database.Project{Activity: "", Details: "", Name: "Overtime"},
+		Hours:   fmt.Sprintf("%.2f", overTimeHours),
 	})
 	return projectsList
 }
@@ -226,4 +235,9 @@ func GetWorkDays(month time.Time) int {
 	} else {
 		return workdays
 	}
+}
+
+func GetWorkDaysUntilToday() int {
+	startOfYear, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", time.Now().Year()))
+	return calendar.WorkdaysInRange(startOfYear, time.Now()) + 1
 }

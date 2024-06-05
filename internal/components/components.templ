@@ -536,6 +536,11 @@ templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, work
 									<td>{ hoursToDays(project.Hours) }</td>
 								</tr>
 							}
+							<tr class="bg-base-100">
+									<td>{ projects[len(projects)-1].Name }</td>
+									<td>{ projects[len(projects)-1].Hours }</td>
+									<td>{ hoursToDays(projects[len(projects)-1].Hours) }</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
