@@ -157,12 +157,12 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, curre
 
 templ CreateRecord(projectList []database.Project, currentDate string) {
 	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
-		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms" hx-preserve>
 			<div class="flex justify-center">
 				<input
 					class="input input-lg bg-neutral text-neutral-content"
 					hx-post="/api/currentdate"
-					hx-trigger="change delay:500ms"
+					hx-trigger="change delay:1000ms"
 					type="date"
 					name="dateofrecord"
 					id="dateofrecord"
@@ -493,7 +493,7 @@ templ OverviewRecords(entries []database.ProjectHoursDaily) {
 	</div>
 }
 
-templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, workdaysYTD int) {
+templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, overtime database.ProjectHours) {
 	<div id="yearly-summary" class="flex justify-center gap-5 py-5">
 		@pieChart(projects[4:])
 		<div class="card w-full bg-base-300 shadow">
@@ -537,9 +537,9 @@ templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, work
 								</tr>
 							}
 							<tr class="bg-base-100">
-									<td>{ projects[len(projects)-1].Name }</td>
-									<td>{ projects[len(projects)-1].Hours }</td>
-									<td>{ hoursToDays(projects[len(projects)-1].Hours) }</td>
+								<td>{ overtime.Name }</td>
+								<td>{ overtime.Hours }</td>
+								<td>{ hoursToDays(overtime.Hours) }</td>
 							</tr>
 						</tbody>
 					</table>

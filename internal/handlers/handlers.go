@@ -80,7 +80,10 @@ func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.YearlySummary(activeYearSummary, GetProjectHoursYear(activeYearSummary), 0).Render(r.Context(), w)
+	components.YearlySummary(
+		activeYearSummary,
+		GetProjectHoursYear(activeYearSummary),
+		GetOvertimeHoursYear(activeYearSummary)).Render(r.Context(), w)
 }
 
 func ChangeDate(w http.ResponseWriter, r *http.Request) {

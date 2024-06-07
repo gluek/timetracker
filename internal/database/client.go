@@ -204,7 +204,7 @@ func GetRecordsForProjectAndMonth(year int, month int, projectid int) []Timefram
 	return timeframes
 }
 
-func GetRecordsForProjectAndYear(year int, projectid int) []Timeframe {
+func GetRecordsForProjectAndYear(year time.Time, projectid int) []Timeframe {
 	var timeframes []Timeframe = []Timeframe{}
 	var timefr Timeframe
 
@@ -212,8 +212,39 @@ func GetRecordsForProjectAndYear(year int, projectid int) []Timeframe {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, _ := statement.Query(year, projectid)
+	rows, _ := statement.Query(year.Year(), projectid)
 
+	for rows.Next() {
+		timefr = Timeframe{}
+		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		timeframes = append(timeframes, timefr)
+	}
+	return timeframes
+}
+
+func GetRecordsForProjectAndYearUntilToday(year time.Time, projectid int) []Timeframe {
+	var timeframes []Timeframe = []Timeframe{}
+	var timefr Timeframe
+
+	var endDate time.Time
+	if year.Year() < time.Now().Year() {
+		endDate, err = time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year.Year()))
+		if err != nil {
+			log.Println(err)
+		}
+	} else {
+		endDate = time.Now()
+	}
+
+	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE year=? AND date<=date(?) AND projectid=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := statement.Query(year.Year(), endDate.Format("2006-01-02"), projectid)
+	if err != nil {
+		log.Println("GetRecordsForProjectAndYearUntilToday:", err)
+	}
 	for rows.Next() {
 		timefr = Timeframe{}
 		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
