@@ -59,7 +59,18 @@ func Connect() {
 	}
 	log.Println("Connected to Database...")
 
-	tableVars := "(id int, date string, year int, month int, day int, start string, end string, duration string, projectid int)"
+	tableVars := `(
+		id int PRIMARY KEY,
+		date string NOT NULL,
+		year int NOT NULL,
+		month int NOT NULL,
+		day int NOT NULL,
+		start string NOT NULL,
+		end string NOT NULL,
+		duration string,
+		projectid int
+	)`
+
 	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
 	if err != nil {
 		log.Fatal(err)
@@ -71,7 +82,12 @@ func Connect() {
 	}
 	log.Println("Created timeframes Table...")
 
-	tableVars = "(id int, name string, activity string, details string)"
+	tableVars = `(
+		id int PRIMARY KEY,
+		name string NOT NULL,
+		activity string NOT NULL,
+		details string NOT NULL
+	)`
 	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS projects " + tableVars)
 	if err != nil {
 		log.Fatal(err)

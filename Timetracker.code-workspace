@@ -1,12 +1,24 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"prettier.documentSelectors": [
-			"**/*.svelte"
-		]
-	}
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "prettier.documentSelectors": ["**/*.svelte"],
+    "cSpell.words": [
+      "modernc",
+      "parentalleave",
+      "projectid",
+      "projectids",
+      "sickdays",
+      "sqlite",
+      "SQLITE",
+      "timefr",
+      "Timeframe",
+      "timeframes",
+      "timetrack",
+      "workhours"
+    ]
+  }
 }
