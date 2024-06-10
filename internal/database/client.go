@@ -129,8 +129,8 @@ func Connect() {
 func Close() {
 	err = DB.Close()
 	if err != nil {
-		log.Fatal(err)
 		log.Println("Could not close database")
+		log.Fatal(err)
 	}
 	log.Println("Database closed")
 }
@@ -171,12 +171,19 @@ func GetRecords() []Timeframe {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, _ := statement.Query()
+	rows, err := statement.Query()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for rows.Next() {
 		timefr = Timeframe{}
-		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		timeframes = append(timeframes, timefr)
 	}
 	return timeframes
@@ -190,12 +197,18 @@ func GetRecordsForDate(date string) []Timeframe {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, _ := statement.Query(date)
+	rows, err := statement.Query(date)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for rows.Next() {
 		timefr = Timeframe{}
-		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		if err != nil {
+			log.Fatal(err)
+		}
 		timeframes = append(timeframes, timefr)
 	}
 	return timeframes
@@ -209,12 +222,18 @@ func GetRecordsForProjectAndMonth(year int, month int, projectid int) []Timefram
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, _ := statement.Query(year, month, projectid)
+	rows, err := statement.Query(year, month, projectid)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for rows.Next() {
 		timefr = Timeframe{}
-		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		if err != nil {
+			log.Fatal(err)
+		}
 		timeframes = append(timeframes, timefr)
 	}
 	return timeframes
@@ -228,12 +247,18 @@ func GetRecordsForProjectAndYear(year time.Time, projectid int) []Timeframe {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, _ := statement.Query(year.Year(), projectid)
+	rows, err := statement.Query(year.Year(), projectid)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for rows.Next() {
 		timefr = Timeframe{}
-		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		if err != nil {
+			log.Fatal(err)
+		}
 		timeframes = append(timeframes, timefr)
 	}
 	return timeframes
@@ -259,12 +284,16 @@ func GetRecordsForProjectAndYearUntilToday(year time.Time, projectid int) []Time
 	}
 	rows, err := statement.Query(year.Year(), endDate.Format("2006-01-02"), projectid)
 	if err != nil {
-		log.Println("GetRecordsForProjectAndYearUntilToday:", err)
+		log.Fatal(err)
 	}
+
 	for rows.Next() {
 		timefr = Timeframe{}
-		rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
+		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		if err != nil {
+			log.Fatal(err)
+		}
 		timeframes = append(timeframes, timefr)
 	}
 	return timeframes
@@ -280,7 +309,10 @@ func GetRecordsMaxID() int {
 	if err != nil {
 		log.Fatal(err)
 	}
-	row.Scan(&maxID)
+	err = row.Scan(&maxID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return maxID
 }
@@ -346,11 +378,17 @@ func GetProjects() []Project {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, _ := statement.Query()
+	rows, err := statement.Query()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for rows.Next() {
 		project = Project{}
-		rows.Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+		err = rows.Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+		if err != nil {
+			log.Fatal(err)
+		}
 		projects = append(projects, project)
 	}
 	return projects
@@ -363,7 +401,10 @@ func GetProjectsMaxID() int {
 		log.Fatal(err)
 	}
 	row := statement.QueryRow()
-	row.Scan(&maxID)
+	err = row.Scan(&maxID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return maxID
 }
@@ -406,7 +447,10 @@ func GetProjectsForDate(date time.Time) map[int]string {
 	projectids := map[int]string{}
 	for rows.Next() {
 		var id int
-		rows.Scan(&id)
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Fatal(err)
+		}
 		projectName, err := GetProjectByID(id)
 		if err != nil {
 			log.Print(err)

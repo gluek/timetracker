@@ -41,7 +41,11 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		activeDate,
 		workTotalByDate(activeDate).String(),
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
-	component.Render(r.Context(), w)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render homepage: %v", err)
+	}
 }
 
 func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,10 +55,18 @@ func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
 		activeDate,
 		workTotalByDate(activeDate).String(),
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
-	component.Render(r.Context(), w)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render records: %v", err)
+	}
 }
 func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change date records: %v", err)
+	}
 	activeDate = r.PathValue("date")
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
@@ -62,39 +74,77 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 		activeDate,
 		workTotalByDate(activeDate).String(),
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
-	component.Render(r.Context(), w)
+	err = component.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render records: %v", err)
+	}
 }
 func RecordsHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.RecordList(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects())
-	component.Render(r.Context(), w)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render records: %v", err)
+	}
 }
 
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
-	components.Projects(database.GetProjects()).Render(r.Context(), w)
+	err := components.Projects(database.GetProjects()).Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render projects: %v", err)
+	}
 }
 
 func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.MonthlySummary(activeMonthSummary, GetProjectHoursMonth(activeMonthSummary), GetWorkDays(activeMonthSummary), GetProjectsHoursOverview(activeMonthSummary)).Render(r.Context(), w)
+	component := components.MonthlySummary(
+		activeMonthSummary,
+		GetProjectHoursMonth(activeMonthSummary),
+		GetWorkDays(activeMonthSummary),
+		GetProjectsHoursOverview(activeMonthSummary),
+	)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render monthly summary: %v", err)
+	}
 }
 
 func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
-	components.YearlySummary(
+	component := components.YearlySummary(
 		activeYearSummary,
 		GetProjectHoursYear(activeYearSummary),
-		GetOvertimeHoursYear(activeYearSummary)).Render(r.Context(), w)
+		GetOvertimeHoursYear(activeYearSummary),
+	)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error render yearly summary: %v", err)
+	}
 }
 
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change date: %v", err)
+		return
+	}
 	activeDate = r.FormValue("dateofrecord")
 	log.Printf("Date changed to %s\n", activeDate)
 	RecordsPageHandler(w, r)
 }
 
 func CreateRecord(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error create record: %v", err)
+		return
+	}
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
 		ID:        database.GetRecordsMaxID() + 1,
@@ -113,12 +163,17 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	log.Printf("Created Record %s %s ID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
+	log.Printf("Created Record %s %s ProjectID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
 	RecordsPageHandler(w, r)
 }
 
 func UpdateRecord(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error update record: %v", err)
+		return
+	}
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	id := r.PathValue("id")
 	timefr := database.Timeframe{
@@ -151,7 +206,11 @@ func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateProject(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error create project: %v", err)
+	}
 	var project = database.Project{
 		ID:       database.GetProjectsMaxID() + 1,
 		Name:     r.FormValue("projectName"),
@@ -168,7 +227,12 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateProject(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error update project: %v", err)
+		return
+	}
 	id := r.PathValue("id")
 	project := database.Project{
 		ID:       atoi(id),
@@ -189,7 +253,12 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func MonthlySummaryChangeMonth(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change month summary: %v", err)
+		return
+	}
 	activeMonthSummary, err = time.Parse("2006-Jan", fmt.Sprintf("%s-%s", r.FormValue("year"), r.FormValue("month")[:3]))
 	log.Println("Month changed to:", activeMonthSummary.Format("2006-01"))
 	if err != nil {
@@ -199,7 +268,12 @@ func MonthlySummaryChangeMonth(w http.ResponseWriter, r *http.Request) {
 }
 
 func YearlySummaryChangeYear(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change year summary: %v", err)
+		return
+	}
 	activeYearSummary, err = time.Parse("2006", r.FormValue("year"))
 	log.Println("Year changed to:", activeYearSummary.Format("2006"))
 	if err != nil {

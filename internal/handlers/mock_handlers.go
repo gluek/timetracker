@@ -3,11 +3,15 @@ package handlers
 import (
 	"fmt"
 	"local/timetracker/internal/database"
+	"log"
 	"net/http"
 )
 
 func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("error mock create record: %v", err)
+	}
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
 		ID:        globalID,
@@ -27,7 +31,10 @@ func MockCreateRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func MockUpdateRecord(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("error mock update record: %v", err)
+	}
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	id := r.PathValue("id")
 	index := findIDTimeframe(atoi(id))
@@ -55,7 +62,10 @@ func MockDeleteRecord(w http.ResponseWriter, r *http.Request) {
 }
 
 func MockCreateProject(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("error mock create project: %v", err)
+	}
 	var project = database.Project{
 		ID:       globalIDProject,
 		Name:     r.FormValue("projectName"),
@@ -69,7 +79,10 @@ func MockCreateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func MockUpdateProject(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("error mock update project: %v", err)
+	}
 	id := r.PathValue("id")
 	index := findIDProject(atoi(id))
 	projectList[index] = database.Project{

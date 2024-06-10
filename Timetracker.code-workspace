@@ -7,18 +7,27 @@
   "settings": {
     "prettier.documentSelectors": ["**/*.svelte"],
     "cSpell.words": [
+      "atoi",
+      "currentdate",
+      "getlantern",
       "modernc",
+      "monthlysummary",
       "parentalleave",
       "projectid",
       "projectids",
+      "rickar",
       "sickdays",
       "sqlite",
       "SQLITE",
       "timefr",
+      "timeframe",
       "Timeframe",
       "timeframes",
       "timetrack",
-      "workhours"
+      "timetracker",
+      "workhours",
+      "worktime",
+      "yearlysummary"
     ]
   }
 }

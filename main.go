@@ -40,7 +40,10 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 
-	mime.AddExtensionType(".js", "application/javascript")
+	err := mime.AddExtensionType(".js", "application/javascript")
+	if err != nil {
+		log.Printf("error add mime: %v", err)
+	}
 
 	if os.Getenv("TIMETRACKER_DEV") != "1" {
 		go func() {
