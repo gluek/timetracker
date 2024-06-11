@@ -143,15 +143,15 @@ templ DarkModeSwitch() {
 	</label>
 }
 
-templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string) {
-	@PageHeader(Records(tfList, projectList, currentDate, workDurationDaily, workDeltaWeek))
+templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+	@PageHeader(Records(tfList, projectList, currentDate, workDurationDaily, workDeltaWeek, overtime))
 }
 
-templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string) {
+templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
 		@CreateRecord(projectList, currentDate)
 		@RecordList(tfList, projectList)
-		@dailySummary(workDurationDaily, workDeltaWeek)
+		@dailySummary(workDurationDaily, workDeltaWeek, overtime)
 	</div>
 }
 
@@ -261,7 +261,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 	</div>
 }
 
-templ dailySummary(workDurationDaily string, workDeltaWeek string) {
+templ dailySummary(workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
 	<div id="summary-day">
 		<div class="card bg-base-300 shadow">
 			<div class="card-body">
@@ -281,6 +281,10 @@ templ dailySummary(workDurationDaily string, workDeltaWeek string) {
 								} else {
 									<td class="text-success">{ workDeltaWeek }</td>
 								}
+							</tr>
+							<tr>
+								<td>Overtime:</td>
+								<td>{ overtime.Hours }</td>
 							</tr>
 						</tbody>
 					</table>

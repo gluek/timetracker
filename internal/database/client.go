@@ -264,7 +264,7 @@ func GetRecordsForProjectAndYear(year time.Time, projectid int) []Timeframe {
 	return timeframes
 }
 
-func GetRecordsForProjectAndYearUntilToday(year time.Time, projectid int) []Timeframe {
+func GetRecordsForProjectAndYearUntilToday(year time.Time, day time.Time, projectid int) []Timeframe {
 	var timeframes []Timeframe = []Timeframe{}
 	var timefr Timeframe
 
@@ -275,7 +275,7 @@ func GetRecordsForProjectAndYearUntilToday(year time.Time, projectid int) []Time
 			log.Println(err)
 		}
 	} else {
-		endDate = time.Now()
+		endDate = day
 	}
 
 	statement, err := DB.Prepare("SELECT * FROM timeframes WHERE year=? AND date<=date(?) AND projectid=?")

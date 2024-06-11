@@ -218,14 +218,14 @@ func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursDaily {
 	return dailyEntries
 }
 
-func GetOvertimeHoursYear(year time.Time) database.ProjectHours {
+func GetOvertimeHoursUntilDay(year time.Time, day time.Time) database.ProjectHours {
 	projects := database.GetProjects()
 	total, err := time.ParseDuration("0s")
 	if err != nil {
 		log.Println(err)
 	}
 	for _, project := range projects {
-		records := database.GetRecordsForProjectAndYearUntilToday(year, project.ID)
+		records := database.GetRecordsForProjectAndYearUntilToday(year, day, project.ID)
 		duration := workTotalForRecords(records)
 		total += duration
 	}
@@ -237,7 +237,7 @@ func GetOvertimeHoursYear(year time.Time) database.ProjectHours {
 	if err != nil {
 		log.Println(err)
 	}
-	overTimeHours := offsetOvertime.Hours() + total.Hours() - float64(GetWorkDaysUntilToday(year))*workTotalTarget.Hours()/5
+	overTimeHours := offsetOvertime.Hours() + total.Hours() - float64(GetWorkDaysUntilDay(year, day))*workTotalTarget.Hours()/5
 	return database.ProjectHours{
 		Project: database.Project{Activity: "", Details: "", Name: "Overtime"},
 		Hours:   fmt.Sprintf("%.2f", overTimeHours),
@@ -254,7 +254,7 @@ func GetWorkDays(month time.Time) int {
 	}
 }
 
-func GetWorkDaysUntilToday(year time.Time) int {
+func GetWorkDaysUntilDay(year time.Time, day time.Time) int {
 	startOfYear, err := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year.Year()))
 	if err != nil {
 		log.Println(err)
@@ -266,7 +266,11 @@ func GetWorkDaysUntilToday(year time.Time) int {
 			log.Println(err)
 		}
 	} else {
-		endDate = time.Now()
+		dayParse, err := time.Parse("2006-01-02", day.Format("2006-01-02"))
+		if err != nil {
+			log.Printf("error parse day %v", err)
+		}
+		endDate = dayParse
 	}
-	return calendar.WorkdaysInRange(startOfYear, endDate) + 1
+	return calendar.WorkdaysInRange(startOfYear, endDate)
 }

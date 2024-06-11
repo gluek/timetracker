@@ -14,8 +14,8 @@ func TestGetWorkDays(t *testing.T) {
 	}
 }
 
-func TestGetWorkDaysUntilToday(t *testing.T) {
+func TestGetWorkDaysUntilDay(t *testing.T) {
 	HandlerInit()
 	fmt.Println("Today:", time.Now().String())
-	fmt.Println("Days:", GetWorkDaysUntilToday(time.Now()))
+	fmt.Println("Days:", GetWorkDaysUntilDay(time.Now(), time.Now()))
 }

@@ -35,12 +35,13 @@ func HandlerInit() {
 }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
+	today, _ := time.Parse("2006-01-02", activeDate)
 	component := components.HomePage(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(today, today))
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,12 +50,13 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
+	today, _ := time.Parse("2006-01-02", activeDate)
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(today, today))
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -67,13 +69,14 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error change date records: %v", err)
 	}
+	today, _ := time.Parse("2006-01-02", activeDate)
 	activeDate = r.PathValue("date")
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String())
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(today, today))
 	err = component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -117,7 +120,7 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.YearlySummary(
 		activeYearSummary,
 		GetProjectHoursYear(activeYearSummary),
-		GetOvertimeHoursYear(activeYearSummary),
+		GetOvertimeHoursUntilDay(activeYearSummary, time.Now()),
 	)
 	err := component.Render(r.Context(), w)
 	if err != nil {
@@ -241,6 +244,11 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		Details:  r.FormValue("details"),
 	}
 	err = database.UpdateProject(project)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error update project: %v", err)
+		return
+	}
 	log.Printf("Update Project with ID %s\n", id)
 	ProjectsHandler(w, r)
 }
