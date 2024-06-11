@@ -45,7 +45,7 @@ func findIDProject(id int) int {
 	return -1
 }
 
-func workTotalByDate(date string) time.Duration {
+func workTotalByDate(date time.Time) time.Duration {
 	timeTotal, err := time.ParseDuration("0s")
 	if err != nil {
 		log.Print(err)
@@ -86,26 +86,22 @@ func workTotalForRecords(timeframes []database.Timeframe) time.Duration {
 	return timeTotal
 }
 
-func weekDaysByDate(date string) []time.Time {
+func weekDaysByDate(date time.Time) []time.Time {
 	var weekDays []time.Time
 	daysInAWeek := []int{1, 2, 3, 4, 5, 6, 7}
 
-	dateTime, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		log.Print(err)
-	}
 	for _, weekday := range daysInAWeek {
-		dayOfWeek := int(dateTime.Weekday())
+		dayOfWeek := int(date.Weekday())
 		if dayOfWeek == 0 {
 			dayOfWeek = 7
 		}
 		weekdayOffset := weekday - dayOfWeek
-		weekDays = append(weekDays, dateTime.AddDate(0, 0, weekdayOffset))
+		weekDays = append(weekDays, date.AddDate(0, 0, weekdayOffset))
 	}
 	return weekDays
 }
 
-func weekWorkdaysByDate(date string) float64 {
+func weekWorkdaysByDate(date time.Time) float64 {
 	var workDays float64
 	weekDays := weekDaysByDate(date)
 
@@ -117,20 +113,20 @@ func weekWorkdaysByDate(date string) float64 {
 	return workDays
 }
 
-func workTotalWeek(date string) time.Duration {
+func workTotalWeek(date time.Time) time.Duration {
 	workTotalDuration, err := time.ParseDuration("0s")
 	if err != nil {
 		log.Print(err)
 	}
 	var daysInWeek []time.Time = weekDaysByDate(date)
 	for _, day := range daysInWeek {
-		dayDuration := workTotalByDate(day.Format("2006-01-02"))
+		dayDuration := workTotalByDate(day)
 		workTotalDuration += dayDuration
 	}
 	return workTotalDuration
 }
 
-func workDeltaWeek(workTotalDuration time.Duration, date string) time.Duration {
+func workDeltaWeek(workTotalDuration time.Duration, date time.Time) time.Duration {
 	workTotalTarget, err := time.ParseDuration(viper.GetString("worktime_per_week"))
 	if err != nil {
 		log.Println(err)
@@ -206,7 +202,7 @@ func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursDaily {
 			log.Println(err)
 		}
 		entries := database.GetProjectsForDate(dayTime)
-		work_total := workTotalByDate(dayTime.Format("2006-01-02"))
+		work_total := workTotalByDate(dayTime)
 		projectStrings := []string{}
 		for _, entry := range entries {
 			projectStrings = append(projectStrings, entry)

@@ -24,7 +24,7 @@ var (
 	}}
 	globalID           int
 	globalIDProject    int                   = 1
-	activeDate         string                = time.Now().Format("2006-01-02")
+	activeDate         time.Time             = time.Now()
 	activeMonthSummary time.Time             = time.Now()
 	activeYearSummary  time.Time             = time.Now()
 	calendar           *cal.BusinessCalendar = cal.NewBusinessCalendar()
@@ -35,13 +35,12 @@ func HandlerInit() {
 }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	today, _ := time.Parse("2006-01-02", activeDate)
 	component := components.HomePage(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(today, today))
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -50,13 +49,12 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
-	today, _ := time.Parse("2006-01-02", activeDate)
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(today, today))
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,14 +67,18 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error change date records: %v", err)
 	}
-	today, _ := time.Parse("2006-01-02", activeDate)
-	activeDate = r.PathValue("date")
+	activeDate, err = time.Parse("2006-01-02", r.PathValue("date"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change date: %v", err)
+		return
+	}
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(today, today))
+		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err = component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -136,7 +138,12 @@ func ChangeDate(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error change date: %v", err)
 		return
 	}
-	activeDate = r.FormValue("dateofrecord")
+	activeDate, err = time.Parse("2006-01-02", r.FormValue("dateofrecord"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change date: %v", err)
+		return
+	}
 	log.Printf("Date changed to %s\n", activeDate)
 	RecordsPageHandler(w, r)
 }

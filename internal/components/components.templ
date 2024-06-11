@@ -143,11 +143,11 @@ templ DarkModeSwitch() {
 	</label>
 }
 
-templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
 	@PageHeader(Records(tfList, projectList, currentDate, workDurationDaily, workDeltaWeek, overtime))
 }
 
-templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate string, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
 		@CreateRecord(projectList, currentDate)
 		@RecordList(tfList, projectList)
@@ -155,7 +155,7 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, curre
 	</div>
 }
 
-templ CreateRecord(projectList []database.Project, currentDate string) {
+templ CreateRecord(projectList []database.Project, currentDate time.Time) {
 	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
 		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms" hx-preserve>
 			<div class="flex justify-center">
@@ -166,7 +166,7 @@ templ CreateRecord(projectList []database.Project, currentDate string) {
 					type="date"
 					name="dateofrecord"
 					id="dateofrecord"
-					value={ currentDate }
+					value={ currentDate.Format("2006-01-02") }
 				/>
 			</div>
 			<div class="flex flex-row content-center justify-center space-x-1">

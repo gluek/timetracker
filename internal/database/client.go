@@ -189,7 +189,7 @@ func GetRecords() []Timeframe {
 	return timeframes
 }
 
-func GetRecordsForDate(date string) []Timeframe {
+func GetRecordsForDate(date time.Time) []Timeframe {
 	var timeframes []Timeframe = []Timeframe{}
 	var timefr Timeframe
 
@@ -197,7 +197,7 @@ func GetRecordsForDate(date string) []Timeframe {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := statement.Query(date)
+	rows, err := statement.Query(date.Format("2006-01-02"))
 	if err != nil {
 		log.Fatal(err)
 	}
