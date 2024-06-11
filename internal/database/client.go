@@ -18,15 +18,16 @@ var (
 )
 
 type Timeframe struct {
-	ID        int    `json:"id"`
-	Date      string `json:"date"`
-	Year      int    `json:"year"`
-	Month     int    `json:"month"`
-	Day       int    `json:"day"`
-	Start     string `json:"start"`
-	End       string `json:"end"`
-	Duration  string `json:"duration"`
-	ProjectID int    `json:"projectid"`
+	ID         int    `json:"id"`
+	Date       string `json:"date"`
+	Year       int    `json:"year"`
+	Month      int    `json:"month"`
+	Day        int    `json:"day"`
+	Start      string `json:"start"`
+	End        string `json:"end"`
+	Duration   string `json:"duration"`
+	ProjectID  int    `json:"projectid"`
+	LocationID int    `json:"locationid"`
 }
 
 type Project struct {
@@ -68,7 +69,8 @@ func Connect() {
 		start string NOT NULL,
 		end string NOT NULL,
 		duration string,
-		projectid int
+		projectid int,
+		locationid int
 	)`
 
 	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
@@ -99,6 +101,23 @@ func Connect() {
 	}
 	log.Println("Created projects Table...")
 
+	tableVars = `(
+		id INT PRIMARY KEY,
+		location STRING NOT NULL
+	)`
+	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS workplaces " + tableVars)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = statement.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Created workplaces Table...")
+
+	Migrations()
+
 	_, err = GetProjectByID(0)
 	if err != nil {
 		log.Println("Created default projects...")
@@ -123,7 +142,6 @@ func Connect() {
 			log.Fatal(err)
 		}
 	}
-
 }
 
 func Close() {
@@ -133,6 +151,51 @@ func Close() {
 		log.Fatal(err)
 	}
 	log.Println("Database closed")
+}
+
+func Migrations() {
+	version := getDBVersion()
+
+	switch version {
+	case 0:
+		statement, err := DB.Prepare("ALTER TABLE timeframes ADD COLUMN locationid int;")
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			log.Fatal(err)
+		}
+		setDBVersion(1)
+		log.Println("Migration to Version 1")
+		fallthrough
+	default:
+		log.Printf("DB Version: %d", getDBVersion())
+	}
+}
+
+func getDBVersion() int {
+	var version int
+	statement, err := DB.Prepare("PRAGMA user_version;")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = statement.QueryRow().Scan(&version)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return version
+}
+
+func setDBVersion(version int) {
+	statement, err := DB.Prepare(fmt.Sprintf("PRAGMA user_version = %d;", version))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func CreateRecord(timefr Timeframe) error {
