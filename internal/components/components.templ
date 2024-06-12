@@ -100,25 +100,17 @@ templ PageHeader(contents templ.Component) {
 		</head>
 		<body>
 			<div class="flex flex-col">
-				<div class="navbar bg-neutral text-neutral-content shadow">
+				<div class="navbar border-b shadow">
 					<div class="container mx-auto max-w-[1000px] grow">
 						<div class="hero-content h-20">
 							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
 						</div>
 						<div class="grow"></div>
-						<div class="">
-							<button class="btn btn-ghost text-xl" hx-get="/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Records</button>
-						</div>
-						<div class="">
-							<button class="btn btn-ghost text-xl" hx-get="/projects" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Projects</button>
-						</div>
+						<button class="btn btn-ghost text-xl" hx-get="/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Records</button>
+						<button class="btn btn-ghost text-xl" hx-get="/projects" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Projects</button>
 						<div class="divider divider-horizontal"></div>
-						<div class="">
-							<button class="btn btn-ghost text-xl" hx-get="/month" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Month</button>
-						</div>
-						<div class="">
-							<button class="btn btn-ghost text-xl" hx-get="/year" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Year</button>
-						</div>
+						<button class="btn btn-ghost text-xl" hx-get="/month" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Month</button>
+						<button class="btn btn-ghost text-xl" hx-get="/year" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Year</button>
 					</div>
 				</div>
 				<div class="container mx-auto max-w-[1000px] grow">
