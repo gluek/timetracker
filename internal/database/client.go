@@ -538,7 +538,7 @@ func GetLocationDaysForMonth(month time.Time) []LocationDays {
 		SELECT workplaces.id, workplaces.location, COUNT(DISTINCT date)
 		FROM timeframes INNER JOIN workplaces 
 		ON timeframes.locationid = workplaces.id
-		WHERE timeframes.year=? AND timeframes.month=?
+		WHERE timeframes.year=? AND timeframes.month=? AND timeframes.projectid NOT IN (1,2,3)
 		GROUP BY workplaces.location;`)
 	if err != nil {
 		log.Fatal(err)
@@ -564,7 +564,7 @@ func GetLocationDaysForYear(year time.Time) []LocationDays {
 		SELECT workplaces.id, workplaces.location, COUNT(DISTINCT date)
 		FROM timeframes INNER JOIN workplaces 
 		ON timeframes.locationid = workplaces.id
-		WHERE timeframes.year=?
+		WHERE timeframes.year=? AND timeframes.projectid NOT IN (1,2,3)
 		GROUP BY workplaces.location;`)
 	if err != nil {
 		log.Fatal(err)
