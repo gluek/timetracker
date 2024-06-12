@@ -115,6 +115,7 @@ func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 		GetProjectHoursMonth(activeMonthSummary),
 		GetWorkDays(activeMonthSummary),
 		GetProjectsHoursOverview(activeMonthSummary),
+		database.GetLocationDaysForMonth(activeMonthSummary),
 	)
 	err := component.Render(r.Context(), w)
 	if err != nil {
@@ -128,6 +129,7 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 		activeYearSummary,
 		GetProjectHoursYear(activeYearSummary),
 		GetOvertimeHoursUntilDay(activeYearSummary, time.Now()),
+		database.GetLocationDaysForYear(activeYearSummary),
 	)
 	err := component.Render(r.Context(), w)
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 )
 
 var DB *sql.DB
+var dbVersion int = 1
 var err error
 var (
 	pwd, _ = os.Getwd()
@@ -53,6 +54,11 @@ type Location struct {
 	Name string `json:"name"`
 }
 
+type LocationDays struct {
+	Location
+	Days int `json:"days"`
+}
+
 type Config struct {
 	DailyHours time.Duration
 }
@@ -64,7 +70,6 @@ func Connect() {
 		panic("Cannot connect to DB")
 	}
 	log.Println("Connected to Database...")
-
 	tableVars := `(
 		id int PRIMARY KEY,
 		date string NOT NULL,
@@ -121,7 +126,9 @@ func Connect() {
 	}
 	log.Println("Created workplaces Table...")
 
-	Migrations()
+	if getDBVersion() != dbVersion {
+		Migrations()
+	}
 
 	_, err = GetProjectByID(0)
 	if err != nil {
@@ -343,14 +350,13 @@ func GetRecordsMaxID() int {
 	}
 	err = row.Scan(&maxID)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("error empty timeframes, return id 0: %v", err)
 	}
 
 	return maxID
 }
 
 func UpdateRecord(timefr Timeframe) error {
-
 	statement, err := DB.Prepare("UPDATE timeframes SET " +
 		"date=?, year=?, month=?, day=?, start=?, end=?, duration=?, projectid=?, locationid=? WHERE id=?")
 	if err != nil {
@@ -525,6 +531,58 @@ func GetLocations() []Location {
 		locations = append(locations, location)
 	}
 	return locations
+}
+
+func GetLocationDaysForMonth(month time.Time) []LocationDays {
+	statement, err := DB.Prepare(`
+		SELECT workplaces.id, workplaces.location, COUNT(DISTINCT date)
+		FROM timeframes INNER JOIN workplaces 
+		ON timeframes.locationid = workplaces.id
+		WHERE timeframes.year=? AND timeframes.month=?
+		GROUP BY workplaces.location;`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := statement.Query(month.Year(), int(month.Month()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	locationDays := []LocationDays{}
+	for rows.Next() {
+		location := LocationDays{Location{ID: 0, Name: ""}, 0}
+		err = rows.Scan(&location.Location.ID, &location.Location.Name, &location.Days)
+		if err != nil {
+			log.Fatal(err)
+		}
+		locationDays = append(locationDays, location)
+	}
+	return locationDays
+}
+
+func GetLocationDaysForYear(year time.Time) []LocationDays {
+	statement, err := DB.Prepare(`
+		SELECT workplaces.id, workplaces.location, COUNT(DISTINCT date)
+		FROM timeframes INNER JOIN workplaces 
+		ON timeframes.locationid = workplaces.id
+		WHERE timeframes.year=?
+		GROUP BY workplaces.location;`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := statement.Query(year.Year())
+	if err != nil {
+		log.Fatal(err)
+	}
+	locationDays := []LocationDays{}
+	for rows.Next() {
+		location := LocationDays{Location{ID: 0, Name: ""}, 0}
+		err = rows.Scan(&location.Location.ID, &location.Location.Name, &location.Days)
+		if err != nil {
+			log.Fatal(err)
+		}
+		locationDays = append(locationDays, location)
+	}
+	return locationDays
 }
 
 func GetVersion() {

@@ -397,7 +397,7 @@ templ ProjectsList(projectList []database.Project) {
 	}
 }
 
-templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursDaily) {
+templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursDaily, locations []database.LocationDays) {
 	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
 		<div class="card bg-base-300 shadow">
 			<div class="card-body">
@@ -472,6 +472,7 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 			</div>
 		</div>
 		@WorkDays(workdays, projects[len(projects)-1])
+		@LocationsCard(locations)
 		@OverviewRecords(entries)
 	</div>
 }
@@ -507,6 +508,31 @@ templ WorkDays(workdays int, total database.ProjectHours) {
 	</div>
 }
 
+templ LocationsCard(locations []database.LocationDays) {
+	<div id="locations" class="card bg-base-300 shadow">
+		<div class="card-body">
+			@Locations(locations)
+		</div>
+	</div>
+}
+
+templ Locations(locations []database.LocationDays) {
+	<table id="locations-table" class="table">
+		<thead>
+			<td>Work Place:</td>
+			<td>Days:</td>
+		</thead>
+		<tbody>
+			for _, location := range locations {
+				<tr class="bg-base-200">
+					<td>{ location.Name }</td>
+					<td>{ fmt.Sprintf("%d", location.Days) }</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
 templ OverviewRecords(entries []database.ProjectHoursDaily) {
 	<div id="overview-records" class="card bg-base-300 shadow">
 		<div class="card-body">
@@ -530,7 +556,7 @@ templ OverviewRecords(entries []database.ProjectHoursDaily) {
 	</div>
 }
 
-templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, overtime database.ProjectHours) {
+templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, overtime database.ProjectHours, locations []database.LocationDays) {
 	<div id="yearly-summary" class="flex justify-center gap-5 py-5">
 		@pieChart(projects[4:])
 		<div class="card w-full bg-base-300 shadow">
@@ -567,19 +593,20 @@ templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, over
 						</thead>
 						<tbody>
 							for _, project := range projects[1:4] {
-								<tr class="bg-base-100">
+								<tr class="bg-base-200">
 									<td>{ project.Name }</td>
 									<td>{ project.Hours }</td>
 									<td>{ hoursToDays(project.Hours) }</td>
 								</tr>
 							}
-							<tr class="bg-base-100">
+							<tr class="bg-base-200">
 								<td>{ overtime.Name }</td>
 								<td>{ overtime.Hours }</td>
 								<td>{ hoursToDays(overtime.Hours) }</td>
 							</tr>
 						</tbody>
 					</table>
+					@Locations(locations)
 				</div>
 			</div>
 		</div>
