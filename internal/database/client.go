@@ -48,6 +48,11 @@ type ProjectHoursDaily struct {
 	Projects []string `json:"projects"`
 }
 
+type Location struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type Config struct {
 	DailyHours time.Duration
 }
@@ -69,8 +74,8 @@ func Connect() {
 		start string NOT NULL,
 		end string NOT NULL,
 		duration string,
-		projectid int,
-		locationid int
+		projectid int NOT NULL,
+		locationid int NOT NULL
 	)`
 
 	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
@@ -121,25 +126,33 @@ func Connect() {
 	_, err = GetProjectByID(0)
 	if err != nil {
 		log.Println("Created default projects...")
-		defaultProject := Project{ID: 0, Name: "NotAssigned", Activity: "", Details: ""}
-		vacationProject := Project{ID: 1, Name: "Vacation", Activity: "Vacation", Details: "Vacation"}
-		sickdaysProject := Project{ID: 2, Name: "Sick", Activity: "Sick Days", Details: "Sick Days"}
-		parentalleaveProject := Project{ID: 3, Name: "Parental Leave", Activity: "Parental Leave", Details: "Parental Leave"}
-		err = CreateProject(defaultProject)
-		if err != nil {
-			log.Fatal(err)
+		defaultProjects := []Project{
+			{ID: 0, Name: "NotAssigned", Activity: "", Details: ""},
+			{ID: 1, Name: "Vacation", Activity: "Vacation", Details: "Vacation"},
+			{ID: 2, Name: "Sick", Activity: "Sick Days", Details: "Sick Days"},
+			{ID: 3, Name: "Parental Leave", Activity: "Parental Leave", Details: "Parental Leave"},
 		}
-		err = CreateProject(vacationProject)
-		if err != nil {
-			log.Fatal(err)
+		for _, v := range defaultProjects {
+			err = CreateProject(v)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
-		err = CreateProject(sickdaysProject)
-		if err != nil {
-			log.Fatal(err)
+	}
+
+	if len(GetLocations()) == 0 {
+		log.Println("Created default workplaces...")
+		defaultLocations := []Location{
+			{ID: 0, Name: "Company"},
+			{ID: 1, Name: "Home"},
+			{ID: 2, Name: "Mobile"},
+			{ID: 3, Name: "Trip"},
 		}
-		err = CreateProject(parentalleaveProject)
-		if err != nil {
-			log.Fatal(err)
+		for _, v := range defaultLocations {
+			err = CreateLocation(v)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 }
@@ -153,58 +166,14 @@ func Close() {
 	log.Println("Database closed")
 }
 
-func Migrations() {
-	version := getDBVersion()
-
-	switch version {
-	case 0:
-		statement, err := DB.Prepare("ALTER TABLE timeframes ADD COLUMN locationid int;")
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			log.Fatal(err)
-		}
-		setDBVersion(1)
-		log.Println("Migration to Version 1")
-		fallthrough
-	default:
-		log.Printf("DB Version: %d", getDBVersion())
-	}
-}
-
-func getDBVersion() int {
-	var version int
-	statement, err := DB.Prepare("PRAGMA user_version;")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = statement.QueryRow().Scan(&version)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return version
-}
-
-func setDBVersion(version int) {
-	statement, err := DB.Prepare(fmt.Sprintf("PRAGMA user_version = %d;", version))
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func CreateRecord(timefr Timeframe) error {
 	statement, err := DB.Prepare("INSERT INTO timeframes " +
-		"(id, date, year, month, day, start, end, duration, projectid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		"(id, date, year, month, day, start, end, duration, projectid, locationid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(timefr.ID, timefr.Date, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID)
+	_, err = statement.Exec(timefr.ID, timefr.Date, timefr.Year, timefr.Month, timefr.Day,
+		timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.LocationID)
 	if err != nil {
 		return err
 	}
@@ -219,7 +188,7 @@ func GetRecordByID(id int) error {
 		log.Fatal(err)
 	}
 	err = statement.QueryRow(id).Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
-		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 	if err != nil {
 		return err
 	}
@@ -242,7 +211,7 @@ func GetRecords() []Timeframe {
 	for rows.Next() {
 		timefr = Timeframe{}
 		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
-			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -268,7 +237,7 @@ func GetRecordsForDate(date time.Time) []Timeframe {
 	for rows.Next() {
 		timefr = Timeframe{}
 		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
-			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -293,7 +262,7 @@ func GetRecordsForProjectAndMonth(year int, month int, projectid int) []Timefram
 	for rows.Next() {
 		timefr = Timeframe{}
 		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
-			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -318,7 +287,7 @@ func GetRecordsForProjectAndYear(year time.Time, projectid int) []Timeframe {
 	for rows.Next() {
 		timefr = Timeframe{}
 		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
-			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -353,7 +322,7 @@ func GetRecordsForProjectAndYearUntilToday(year time.Time, day time.Time, projec
 	for rows.Next() {
 		timefr = Timeframe{}
 		err = rows.Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
-			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID)
+			&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -383,11 +352,12 @@ func GetRecordsMaxID() int {
 func UpdateRecord(timefr Timeframe) error {
 
 	statement, err := DB.Prepare("UPDATE timeframes SET " +
-		"date=?, year=?, month=?, day=?, start=?, end=?, duration=?, projectid=? WHERE id=?")
+		"date=?, year=?, month=?, day=?, start=?, end=?, duration=?, projectid=?, locationid=? WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(timefr.Date, timefr.Year, timefr.Month, timefr.Day, timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.ID)
+	_, err = statement.Exec(timefr.Date, timefr.Year, timefr.Month, timefr.Day,
+		timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.LocationID, timefr.ID)
 	if err != nil {
 		return err
 	}
@@ -521,6 +491,40 @@ func GetProjectsForDate(date time.Time) map[int]string {
 		projectids[id] = projectName.Name
 	}
 	return projectids
+}
+
+func CreateLocation(location Location) error {
+	statement, err := DB.Prepare("INSERT INTO workplaces " +
+		"(id, location) VALUES (?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(location.ID, location.Name)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetLocations() []Location {
+	statement, err := DB.Prepare("SELECT * FROM workplaces;")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := statement.Query()
+	if err != nil {
+		log.Fatal(err)
+	}
+	locations := []Location{}
+	for rows.Next() {
+		var location Location
+		err = rows.Scan(&location.ID, &location.Name)
+		if err != nil {
+			log.Println(err)
+		}
+		locations = append(locations, location)
+	}
+	return locations
 }
 
 func GetVersion() {

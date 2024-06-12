@@ -112,6 +112,7 @@ templ PageHeader(contents templ.Component) {
 						<div class="">
 							<button class="btn btn-ghost text-xl" hx-get="/projects" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Projects</button>
 						</div>
+						<div class="divider divider-horizontal"></div>
 						<div class="">
 							<button class="btn btn-ghost text-xl" hx-get="/month" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Month</button>
 						</div>
@@ -143,19 +144,21 @@ templ DarkModeSwitch() {
 	</label>
 }
 
-templ HomePage(tfList []database.Timeframe, projectList []database.Project, currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
-	@PageHeader(Records(tfList, projectList, currentDate, workDurationDaily, workDeltaWeek, overtime))
+templ HomePage(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
+currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+	@PageHeader(Records(tfList, projectList, locationList, currentDate, workDurationDaily, workDeltaWeek, overtime))
 }
 
-templ Records(tfList []database.Timeframe, projectList []database.Project, currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+templ Records(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
+ currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
-		@CreateRecord(projectList, currentDate)
-		@RecordList(tfList, projectList)
+		@CreateRecord(projectList, locationList, currentDate)
+		@RecordList(tfList, projectList, locationList)
 		@dailySummary(workDurationDaily, workDeltaWeek, overtime)
 	</div>
 }
 
-templ CreateRecord(projectList []database.Project, currentDate time.Time) {
+templ CreateRecord(projectList []database.Project, locationList []database.Location, currentDate time.Time) {
 	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
 		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms" hx-preserve>
 			<div class="flex justify-center">
@@ -192,6 +195,18 @@ templ CreateRecord(projectList []database.Project, currentDate time.Time) {
 								<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
 							}
 						</select>
+					</div>
+				</label>
+				<label class="form-control w-full max-w-xs">
+					<div class="label">
+						<span class="label-text">Location:</span>
+					</div>
+					<div class="flex flex-row space-x-1">
+						<select class="select rounded bg-neutral text-neutral-content" id="location" name="location">
+							for _, location := range locationList {
+								<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
+							}
+						</select>
 						<button class="btn btn-success animate-none" type="submit" form="defaultRecord">&#x2713;</button>
 					</div>
 				</label>
@@ -200,7 +215,7 @@ templ CreateRecord(projectList []database.Project, currentDate time.Time) {
 	</div>
 }
 
-templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
+templ RecordList(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location) {
 	<div id="record-list">
 		if len(tfList) > 0 {
 			<div class="card bg-base-300 shadow">
@@ -248,6 +263,24 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project) {
 											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
 										} else {
 											<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+										}
+									}
+								</select>
+								<select
+									class="select select-sm rounded bg-neutral text-neutral-content"
+									id="location"
+									name="location"
+									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="none"
+									hx-trigger="change delay:400ms"
+								>
+									for _, location := range locationList {
+										if timeframe.LocationID == location.ID {
+											<option value={ strconv.Itoa(location.ID) } selected>{ location.Name }</option>
+										} else {
+											<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
 										}
 									}
 								</select>

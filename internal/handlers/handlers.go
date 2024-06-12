@@ -38,6 +38,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	component := components.HomePage(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
+		database.GetLocations(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
@@ -52,6 +53,7 @@ func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
+		database.GetLocations(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
@@ -76,6 +78,7 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.Records(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),
+		database.GetLocations(),
 		activeDate,
 		workTotalByDate(activeDate).String(),
 		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
@@ -88,7 +91,9 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 func RecordsHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.RecordList(
 		database.GetRecordsForDate(activeDate),
-		database.GetProjects())
+		database.GetProjects(),
+		database.GetLocations(),
+	)
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -144,7 +149,7 @@ func ChangeDate(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error change date: %v", err)
 		return
 	}
-	log.Printf("Date changed to %s\n", activeDate)
+	log.Printf("Date changed to %s\n", activeDate.Format("2006-01-02"))
 	RecordsPageHandler(w, r)
 }
 
@@ -157,23 +162,25 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 	}
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
-		ID:        database.GetRecordsMaxID() + 1,
-		Date:      r.FormValue("dateofrecord"),
-		Year:      year,
-		Month:     month,
-		Day:       day,
-		Start:     r.FormValue("start"),
-		End:       r.FormValue("end"),
-		Duration:  "",
-		ProjectID: atoi(r.FormValue("project")),
+		ID:         database.GetRecordsMaxID() + 1,
+		Date:       r.FormValue("dateofrecord"),
+		Year:       year,
+		Month:      month,
+		Day:        day,
+		Start:      r.FormValue("start"),
+		End:        r.FormValue("end"),
+		Duration:   "",
+		ProjectID:  atoi(r.FormValue("project")),
+		LocationID: atoi(r.FormValue("location")),
 	}
 	globalID += 1
 	err = database.CreateRecord(timeframe)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Fatal(err)
 	}
 
-	log.Printf("Created Record %s %s ProjectID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID)
+	log.Printf("Created Record - From: %s, To: %s, ProjectID: %d, LocationID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, timeframe.LocationID)
 	RecordsPageHandler(w, r)
 }
 
@@ -187,18 +194,20 @@ func UpdateRecord(w http.ResponseWriter, r *http.Request) {
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	id := r.PathValue("id")
 	timefr := database.Timeframe{
-		ID:        atoi(id),
-		Date:      r.FormValue("dateofrecord"),
-		Year:      year,
-		Month:     month,
-		Day:       day,
-		Start:     r.FormValue("start"),
-		End:       r.FormValue("end"),
-		Duration:  "",
-		ProjectID: atoi(r.FormValue("project")),
+		ID:         atoi(id),
+		Date:       r.FormValue("dateofrecord"),
+		Year:       year,
+		Month:      month,
+		Day:        day,
+		Start:      r.FormValue("start"),
+		End:        r.FormValue("end"),
+		Duration:   "",
+		ProjectID:  atoi(r.FormValue("project")),
+		LocationID: atoi(r.FormValue("location")),
 	}
 	err = database.UpdateRecord(timefr)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Fatal(err)
 	}
 	log.Printf("Update Record with ID %s\n", id)
@@ -209,6 +218,7 @@ func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	err = database.DeleteRecord(atoi(id))
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Fatal(err)
 	}
 	log.Printf("Remove Record with ID: %v\n", id)
