@@ -2343,7 +2343,3 @@ html {
 input {
   color-scheme: dark;
 }
-
-.navbar[data-theme="dark"] {
-  background-color: aqua;
-}

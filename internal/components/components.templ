@@ -389,7 +389,7 @@ templ ProjectsList(projectList []database.Project) {
 	}
 }
 
-templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursDaily, locations []database.LocationDays) {
+templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursLocationsDaily, locations []database.LocationDays) {
 	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
 		<div class="card bg-base-300 shadow">
 			<div class="card-body">
@@ -525,7 +525,7 @@ templ Locations(locations []database.LocationDays) {
 	</table>
 }
 
-templ OverviewRecords(entries []database.ProjectHoursDaily) {
+templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 	<div id="overview-records" class="card bg-base-300 shadow">
 		<div class="card-body">
 			<table class="table table-xs">
@@ -533,6 +533,7 @@ templ OverviewRecords(entries []database.ProjectHoursDaily) {
 					<td>Date:</td>
 					<td>Hours:</td>
 					<td>Projects:</td>
+					<td>Work Places:</td>
 				</thead>
 				<tbody>
 					for _, entry := range entries {
@@ -540,6 +541,7 @@ templ OverviewRecords(entries []database.ProjectHoursDaily) {
 							<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
 							<td>{ entry.Hours }</td>
 							<td>{ strings.Join(entry.Projects, ", ") }</td>
+							<td>{ strings.Join(entry.Locations, ", ") }</td>
 						</tr>
 					}
 				</tbody>

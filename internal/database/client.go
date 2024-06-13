@@ -43,10 +43,11 @@ type ProjectHours struct {
 	Project
 }
 
-type ProjectHoursDaily struct {
-	Date     string   `json:"date"`
-	Hours    string   `json:"workhours"`
-	Projects []string `json:"projects"`
+type ProjectHoursLocationsDaily struct {
+	Date      string   `json:"date"`
+	Hours     string   `json:"workhours"`
+	Projects  []string `json:"projects"`
+	Locations []string `json:"locations"`
 }
 
 type Location struct {
@@ -69,7 +70,23 @@ func Connect() {
 		log.Fatal(err)
 		panic("Cannot connect to DB")
 	}
-	log.Println("Connected to Database...")
+	log.Println("Connected to Database")
+
+	// Check if new database
+	var tableCount int
+	statement, err := DB.Prepare("SELECT COUNT(*) FROM sqlite_master AS tables WHERE type='table'")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = statement.QueryRow().Scan(&tableCount)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if tableCount == 0 {
+		log.Println("New table, set db version")
+		setDBVersion(dbVersion)
+	}
+
 	tableVars := `(
 		id int PRIMARY KEY,
 		date string NOT NULL,
@@ -83,7 +100,7 @@ func Connect() {
 		locationid int NOT NULL
 	)`
 
-	statement, err := DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
+	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +109,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created timeframes Table...")
+	log.Println("Created timeframes Table")
 
 	tableVars = `(
 		id int PRIMARY KEY,
@@ -109,7 +126,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created projects Table...")
+	log.Println("Created projects Table")
 
 	tableVars = `(
 		id INT PRIMARY KEY,
@@ -124,15 +141,14 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created workplaces Table...")
+	log.Println("Created workplaces Table")
 
 	if getDBVersion() != dbVersion {
 		Migrations()
 	}
 
-	_, err = GetProjectByID(0)
-	if err != nil {
-		log.Println("Created default projects...")
+	if len(GetProjects()) == 0 {
+		log.Println("Created default projects")
 		defaultProjects := []Project{
 			{ID: 0, Name: "NotAssigned", Activity: "", Details: ""},
 			{ID: 1, Name: "Vacation", Activity: "Vacation", Details: "Vacation"},
@@ -148,7 +164,7 @@ func Connect() {
 	}
 
 	if len(GetLocations()) == 0 {
-		log.Println("Created default workplaces...")
+		log.Println("Created default workplaces")
 		defaultLocations := []Location{
 			{ID: 0, Name: "Company"},
 			{ID: 1, Name: "Home"},
@@ -531,6 +547,44 @@ func GetLocations() []Location {
 		locations = append(locations, location)
 	}
 	return locations
+}
+func GetLocationByID(id int) (Location, error) {
+	var location Location = Location{}
+
+	statement, err := DB.Prepare("SELECT * FROM workplaces WHERE id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = statement.QueryRow(id).Scan(&location.ID, &location.Name)
+	if err != nil {
+		return Location{}, err
+	}
+	return location, nil
+}
+
+func GetLocationsForDate(date time.Time) map[int]string {
+	statement, err := DB.Prepare("SELECT locationid FROM timeframes WHERE date=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := statement.Query(date.Format("2006-01-02"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	locationids := map[int]string{}
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		projectName, err := GetLocationByID(id)
+		if err != nil {
+			log.Print(err)
+		}
+		locationids[id] = projectName.Name
+	}
+	return locationids
 }
 
 func GetLocationDaysForMonth(month time.Time) []LocationDays {
