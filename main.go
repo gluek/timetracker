@@ -25,16 +25,19 @@ var content embed.FS
 //internal/assets/js/echarts.js
 
 func main() {
-	var err error
-	// logfile, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	// if err != nil {
-	// 	log.Fatalf("could not open logfile: %v", err)
-	// }
-	// defer logfile.Close()
-	// log.SetOutput(logfile)
-
 	// Init session
 	viperInit()
+
+	var err error
+	if viper.GetBool("logfile") {
+		logfile, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatalf("could not open logfile: %v", err)
+		}
+		defer logfile.Close()
+		log.SetOutput(logfile)
+	}
+
 	handlers.HandlerInit()
 
 	database.Connect()
@@ -108,6 +111,7 @@ func viperInit() {
 	viper.SetDefault("port", 34115)
 	viper.SetDefault("worktime_per_week", "39h0m0s")
 	viper.SetDefault("offset_overtime", "0h0m0s")
+	viper.SetDefault("logfile", false)
 
 	viper.SetConfigName("timetracker")
 	viper.SetConfigType("yaml")
