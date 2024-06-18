@@ -318,7 +318,7 @@ func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
 	// Init returns an error if the package is not ready for use.
 	err := clipboard.Init()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	clipboard.Write(clipboard.FmtText, []byte(out))
 }

@@ -25,6 +25,14 @@ var content embed.FS
 //internal/assets/js/echarts.js
 
 func main() {
+	var err error
+	// logfile, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	// if err != nil {
+	// 	log.Fatalf("could not open logfile: %v", err)
+	// }
+	// defer logfile.Close()
+	// log.SetOutput(logfile)
+
 	// Init session
 	viperInit()
 	handlers.HandlerInit()
@@ -40,7 +48,7 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 
-	err := mime.AddExtensionType(".js", "application/javascript")
+	err = mime.AddExtensionType(".js", "application/javascript")
 	if err != nil {
 		log.Printf("error add mime: %v", err)
 	}

@@ -68,7 +68,6 @@ func Connect() {
 	DB, err = sql.Open("sqlite", pwd+"/timetrack.sqlite")
 	if err != nil {
 		log.Fatal(err)
-		panic("Cannot connect to DB")
 	}
 	log.Println("Connected to Database")
 
