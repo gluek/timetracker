@@ -78,6 +78,19 @@ func workHoursMonthDelta(workdays int, total database.ProjectHours) time.Duratio
 	return deltaDuration
 }
 
+func workHoursDailyDelta(workhoursDaily string) string {
+	workHoursPerWeek, err := time.ParseDuration(viper.GetString("worktime_per_week"))
+	if err != nil {
+		log.Println(fmt.Errorf("hoursToDays: %w", err))
+	}
+	workDaily, err := time.ParseDuration(workhoursDaily)
+	if err != nil {
+		log.Println("workHoursDailyDelta workDaily: %v", err)
+	}
+	deltaDuration := workDaily - (workHoursPerWeek / 5)
+	return deltaDuration.String()
+}
+
 func durationStrToFloat(duration string) float64 {
 	durFloat, err := time.ParseDuration(duration)
 	if err != nil {
@@ -296,8 +309,8 @@ templ dailySummary(workDurationDaily string, workDeltaWeek string, overtime data
 						<thead></thead>
 						<tbody>
 							<tr>
-								<td>Total Work:</td>
-								<td>{ workDurationDaily }</td>
+								<td>Total Work / Delta:</td>
+								<td>{ workDurationDaily } / { workHoursDailyDelta(workDurationDaily) }</td>
 							</tr>
 							<tr>
 								<td>Delta Week:</td>
