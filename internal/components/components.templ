@@ -9,6 +9,8 @@ import "fmt"
 import "log"
 import "strings"
 
+var version string = "v0.4"
+
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
 	years := []int{}
@@ -117,6 +119,7 @@ templ PageHeader(contents templ.Component) {
 					<div class="container mx-auto max-w-[1000px] grow">
 						<div class="hero-content h-20">
 							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
+							<p class="primary-content self-end">{ version }</p>
 						</div>
 						<div class="grow"></div>
 						<button class="btn btn-ghost text-xl" hx-get="/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Records</button>
