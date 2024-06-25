@@ -109,6 +109,7 @@ func Connect() {
 		log.Fatal(err)
 	}
 	log.Println("Created timeframes Table")
+	statement.Close()
 
 	tableVars = `(
 		id int PRIMARY KEY,
@@ -126,6 +127,7 @@ func Connect() {
 		log.Fatal(err)
 	}
 	log.Println("Created projects Table")
+	statement.Close()
 
 	tableVars = `(
 		id INT PRIMARY KEY,
@@ -141,6 +143,7 @@ func Connect() {
 		log.Fatal(err)
 	}
 	log.Println("Created workplaces Table")
+	statement.Close()
 
 	if getDBVersion() != dbVersion {
 		Migrations()
@@ -194,6 +197,8 @@ func CreateRecord(timefr Timeframe) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(timefr.ID, timefr.Date, timefr.Year, timefr.Month, timefr.Day,
 		timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.LocationID)
 	if err != nil {
@@ -209,6 +214,8 @@ func GetRecordByID(id int) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	err = statement.QueryRow(id).Scan(&timefr.ID, &timefr.Date, &timefr.Year, &timefr.Month, &timefr.Day,
 		&timefr.Start, &timefr.End, &timefr.Duration, &timefr.ProjectID, &timefr.LocationID)
 	if err != nil {
@@ -226,6 +233,8 @@ func GetRecords() []Timeframe {
 		log.Printf("could not prepare statement GetRecords: %v", err)
 		return []Timeframe{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query()
 	if err != nil {
 		log.Printf("could not query database GetRecords: %v", err)
@@ -255,6 +264,7 @@ func GetRecordsForDate(date time.Time) []Timeframe {
 		log.Printf("could not prepare statement GetRecordsForDate: %v", err)
 		return []Timeframe{}
 	}
+	defer statement.Close()
 	rows, err := statement.Query(date.Format("2006-01-02"))
 	if err != nil {
 		log.Printf("could not query database GetRecordsForDate: %v", err)
@@ -283,6 +293,7 @@ func GetRecordsForProjectAndMonth(year int, month int, projectid int) []Timefram
 		log.Printf("could not prepare statement GetRecordsForProjectAndMonth: %v", err)
 		return []Timeframe{}
 	}
+	defer statement.Close()
 	rows, err := statement.Query(year, month, projectid)
 	if err != nil {
 		log.Printf("could not query database GetRecordsForProjectAndMonth: %v", err)
@@ -311,6 +322,7 @@ func GetRecordsForProjectAndYear(year time.Time, projectid int) []Timeframe {
 		log.Printf("could not prepare statement GetRecordsForProjectAndYear: %v", err)
 		return []Timeframe{}
 	}
+	defer statement.Close()
 	rows, err := statement.Query(year.Year(), projectid)
 	if err != nil {
 		log.Printf("could not query database GetRecordsForProjectAndYear: %v", err)
@@ -349,6 +361,8 @@ func GetRecordsForProjectAndYearUntilToday(year time.Time, day time.Time, projec
 		log.Printf("could not prepare statement GetRecordsForProjectAndYearUntilToday: %v", err)
 		return []Timeframe{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query(year.Year(), endDate.Format("2006-01-02"), projectid)
 	if err != nil {
 		log.Printf("could not query database GetRecordsForProjectAndYearUntilToday: %v", err)
@@ -374,6 +388,8 @@ func GetRecordsMaxID() int {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer statement.Close()
+
 	row := statement.QueryRow()
 	if err != nil {
 		log.Fatal(err)
@@ -392,6 +408,8 @@ func UpdateRecord(timefr Timeframe) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(timefr.Date, timefr.Year, timefr.Month, timefr.Day,
 		timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.LocationID, timefr.ID)
 	if err != nil {
@@ -405,6 +423,8 @@ func DeleteRecord(id int) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(id)
 	if err != nil {
 		return err
@@ -418,6 +438,8 @@ func CreateProject(project Project) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(project.ID, project.Name, project.Activity, project.Details)
 	if err != nil {
 		return err
@@ -432,6 +454,8 @@ func GetProjectByID(id int) (Project, error) {
 	if err != nil {
 		return Project{}, err
 	}
+	defer statement.Close()
+
 	err = statement.QueryRow(id).Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
 	if err != nil {
 		return Project{}, err
@@ -448,6 +472,8 @@ func GetProjects() []Project {
 		log.Printf("could not prepare statement GetProjects: %v", err)
 		return []Project{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query()
 	if err != nil {
 		log.Printf("could not query database GetProjects: %v", err)
@@ -472,6 +498,8 @@ func GetProjectsMaxID() int {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer statement.Close()
+
 	row := statement.QueryRow()
 	err = row.Scan(&maxID)
 	if err != nil {
@@ -488,6 +516,8 @@ func UpdateProject(project Project) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(project.Name, project.Activity, project.Details, project.ID)
 	if err != nil {
 		return err
@@ -500,6 +530,8 @@ func DeleteProject(id int) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(id)
 	if err != nil {
 		return err
@@ -513,6 +545,8 @@ func GetProjectsForDate(date time.Time) map[int]string {
 		log.Printf("could not prepare statement GetProjectsForDate: %v", err)
 		return map[int]string{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query(date.Format("2006-01-02"))
 	if err != nil {
 		log.Printf("could not query database GetProjectsForDate: %v", err)
@@ -542,6 +576,8 @@ func CreateLocation(location Location) error {
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
+
 	_, err = statement.Exec(location.ID, location.Name)
 	if err != nil {
 		return err
@@ -555,6 +591,8 @@ func GetLocations() []Location {
 		log.Printf("could not prepare statement GetLocations: %v", err)
 		return []Location{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query()
 	if err != nil {
 		log.Printf("could not query database GetLocations: %v", err)
@@ -579,6 +617,8 @@ func GetLocationByID(id int) (Location, error) {
 	if err != nil {
 		return Location{}, err
 	}
+	defer statement.Close()
+
 	err = statement.QueryRow(id).Scan(&location.ID, &location.Name)
 	if err != nil {
 		return Location{}, err
@@ -592,6 +632,8 @@ func GetLocationsForDate(date time.Time) map[int]string {
 		log.Printf("could not prepare statement GetLocationsForDate: %v", err)
 		return map[int]string{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query(date.Format("2006-01-02"))
 	if err != nil {
 		log.Printf("could not query database GetLocationsForDate: %v", err)
@@ -626,6 +668,8 @@ func GetLocationDaysForMonth(month time.Time) []LocationDays {
 		log.Printf("could not prepare statement GetLocationDaysForMonth: %v", err)
 		return []LocationDays{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query(month.Year(), int(month.Month()))
 	if err != nil {
 		log.Printf("could not query database GetLocationDaysForMonth: %v", err)
@@ -652,12 +696,14 @@ func GetLocationDaysForYear(year time.Time) []LocationDays {
 		WHERE timeframes.year=? AND timeframes.projectid NOT IN (1,2,3)
 		GROUP BY workplaces.location;`)
 	if err != nil {
-		log.Printf("could not prepare statement GetLocationDaysForYear:", err)
+		log.Printf("could not prepare statement GetLocationDaysForYear: %v", err)
 		return []LocationDays{}
 	}
+	defer statement.Close()
+
 	rows, err := statement.Query(year.Year())
 	if err != nil {
-		log.Printf("could not query database GetLocationDaysForYear:", err)
+		log.Printf("could not query database GetLocationDaysForYear: %v", err)
 		return []LocationDays{}
 	}
 	locationDays := []LocationDays{}
@@ -665,7 +711,7 @@ func GetLocationDaysForYear(year time.Time) []LocationDays {
 		location := LocationDays{Location{ID: 0, Name: ""}, 0}
 		err = rows.Scan(&location.Location.ID, &location.Location.Name, &location.Days)
 		if err != nil {
-			log.Printf("could not scan rows GetLocationDaysForYear:", err)
+			log.Printf("could not scan rows GetLocationDaysForYear: %v", err)
 			return []LocationDays{}
 		}
 		locationDays = append(locationDays, location)
