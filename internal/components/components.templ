@@ -9,7 +9,7 @@ import "fmt"
 import "log"
 import "strings"
 
-var version string = "v0.4.2"
+var version string = "v0.5.0"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -168,58 +168,61 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, locat
 
 templ CreateRecord(projectList []database.Project, locationList []database.Location, currentDate time.Time) {
 	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
-		<form id="defaultRecord" class="card-body" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms" hx-preserve>
-			<div class="flex justify-center">
-				<input
-					class="input input-lg bg-neutral text-neutral-content"
-					hx-post="/api/currentdate"
-					hx-trigger="change delay:1000ms"
-					type="date"
-					name="dateofrecord"
-					id="dateofrecord"
-					value={ currentDate.Format("2006-01-02") }
-				/>
-			</div>
-			<div class="flex flex-row content-center justify-center space-x-1">
-				<label class="form-control w-full max-w-xs">
-					<div class="label">
-						<span class="label-text">From:</span>
-					</div>
-					<input class="input rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
-				</label>
-				<label class="form-control w-full max-w-xs">
-					<div class="label">
-						<span class="label-text">To:</span>
-					</div>
-					<input class="input rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
-				</label>
-				<label class="form-control w-full max-w-xs">
-					<div class="label">
-						<span class="label-text">Project:</span>
-					</div>
-					<div class="flex flex-row space-x-1">
-						<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
-							for _, project := range projectList {
-								<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
-							}
-						</select>
-					</div>
-				</label>
-				<label class="form-control w-full max-w-xs">
-					<div class="label">
-						<span class="label-text">Location:</span>
-					</div>
-					<div class="flex flex-row space-x-1">
-						<select class="select rounded bg-neutral text-neutral-content" id="location" name="location">
-							for _, location := range locationList {
-								<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
-							}
-						</select>
-						<button class="btn btn-success animate-none" type="submit" form="defaultRecord">&#x2713;</button>
-					</div>
-				</label>
-			</div>
-		</form>
+		<div class="card-body">
+			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms" hx-preserve>
+				<div class="flex justify-center">
+					<input
+						class="input input-lg bg-neutral text-neutral-content"
+						hx-post="/api/currentdate"
+						hx-trigger="change delay:1000ms"
+						type="date"
+						name="dateofrecord"
+						id="dateofrecord"
+						value={ currentDate.Format("2006-01-02") }
+					/>
+				</div>
+				<div class="flex flex-row content-center justify-center space-x-1">
+					<label class="form-control w-full max-w-xs">
+						<div class="label">
+							<span class="label-text">From:</span>
+						</div>
+						<input class="input rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
+					</label>
+					<label class="form-control w-full max-w-xs">
+						<div class="label">
+							<span class="label-text">To:</span>
+						</div>
+						<input class="input rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
+					</label>
+					<label class="form-control w-full max-w-xs">
+						<div class="label">
+							<span class="label-text">Project:</span>
+						</div>
+						<div class="flex flex-row space-x-1">
+							<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
+								for _, project := range projectList {
+									<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+								}
+							</select>
+						</div>
+					</label>
+					<label class="form-control w-full max-w-xs">
+						<div class="label">
+							<span class="label-text">Location:</span>
+						</div>
+						<div class="flex flex-row space-x-1">
+							<select class="select rounded bg-neutral text-neutral-content" id="location" name="location">
+								for _, location := range locationList {
+									<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
+								}
+							</select>
+							<button class="btn btn-success animate-none" type="submit" form="defaultRecord">&#x2713;</button>
+						</div>
+					</label>
+				</div>
+			</form>
+			@Quickbar()
+		</div>
 	</div>
 }
 
@@ -620,5 +623,11 @@ templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, over
 				</div>
 			</div>
 		</div>
+	</div>
+}
+
+templ Quickbar() {
+	<div class="flex flex-row pt-2">
+		<button class="btn btn-outline btn-sm w-min" hx-post="/api/quickbar/vacation" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Vacation</button>
 	</div>
 }

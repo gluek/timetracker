@@ -36,6 +36,15 @@ func findIDTimeframe(id int) int {
 	return -1
 }
 
+func durationOneWorkday() time.Duration {
+	workHoursPerWeek, err := time.ParseDuration(viper.GetString("worktime_per_week"))
+	if err != nil {
+		log.Println(fmt.Errorf("workHoursMonth: %w", err))
+	}
+	workHoursPerDay := workHoursPerWeek / 5
+	return workHoursPerDay
+}
+
 func findIDProject(id int) int {
 	for index, project := range projectList {
 		if project.ID == id {

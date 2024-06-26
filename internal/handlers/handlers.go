@@ -322,3 +322,37 @@ func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
 	}
 	clipboard.Write(clipboard.FmtText, []byte(out))
 }
+
+func Quickbar(w http.ResponseWriter, r *http.Request) {
+	quickName := r.PathValue("name")
+	switch quickName {
+	case "vacation":
+		start, err := time.Parse("15:04", "08:00")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error parse time Quickbar vacation: %v", err)
+			return
+		}
+		end := start.Add(durationOneWorkday())
+		var timeframe = database.Timeframe{
+			ID:         database.GetRecordsMaxID() + 1,
+			Date:       activeDate.Format("2006-01-02"),
+			Year:       activeDate.Year(),
+			Month:      int(activeDate.Month()),
+			Day:        activeDate.Day(),
+			Start:      start.Format("15:04"),
+			End:        end.Format("15:04"),
+			Duration:   "",
+			ProjectID:  1,
+			LocationID: 0,
+		}
+		err = database.CreateRecord(timeframe)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Fatal(err)
+		}
+
+		log.Printf("Created Record - From: %s, To: %s, ProjectID: %d, LocationID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, timeframe.LocationID)
+		RecordsPageHandler(w, r)
+	}
+}
