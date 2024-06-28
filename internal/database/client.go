@@ -12,7 +12,7 @@ import (
 )
 
 var DB *sql.DB
-var dbVersion int = 1
+var dbVersion int = 2
 var err error
 var (
 	pwd, _ = os.Getwd()
