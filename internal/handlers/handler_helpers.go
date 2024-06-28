@@ -164,7 +164,7 @@ func GetProjectHoursMonth(month time.Time) []database.ProjectHours {
 			Project: project,
 			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
 		}
-		if projectHour.ID < 4 || duration.Hours() > 0 {
+		if projectHour.ID < 5 || duration.Hours() > 0 {
 			projectsList = append(projectsList, projectHour)
 		}
 	}
@@ -191,7 +191,7 @@ func GetProjectHoursYear(year time.Time) []database.ProjectHours {
 			Project: project,
 			Hours:   fmt.Sprintf("%.2f", duration.Hours()),
 		}
-		if project.ID < 4 || duration.Hours() > 0 {
+		if project.ID < 5 || duration.Hours() > 0 {
 			projectsList = append(projectsList, projectHour)
 		}
 	}

@@ -164,7 +164,7 @@ func CreateRecord(w http.ResponseWriter, r *http.Request) {
 	}
 	year, month, day := parseDate(r.FormValue("dateofrecord"))
 	var timeframe = database.Timeframe{
-		ID:         database.GetRecordsMaxID() + 1,
+		ID:         0, // not used
 		Date:       r.FormValue("dateofrecord"),
 		Year:       year,
 		Month:      month,
@@ -234,7 +234,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error create project: %v", err)
 	}
 	var project = database.Project{
-		ID:       database.GetProjectsMaxID() + 1,
+		ID:       0, // not used
 		Name:     r.FormValue("projectName"),
 		Activity: r.FormValue("activity"),
 		Details:  r.FormValue("details"),
@@ -335,7 +335,7 @@ func Quickbar(w http.ResponseWriter, r *http.Request) {
 		}
 		end := start.Add(durationOneWorkday())
 		var timeframe = database.Timeframe{
-			ID:         database.GetRecordsMaxID() + 1,
+			ID:         0, // not used
 			Date:       activeDate.Format("2006-01-02"),
 			Year:       activeDate.Year(),
 			Month:      int(activeDate.Month()),
@@ -343,8 +343,8 @@ func Quickbar(w http.ResponseWriter, r *http.Request) {
 			Start:      start.Format("15:04"),
 			End:        end.Format("15:04"),
 			Duration:   "",
-			ProjectID:  1,
-			LocationID: 0,
+			ProjectID:  2,
+			LocationID: 1,
 		}
 		err = database.CreateRecord(timeframe)
 		if err != nil {

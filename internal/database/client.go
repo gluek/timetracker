@@ -87,16 +87,16 @@ func Connect() {
 	}
 
 	tableVars := `(
-		id int PRIMARY KEY,
-		date string NOT NULL,
-		year int NOT NULL,
-		month int NOT NULL,
-		day int NOT NULL,
-		start string NOT NULL,
-		end string NOT NULL,
-		duration string,
-		projectid int NOT NULL,
-		locationid int NOT NULL
+		id INTEGER PRIMARY KEY NOT NULL,
+		date STRING NOT NULL,
+		year INTEGER NOT NULL,
+		month INTEGER NOT NULL,
+		day INTEGER NOT NULL,
+		start STRING NOT NULL,
+		end STRING NOT NULL,
+		duration STRING,
+		projectid INTEGER NOT NULL,
+		locationid INTEGER NOT NULL
 	)`
 
 	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS timeframes " + tableVars)
@@ -112,10 +112,10 @@ func Connect() {
 	statement.Close()
 
 	tableVars = `(
-		id int PRIMARY KEY,
-		name string NOT NULL,
-		activity string NOT NULL,
-		details string NOT NULL
+		id INTEGER PRIMARY KEY NOT NULL,
+		name STRING NOT NULL,
+		activity STRING NOT NULL,
+		details STRING NOT NULL
 	)`
 	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS projects " + tableVars)
 	if err != nil {
@@ -130,7 +130,7 @@ func Connect() {
 	statement.Close()
 
 	tableVars = `(
-		id INT PRIMARY KEY,
+		id INTEGER PRIMARY KEY NOT NULL,
 		location STRING NOT NULL
 	)`
 	statement, err = DB.Prepare("CREATE TABLE IF NOT EXISTS workplaces " + tableVars)
@@ -152,10 +152,10 @@ func Connect() {
 	if len(GetProjects()) == 0 {
 		log.Println("Created default projects")
 		defaultProjects := []Project{
-			{ID: 0, Name: "NotAssigned", Activity: "", Details: ""},
-			{ID: 1, Name: "Vacation", Activity: "Vacation", Details: "Vacation"},
-			{ID: 2, Name: "Sick", Activity: "Sick Days", Details: "Sick Days"},
-			{ID: 3, Name: "Parental Leave", Activity: "Parental Leave", Details: "Parental Leave"},
+			{ID: 1, Name: "NotAssigned", Activity: "", Details: ""},
+			{ID: 2, Name: "Vacation", Activity: "Vacation", Details: "Vacation"},
+			{ID: 3, Name: "Sick", Activity: "Sick Days", Details: "Sick Days"},
+			{ID: 4, Name: "Parental Leave", Activity: "Parental Leave", Details: "Parental Leave"},
 		}
 		for _, v := range defaultProjects {
 			err = CreateProject(v)
@@ -168,10 +168,10 @@ func Connect() {
 	if len(GetLocations()) == 0 {
 		log.Println("Created default workplaces")
 		defaultLocations := []Location{
-			{ID: 0, Name: "Company"},
-			{ID: 1, Name: "Home"},
-			{ID: 2, Name: "Mobile"},
-			{ID: 3, Name: "Trip"},
+			{ID: 1, Name: "Company"},
+			{ID: 2, Name: "Home"},
+			{ID: 3, Name: "Mobile"},
+			{ID: 4, Name: "Trip"},
 		}
 		for _, v := range defaultLocations {
 			err = CreateLocation(v)
@@ -193,13 +193,13 @@ func Close() {
 
 func CreateRecord(timefr Timeframe) error {
 	statement, err := DB.Prepare("INSERT INTO timeframes " +
-		"(id, date, year, month, day, start, end, duration, projectid, locationid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		"(date, year, month, day, start, end, duration, projectid, locationid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
 
-	_, err = statement.Exec(timefr.ID, timefr.Date, timefr.Year, timefr.Month, timefr.Day,
+	_, err = statement.Exec(timefr.Date, timefr.Year, timefr.Month, timefr.Day,
 		timefr.Start, timefr.End, timefr.Duration, timefr.ProjectID, timefr.LocationID)
 	if err != nil {
 		return err
@@ -312,26 +312,6 @@ func GetRecordsForProjectAndYearUntilToday(year time.Time, day time.Time, projec
 	return timeframes
 }
 
-func GetRecordsMaxID() int {
-	var maxID int
-	statement, err := DB.Prepare("SELECT MAX(id) FROM timeframes")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer statement.Close()
-
-	row := statement.QueryRow()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = row.Scan(&maxID)
-	if err != nil {
-		log.Printf("error empty timeframes, return id 0: %v", err)
-	}
-
-	return maxID
-}
-
 func UpdateRecord(timefr Timeframe) error {
 	statement, err := DB.Prepare("UPDATE timeframes SET " +
 		"date=?, year=?, month=?, day=?, start=?, end=?, duration=?, projectid=?, locationid=? WHERE id=?")
@@ -364,13 +344,13 @@ func DeleteRecord(id int) error {
 
 func CreateProject(project Project) error {
 	statement, err := DB.Prepare("INSERT INTO projects " +
-		"(id, name, activity, details) VALUES (?, ?, ?, ?)")
+		"(name, activity, details) VALUES (?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
 
-	_, err = statement.Exec(project.ID, project.Name, project.Activity, project.Details)
+	_, err = statement.Exec(project.Name, project.Activity, project.Details)
 	if err != nil {
 		return err
 	}
@@ -420,23 +400,6 @@ func GetProjects() []Project {
 		projects = append(projects, project)
 	}
 	return projects
-}
-
-func GetProjectsMaxID() int {
-	var maxID int
-	statement, err := DB.Prepare("SELECT MAX(id) FROM projects")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer statement.Close()
-
-	row := statement.QueryRow()
-	err = row.Scan(&maxID)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return maxID
 }
 
 func UpdateProject(project Project) error {
@@ -501,13 +464,13 @@ func GetProjectsForDate(date time.Time) map[int]string {
 
 func CreateLocation(location Location) error {
 	statement, err := DB.Prepare("INSERT INTO workplaces " +
-		"(id, location) VALUES (?, ?)")
+		"(location) VALUES (?)")
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
 
-	_, err = statement.Exec(location.ID, location.Name)
+	_, err = statement.Exec(location.Name)
 	if err != nil {
 		return err
 	}
@@ -591,7 +554,7 @@ func GetLocationDaysForMonth(month time.Time) []LocationDays {
 		SELECT workplaces.id, workplaces.location, COUNT(DISTINCT date)
 		FROM timeframes INNER JOIN workplaces 
 		ON timeframes.locationid = workplaces.id
-		WHERE timeframes.year=? AND timeframes.month=? AND timeframes.projectid NOT IN (1,2,3)
+		WHERE timeframes.year=? AND timeframes.month=? AND timeframes.projectid NOT IN (2,3,4)
 		GROUP BY workplaces.location;`)
 	if err != nil {
 		log.Printf("could not prepare statement GetLocationDaysForMonth: %v", err)
@@ -622,7 +585,7 @@ func GetLocationDaysForYear(year time.Time) []LocationDays {
 		SELECT workplaces.id, workplaces.location, COUNT(DISTINCT date)
 		FROM timeframes INNER JOIN workplaces 
 		ON timeframes.locationid = workplaces.id
-		WHERE timeframes.year=? AND timeframes.projectid NOT IN (1,2,3)
+		WHERE timeframes.year=? AND timeframes.projectid NOT IN (2,3,4)
 		GROUP BY workplaces.location;`)
 	if err != nil {
 		log.Printf("could not prepare statement GetLocationDaysForYear: %v", err)

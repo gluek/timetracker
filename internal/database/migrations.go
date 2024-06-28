@@ -14,6 +14,7 @@ func Migrations() {
 
 	switch version {
 	case 0:
+		log.Println("Starting Migration to Version 1")
 		statement, err := DB.Prepare("ALTER TABLE timeframes ADD COLUMN locationid INT DEFAULT 0 NOT NULL;")
 		if err != nil {
 			log.Fatal(err)
@@ -23,9 +24,10 @@ func Migrations() {
 			log.Fatal(err)
 		}
 		setDBVersion(1)
-		log.Println("Migration to Version 1")
+		log.Println("Finished")
 		fallthrough
 	case 1:
+		log.Println("Starting Migration to Version 2")
 		DB.Close()
 		os.Rename("timetrack.sqlite", "timetrack_old.sqlite")
 		Connect()
@@ -42,7 +44,12 @@ func Migrations() {
 			panic(err)
 		}
 
-		copy, err := DB.Prepare("INSERT INTO timeframes SELECT * FROM old.timeframes; INSERT INTO projects SELECT * FROM old.projects WHERE id>3;")
+		copy, err := DB.Prepare("INSERT INTO timeframes SELECT * FROM old.timeframes;" +
+			"UPDATE old.projects SET id = id + 1;" +
+			"INSERT INTO projects SELECT * FROM old.projects WHERE id>4;" +
+			"UPDATE old.projects SET id = id - 1;" +
+			"UPDATE timeframes SET projectid = projectid + 1;" +
+			"UPDATE timeframes SET locationid = locationid + 1;")
 		if err != nil {
 			DB.Close()
 			os.Rename("timetrack_old.sqlite", "timetrack.sqlite")
@@ -56,7 +63,7 @@ func Migrations() {
 		}
 
 		setDBVersion(2)
-		log.Println("Migration to Version 1")
+		log.Println("Finished")
 		fallthrough
 	default:
 		log.Printf("DB Version: %d", getDBVersion())
