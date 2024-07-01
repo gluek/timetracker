@@ -37,6 +37,7 @@ func Migrations() {
 			os.Rename("timetrack_old.sqlite", "timetrack.sqlite")
 			panic(err)
 		}
+		defer attach.Close()
 		_, err = attach.Exec()
 		if err != nil {
 			DB.Close()
@@ -55,6 +56,7 @@ func Migrations() {
 			os.Rename("timetrack_old.sqlite", "timetrack.sqlite")
 			panic(err)
 		}
+		defer copy.Close()
 		_, err = copy.Exec()
 		if err != nil {
 			DB.Close()

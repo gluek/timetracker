@@ -210,7 +210,7 @@ func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursLocationsD
 		if err != nil {
 			log.Println(err)
 		}
-		work_total := workTotalByDate(dayTime)
+		workTotal := workTotalByDate(dayTime)
 		projectEntries := database.GetProjectsForDate(dayTime)
 		projectStrings := []string{}
 		for _, entry := range projectEntries {
@@ -225,7 +225,7 @@ func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursLocationsD
 		dailyEntries = append(dailyEntries,
 			database.ProjectHoursLocationsDaily{
 				Date:      dayTime.Format("Mon Jan 2 2006"),
-				Hours:     fmt.Sprintf("%05.2f", work_total.Hours()),
+				Hours:     fmt.Sprintf("%05.2f", workTotal.Hours()),
 				Projects:  projectStrings,
 				Locations: locationStrings})
 

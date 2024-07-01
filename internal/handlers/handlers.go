@@ -6,10 +6,12 @@ import (
 	"local/timetracker/internal/database"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rickar/cal/v2"
 	"github.com/rickar/cal/v2/de"
+	"github.com/spf13/viper"
 	"golang.design/x/clipboard"
 )
 
@@ -315,6 +317,8 @@ func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
 	for _, project := range projects[4 : len(projects)-1] {
 		out += fmt.Sprintf("%s\t%s\t%s\n", project.Activity, project.Details, project.Hours)
 	}
+	separator := viper.GetString("decimal_separator")
+	out = strings.ReplaceAll(out, ".", separator)
 	// Init returns an error if the package is not ready for use.
 	err := clipboard.Init()
 	if err != nil {
