@@ -42,8 +42,8 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		database.GetProjects(),
 		database.GetLocations(),
 		activeDate,
-		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
+		workTotalByDate(activeDate),
+		workDeltaWeek(workTotalWeek(activeDate), activeDate), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -57,8 +57,8 @@ func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
 		database.GetProjects(),
 		database.GetLocations(),
 		activeDate,
-		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
+		workTotalByDate(activeDate),
+		workDeltaWeek(workTotalWeek(activeDate), activeDate), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -82,8 +82,8 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 		database.GetProjects(),
 		database.GetLocations(),
 		activeDate,
-		workTotalByDate(activeDate).String(),
-		workDeltaWeek(workTotalWeek(activeDate), activeDate).String(), GetOvertimeHoursUntilDay(activeDate, activeDate))
+		workTotalByDate(activeDate),
+		workDeltaWeek(workTotalWeek(activeDate), activeDate), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err = component.Render(r.Context(), w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

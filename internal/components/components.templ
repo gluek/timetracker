@@ -80,17 +80,13 @@ func workHoursMonthDelta(workdays int, total database.ProjectHours) time.Duratio
 	return deltaDuration
 }
 
-func workHoursDailyDelta(workhoursDaily string) string {
+func workHoursDailyDelta(workhoursDaily time.Duration) time.Duration {
 	workHoursPerWeek, err := time.ParseDuration(viper.GetString("worktime_per_week"))
 	if err != nil {
 		log.Println(fmt.Errorf("hoursToDays: %w", err))
 	}
-	workDaily, err := time.ParseDuration(workhoursDaily)
-	if err != nil {
-		log.Println("workHoursDailyDelta workDaily: %v", err)
-	}
-	deltaDuration := workDaily - (workHoursPerWeek / 5)
-	return deltaDuration.String()
+	deltaDuration := workhoursDaily - (workHoursPerWeek / 5)
+	return deltaDuration
 }
 
 func durationStrToFloat(duration string) float64 {
@@ -99,6 +95,14 @@ func durationStrToFloat(duration string) float64 {
 		log.Println(fmt.Errorf("durationStrToFloat: %w", err))
 	}
 	return durFloat.Hours()
+}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Minute)
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d.Abs() / time.Minute
+	return fmt.Sprintf("%02dh%02dm", h, m)
 }
 
 templ PageHeader(contents templ.Component) {
@@ -153,12 +157,12 @@ templ DarkModeSwitch() {
 }
 
 templ HomePage(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
-currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	@PageHeader(Records(tfList, projectList, locationList, currentDate, workDurationDaily, workDeltaWeek, overtime))
 }
 
 templ Records(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
- currentDate time.Time, workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+ currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
 		@CreateRecord(projectList, locationList, currentDate)
 		@RecordList(tfList, projectList, locationList)
@@ -305,7 +309,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 	</div>
 }
 
-templ dailySummary(workDurationDaily string, workDeltaWeek string, overtime database.ProjectHours) {
+templ dailySummary(workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	<div id="summary-day">
 		<div class="card bg-base-300 shadow">
 			<div class="card-body">
@@ -316,14 +320,14 @@ templ dailySummary(workDurationDaily string, workDeltaWeek string, overtime data
 						<tbody>
 							<tr>
 								<td>Total Work / Delta:</td>
-								<td>{ workDurationDaily } / { workHoursDailyDelta(workDurationDaily) }</td>
+								<td>{ fmtDuration(workDurationDaily) } / { fmtDuration(workHoursDailyDelta(workDurationDaily)) }</td>
 							</tr>
 							<tr>
 								<td>Delta Week:</td>
-								if durationStrToFloat(workDeltaWeek) < 0 {
-									<td class="text-error">{ workDeltaWeek }</td>
+								if workDeltaWeek.Hours() < 0 {
+									<td class="text-error">{ fmtDuration(workDeltaWeek) }</td>
 								} else {
-									<td class="text-success">{ workDeltaWeek }</td>
+									<td class="text-success">{ fmtDuration(workDeltaWeek) }</td>
 								}
 							</tr>
 							<tr>
