@@ -9,7 +9,7 @@ import "fmt"
 import "log"
 import "strings"
 
-var version string = "v0.5.2"
+var version string = "v0.5.3"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -539,7 +539,7 @@ templ Locations(locations []database.LocationDays) {
 		</thead>
 		<tbody>
 			for _, location := range locations {
-				<tr class="bg-base-200">
+				<tr>
 					<td>{ location.Name }</td>
 					<td>{ fmt.Sprintf("%d", location.Days) }</td>
 				</tr>
@@ -560,12 +560,21 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 				</thead>
 				<tbody>
 					for _, entry := range entries {
-						<tr>
-							<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
-							<td>{ entry.Hours }</td>
-							<td>{ strings.Join(entry.Projects, ", ") }</td>
-							<td>{ strings.Join(entry.Locations, ", ") }</td>
-						</tr>
+						if strings.Contains(entry.Date, "Sat") || strings.Contains(entry.Date, "Sun") {
+							<tr class="bg-base-200">
+								<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
+								<td>{ entry.Hours }</td>
+								<td>{ strings.Join(entry.Projects, ", ") }</td>
+								<td>{ strings.Join(entry.Locations, ", ") }</td>
+							</tr>
+						} else {
+							<tr>
+								<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
+								<td>{ entry.Hours }</td>
+								<td>{ strings.Join(entry.Projects, ", ") }</td>
+								<td>{ strings.Join(entry.Locations, ", ") }</td>
+							</tr>
+						}
 					}
 				</tbody>
 			</table>
