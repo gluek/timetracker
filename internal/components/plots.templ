@@ -1,7 +1,7 @@
 // Copyright 2024 Gerrit Lükens. All rights reserved.
 package components
 
-import "local/timetracker/internal/database"
+import "github.com/gluek/timetracker/internal/database"
 
 script pieChart(projects []database.ProjectHours) {
     var chartDom = document.getElementById('piechart');

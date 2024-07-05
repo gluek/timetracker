@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"local/timetracker/internal/components"
-	"local/timetracker/internal/database"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gluek/timetracker/internal/components"
+	"github.com/gluek/timetracker/internal/database"
 
 	"github.com/rickar/cal/v2"
 	"github.com/rickar/cal/v2/de"

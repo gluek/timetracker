@@ -4,12 +4,13 @@ package main
 import (
 	"embed"
 	"fmt"
-	"local/timetracker/internal/database"
-	"local/timetracker/internal/handlers"
 	"log"
 	"mime"
 	"net/http"
 	"os"
+
+	"github.com/gluek/timetracker/internal/database"
+	"github.com/gluek/timetracker/internal/handlers"
 
 	"github.com/getlantern/systray"
 	"github.com/pkg/browser"

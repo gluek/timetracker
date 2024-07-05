@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"local/timetracker/internal/database"
 	"log"
 	"net/http"
+
+	"github.com/gluek/timetracker/internal/database"
 )
 
 func MockCreateRecord(w http.ResponseWriter, r *http.Request) {

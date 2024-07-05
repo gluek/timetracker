@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"local/timetracker/internal/database"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/gluek/timetracker/internal/database"
 
 	"github.com/rickar/cal/v2"
 	"github.com/spf13/viper"

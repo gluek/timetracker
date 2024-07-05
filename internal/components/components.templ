@@ -1,13 +1,15 @@
 // Copyright 2024 Gerrit Lükens. All rights reserved.
 package components
 
-import "local/timetracker/internal/database"
-import "strconv"
-import "github.com/spf13/viper"
-import "time"
-import "fmt"
-import "log"
-import "strings"
+import (
+	"strconv"
+	"github.com/gluek/timetracker/internal/database"
+	"github.com/spf13/viper"
+	"time"
+	"fmt"
+	"log"
+	"strings"
+) 
 
 var version string = "v0.5.3"
 

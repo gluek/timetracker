@@ -1,4 +1,4 @@
-module local/timetracker
+module github.com/gluek/timetracker
 
 go 1.22
 
