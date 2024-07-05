@@ -238,6 +238,7 @@ func getTimeframes(sqlString string, args ...any) ([]Timeframe, error) {
 	if err != nil {
 		return []Timeframe{}, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		timefr = Timeframe{}
@@ -297,7 +298,8 @@ func GetRecordsForProjectAndYearUntilToday(year time.Time, day time.Time, projec
 	if year.Year() < time.Now().Year() {
 		endDate, err = time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year.Year()))
 		if err != nil {
-			log.Println(err)
+			log.Printf("error GetRecordsForProjectAndYearUntilToday: %v", err)
+			return []Timeframe{}
 		}
 	} else {
 		endDate = day
@@ -389,6 +391,7 @@ func GetProjects() []Project {
 		log.Printf("could not query database GetProjects: %v", err)
 		return []Project{}
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		project = Project{}
@@ -444,6 +447,8 @@ func GetProjectsForDate(date time.Time) map[int]string {
 		log.Printf("could not query database GetProjectsForDate: %v", err)
 		return map[int]string{}
 	}
+	defer rows.Close()
+
 	projectids := map[int]string{}
 	for rows.Next() {
 		var id int
@@ -490,6 +495,8 @@ func GetLocations() []Location {
 		log.Printf("could not query database GetLocations: %v", err)
 		return []Location{}
 	}
+	defer rows.Close()
+
 	locations := []Location{}
 	for rows.Next() {
 		var location Location
@@ -531,6 +538,8 @@ func GetLocationsForDate(date time.Time) map[int]string {
 		log.Printf("could not query database GetLocationsForDate: %v", err)
 		return map[int]string{}
 	}
+	defer rows.Close()
+
 	locationids := map[int]string{}
 	for rows.Next() {
 		var id int
@@ -567,6 +576,8 @@ func GetLocationDaysForMonth(month time.Time) []LocationDays {
 		log.Printf("could not query database GetLocationDaysForMonth: %v", err)
 		return []LocationDays{}
 	}
+	defer rows.Close()
+
 	locationDays := []LocationDays{}
 	for rows.Next() {
 		location := LocationDays{Location{ID: 0, Name: ""}, 0}
@@ -598,6 +609,8 @@ func GetLocationDaysForYear(year time.Time) []LocationDays {
 		log.Printf("could not query database GetLocationDaysForYear: %v", err)
 		return []LocationDays{}
 	}
+	defer rows.Close()
+
 	locationDays := []LocationDays{}
 	for rows.Next() {
 		location := LocationDays{Location{ID: 0, Name: ""}, 0}
