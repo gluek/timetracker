@@ -81,6 +81,8 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	statement.Close()
+
 	if tableCount == 0 {
 		log.Println("New table, set db version")
 		setDBVersion(dbVersion)
