@@ -238,7 +238,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 			<div class="card bg-base-300 shadow">
 				<div class="card-body">
 					for _, timeframe := range tfList {
-						<form id={ "record" + strconv.Itoa(timeframe.ID) } hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+						<form id={ "record" + strconv.Itoa(timeframe.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 							<div class="flex flex-row justify-center space-x-1">
 								<input class="input input-sm rounded bg-neutral text-neutral-content" type="hidden" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
 								<input
