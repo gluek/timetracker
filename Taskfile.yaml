@@ -36,3 +36,8 @@ tasks:
     deps: [css, gen, winres]
     cmds:
       - go build -ldflags "-w -s -H=windowsgui" .
+  release:
+    desc: Tag commit and push to remote
+    cmds:
+      - git tag {{.CLI_ARGS}}
+      - git push origin tag {{.CLI_ARGS}}

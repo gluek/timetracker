@@ -102,8 +102,12 @@ func fmtDuration(d time.Duration) string {
 	d = d.Round(time.Minute)
 	h := d / time.Hour
 	d -= h * time.Hour
-	m := d.Abs() / time.Minute
-	return fmt.Sprintf("%02dh%02dm", h, m)
+	m := d / time.Minute
+	sign := ""
+	if d < 0 {
+		sign = "-"
+	}
+	return fmt.Sprintf("%s%02dh%02dm", sign, h.Abs(), m.Abs())
 }
 
 templ PageHeader(contents templ.Component) {

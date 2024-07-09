@@ -7,6 +7,7 @@
 - disabled enter button for create records form
 - improved visuals for daily overview on month page
 - frontend now handles time formatting
+- removed seconds from daily summary
 
 ---
 
