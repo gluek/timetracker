@@ -71,6 +71,7 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error change date records: %v", err)
+		return
 	}
 	activeDate, err = time.Parse("2006-01-02", r.PathValue("date"))
 	if err != nil {
@@ -89,6 +90,7 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render records: %v", err)
+		return
 	}
 }
 func RecordsHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +103,7 @@ func RecordsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render records: %v", err)
+		return
 	}
 }
 
@@ -109,6 +112,7 @@ func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render projects: %v", err)
+		return
 	}
 }
 
@@ -124,6 +128,7 @@ func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render monthly summary: %v", err)
+		return
 	}
 }
 
@@ -138,6 +143,7 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render yearly summary: %v", err)
+		return
 	}
 }
 
@@ -235,6 +241,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error create project: %v", err)
+		return
 	}
 	var project = database.Project{
 		ID:       0, // not used
