@@ -206,7 +206,8 @@ func GetProjectHoursYear(year time.Time) []database.ProjectHours {
 func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursLocationsDaily {
 	var dailyEntries []database.ProjectHoursLocationsDaily
 	lastDayMonth := cal.MonthEnd(month)
-	for day := range lastDayMonth.Day() {
+	days := lastDayMonth.Day()
+	for day := range days {
 		dayTime, err := time.Parse("2006-01-02", fmt.Sprintf("%s-%02d", month.Format("2006-01"), day+1))
 		if err != nil {
 			log.Println(err)

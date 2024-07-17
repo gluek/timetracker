@@ -69,6 +69,7 @@ func Connect() {
 		log.Fatal(err)
 	}
 	log.Println("Connected to Database")
+	DB.SetMaxOpenConns(2)
 
 	// Check if new database
 	var tableCount int
@@ -109,7 +110,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created timeframes Table")
+	log.Println("Created timeframes Table if necessary")
 	statement.Close()
 
 	tableVars = `(
@@ -127,7 +128,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created projects Table")
+	log.Println("Created projects Table if necessary")
 	statement.Close()
 
 	tableVars = `(
@@ -143,7 +144,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created workplaces Table")
+	log.Println("Created workplaces Table if necessary")
 	statement.Close()
 
 	if getDBVersion() != dbVersion {
@@ -367,12 +368,13 @@ func GetProjectByID(id int) (Project, error) {
 	if err != nil {
 		return Project{}, err
 	}
-	defer statement.Close()
 
-	err = statement.QueryRow(id).Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+	row := statement.QueryRow(id)
+	err = row.Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
 	if err != nil {
 		return Project{}, err
 	}
+	statement.Close()
 	return project, nil
 }
 
@@ -441,7 +443,6 @@ func GetProjectsForDate(date time.Time) map[int]string {
 		log.Printf("could not prepare statement GetProjectsForDate: %v", err)
 		return map[int]string{}
 	}
-	defer statement.Close()
 
 	rows, err := statement.Query(date.Format("2006-01-02"))
 	if err != nil {
@@ -449,6 +450,8 @@ func GetProjectsForDate(date time.Time) map[int]string {
 		return map[int]string{}
 	}
 	defer rows.Close()
+
+	statement.Close()
 
 	projectids := map[int]string{}
 	for rows.Next() {

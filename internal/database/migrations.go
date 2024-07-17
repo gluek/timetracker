@@ -22,6 +22,7 @@ func Migrations() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer statement.Close()
 		setDBVersion(1)
 		log.Println("Finished")
 		fallthrough
@@ -77,6 +78,7 @@ func getDBVersion() int {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer statement.Close()
 	err = statement.QueryRow().Scan(&version)
 	if err != nil {
 		log.Fatal(err)
@@ -89,6 +91,7 @@ func setDBVersion(version int) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer statement.Close()
 	_, err = statement.Exec()
 	if err != nil {
 		log.Fatal(err)
