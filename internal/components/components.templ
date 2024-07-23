@@ -10,7 +10,7 @@ import (
 	"strings"
 ) 
 
-var version string = "v0.5.5"
+var version string = "v0.5.4"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -178,8 +178,9 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, locat
 templ CreateRecord(projectList []database.Project, locationList []database.Location, currentDate time.Time) {
 	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
 		<div class="card-body">
-			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms" hx-preserve>
-				<div class="flex justify-center">
+			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+				<div class="flex justify-center space-x-5">
+					<button class="btn btn-neutral animate-none self-center text-2xl" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">&#8678;</button>
 					<input
 						class="input input-lg bg-neutral text-neutral-content"
 						hx-post="/api/currentdate"
@@ -189,6 +190,7 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 						id="dateofrecord"
 						value={ currentDate.Format("2006-01-02") }
 					/>
+					<button class="btn btn-neutral animate-none self-center text-2xl" hx-post="/api/currentdate/right" hx-target="#content-section" hx-swap="innerHTML settle:0ms">&#8680;</button>
 				</div>
 				<div class="flex flex-row content-center justify-center space-x-1">
 					<label class="form-control w-full max-w-xs">
@@ -646,6 +648,6 @@ templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, over
 
 templ Quickbar() {
 	<div class="flex flex-row pt-2">
-		<button class="btn btn-outline btn-sm w-min" hx-post="/api/quickbar/vacation" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Vacation</button>
+		<button class="btn btn-outline btn-sm w-min animate-none" hx-post="/api/quickbar/vacation" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Vacation</button>
 	</div>
 }

@@ -154,11 +154,17 @@ func ChangeDate(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error change date: %v", err)
 		return
 	}
-	activeDate, err = time.Parse("2006-01-02", r.FormValue("dateofrecord"))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("error change date: %v", err)
-		return
+	if r.PathValue("button") == "left" {
+		activeDate = activeDate.Add(-24 * time.Hour)
+	} else if r.PathValue("button") == "right" {
+		activeDate = activeDate.Add(24 * time.Hour)
+	} else {
+		activeDate, err = time.Parse("2006-01-02", r.FormValue("dateofrecord"))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error change date: %v", err)
+			return
+		}
 	}
 	log.Printf("Date changed to %s\n", activeDate.Format("2006-01-02"))
 	RecordsPageHandler(w, r)

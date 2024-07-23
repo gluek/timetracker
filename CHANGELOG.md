@@ -4,7 +4,7 @@
 
 ### Features
 
--
+- Added change date next/previous to create record card
 
 ### Bugfix
 
