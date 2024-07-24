@@ -180,7 +180,11 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 		<div class="card-body">
 			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 				<div class="flex justify-center space-x-5">
-					<button class="btn btn-neutral animate-none self-center text-2xl" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">&#8678;</button>
+					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m-12 0L5 1m-4 4L5 9"/>
+						</svg>
+					</button>
 					<input
 						class="input input-lg bg-neutral text-neutral-content"
 						hx-post="/api/currentdate"
@@ -190,7 +194,11 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 						id="dateofrecord"
 						value={ currentDate.Format("2006-01-02") }
 					/>
-					<button class="btn btn-neutral animate-none self-center text-2xl" hx-post="/api/currentdate/right" hx-target="#content-section" hx-swap="innerHTML settle:0ms">&#8680;</button>
+					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/right" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+						</svg>
+					</button>
 				</div>
 				<div class="flex flex-row content-center justify-center space-x-1">
 					<label class="form-control w-full max-w-xs">
