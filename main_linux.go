@@ -55,19 +55,10 @@ func main() {
 		log.Printf("error add mime: %v", err)
 	}
 
-	if os.Getenv("TIMETRACKER_DEV") != "1" {
-		go func() {
-			log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
-			if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
-				log.Printf("error listening: %v", err)
-			}
-		}()
-	} else {
-		log.Printf("Running in DEBUG Mode")
-		log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
-		if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
-			log.Printf("error listening: %v", err)
-		}
+	log.Printf("Running in DEBUG Mode")
+	log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
+	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
+		log.Printf("error listening: %v", err)
 	}
 }
 
@@ -78,7 +69,7 @@ func viperInit() {
 	viper.SetDefault("logfile", false)
 	viper.SetDefault("decimal_separator", ".")
 
-	viper.SetConfigName("timetracker")
+	viper.SetConfigName("timetrackerconf")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 
@@ -87,7 +78,7 @@ func viperInit() {
 			viper.SafeWriteConfig()
 			log.Println("Config file not found, creating...")
 		} else {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 }
