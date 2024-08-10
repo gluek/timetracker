@@ -2,6 +2,10 @@ package components
 
 import "github.com/gluek/timetracker/internal/database"
 
+import debugImport() {
+    <div></div>
+}
+
 script pieChart(projects []database.ProjectHours) {
     var chartDom = document.getElementById('piechart');
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
