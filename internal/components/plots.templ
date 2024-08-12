@@ -2,14 +2,9 @@ package components
 
 import "github.com/gluek/timetracker/internal/database"
 
-templ debugImport() {
-	<div></div>
-}
-
-
 templ pieChart(projects []database.ProjectHours) {
 	@templ.JSONScript("projectData", projects)
-    <script type="text/javascript">
+	<script type="text/javascript">
     var chartDom = document.getElementById('piechart');
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         // dark mode

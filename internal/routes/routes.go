@@ -12,6 +12,7 @@ func RegisterOtherRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /month", handlers.MonthlySummaryHandler)
 	mux.HandleFunc("GET /year", handlers.YearlySummaryHandler)
 	mux.HandleFunc("POST /api/monthlysummary", handlers.MonthlySummaryChangeMonth)
+	mux.HandleFunc("GET /api/monthlysummary/export", handlers.MonthlySummaryDownload)
 	mux.HandleFunc("POST /api/yearlysummary", handlers.YearlySummaryChangeYear)
 	mux.HandleFunc("POST /api/clipboard", handlers.MonthlySummaryToClipboard)
 	mux.HandleFunc("POST /api/quickbar/{name}", handlers.Quickbar)

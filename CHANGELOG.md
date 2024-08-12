@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.5
+
+### Features
+
+- Export button for Monthly Summary
+- Support for Linux
+
+---
+
 ## v0.5.4
 
 ### Features
