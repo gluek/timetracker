@@ -1,14 +1,14 @@
 package components
 
 import (
-	"strconv"
+	"fmt"
 	"github.com/gluek/timetracker/internal/database"
 	"github.com/spf13/viper"
-	"time"
-	"fmt"
 	"log"
+	"strconv"
 	"strings"
-) 
+	"time"
+)
 
 var version string = "v0.5.4"
 
@@ -162,12 +162,12 @@ templ DarkModeSwitch() {
 }
 
 templ HomePage(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
-currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
+	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	@PageHeader(Records(tfList, projectList, locationList, currentDate, workDurationDaily, workDeltaWeek, overtime))
 }
 
 templ Records(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
- currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
+	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
 		@CreateRecord(projectList, locationList, currentDate)
 		@RecordList(tfList, projectList, locationList)
@@ -182,7 +182,7 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 				<div class="flex justify-center space-x-5">
 					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m-12 0L5 1m-4 4L5 9"/>
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m-12 0L5 1m-4 4L5 9"></path>
 						</svg>
 					</button>
 					<input
@@ -196,7 +196,7 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 					/>
 					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/right" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"></path>
 						</svg>
 					</button>
 				</div>
@@ -593,6 +593,7 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 					}
 				</tbody>
 			</table>
+			<a class="btn btn-success" href="/api/monthlysummary/export" download>Export</a>
 		</div>
 	</div>
 }

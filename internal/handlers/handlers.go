@@ -132,6 +132,18 @@ func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func MonthlySummaryDownload(w http.ResponseWriter, r *http.Request) {
+	projects := GetProjectsHoursOverview(activeMonthSummary)
+	w.Header().Add("Content-Type", `text/csv; charset=utf-8`)
+	w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s_summary.csv", activeMonthSummary.Format("2006_01")))
+	w.Write([]byte("Date;Hours;Projects;Workplaces\n"))
+	for _, v := range projects {
+		if v.Hours != "00.00" {
+			w.Write([]byte(fmt.Sprintf("%s;%s;%s;%s\n", v.Date, v.Hours, v.Projects, v.Locations)))
+		}
+	}
+}
+
 func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	component := components.YearlySummary(
 		activeYearSummary,

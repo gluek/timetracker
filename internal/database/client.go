@@ -43,10 +43,10 @@ type ProjectHours struct {
 }
 
 type ProjectHoursLocationsDaily struct {
-	Date      string   `json:"date"`
-	Hours     string   `json:"workhours"`
-	Projects  []string `json:"projects"`
-	Locations []string `json:"locations"`
+	Date      string   `json:"date" csv:"date"`
+	Hours     string   `json:"workhours" csv:"Hours"`
+	Projects  []string `json:"projects" csv:"Projects"`
+	Locations []string `json:"locations" csv:"Workplace"`
 }
 
 type Location struct {
