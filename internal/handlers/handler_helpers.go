@@ -237,25 +237,40 @@ func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursLocationsD
 }
 
 func GetOvertimeHoursUntilDay(year time.Time, day time.Time) database.ProjectHours {
-	projects := database.GetProjects()
+	//projects := database.GetProjects()
 	total, err := time.ParseDuration("0s")
 	if err != nil {
 		log.Println(err)
 	}
-	for _, project := range projects {
-		records := database.GetRecordsForProjectAndYearUntilToday(year, day, project.ID)
-		duration := workTotalForRecords(records)
-		total += duration
-	}
+	//for _, project := range projects {
+	//records := database.GetRecordsForProjectAndYearUntilToday(year, day, project.ID)
+	records := database.GetRecordsUntilDay(day)
+	duration := workTotalForRecords(records)
+	total += duration
+	//}
 	workTotalTarget, err := time.ParseDuration(viper.GetString("worktime_per_week"))
 	if err != nil {
 		log.Println(err)
 	}
+	// TODO: Consider overtime offset only once
+	// TODO: Consider hours from previous year
+	// TODO: Write Work Hours per Day into Records? Extra days table?
 	offsetOvertime, err := time.ParseDuration(viper.GetString("offset_overtime"))
 	if err != nil {
 		log.Println(err)
 	}
-	overTimeHours := offsetOvertime.Hours() + total.Hours() - float64(GetWorkDaysUntilDay(year, day))*workTotalTarget.Hours()/5
+
+	// Calculate work days
+	years := database.GetYears()
+	workdays := 0
+	for _, yearDB := range years {
+		if yearDB <= year.Year() {
+			year_as_time, _ := time.Parse("2006", fmt.Sprintf("%d", yearDB))
+			workdays += GetWorkDaysForYearUntilDay(year_as_time, day)
+		}
+	}
+
+	overTimeHours := offsetOvertime.Hours() + total.Hours() - float64(workdays)*workTotalTarget.Hours()/5
 	return database.ProjectHours{
 		Project: database.Project{Activity: "", Details: "", Name: "Overtime"},
 		Hours:   fmt.Sprintf("%.2f", overTimeHours),
@@ -272,13 +287,14 @@ func GetWorkDays(month time.Time) int {
 	}
 }
 
-func GetWorkDaysUntilDay(year time.Time, day time.Time) int {
+// If year is smaller than year of day, work days for whole year are returned
+func GetWorkDaysForYearUntilDay(year time.Time, day time.Time) int {
 	startOfYear, err := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year.Year()))
 	if err != nil {
 		log.Println(err)
 	}
 	var endDate time.Time
-	if year.Year() < time.Now().Year() {
+	if year.Year() < day.Year() {
 		endDate, err = time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year.Year()))
 		if err != nil {
 			log.Println(err)

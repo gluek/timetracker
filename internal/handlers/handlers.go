@@ -47,7 +47,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		workDeltaWeek(workTotalWeek(activeDate), activeDate), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err := component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render homepage: %v", err)
 	}
 }
@@ -62,7 +62,7 @@ func RecordsPageHandler(w http.ResponseWriter, r *http.Request) {
 		workDeltaWeek(workTotalWeek(activeDate), activeDate), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err := component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render records: %v", err)
 	}
 }
@@ -88,7 +88,7 @@ func RecordsPageDateChangeHandler(w http.ResponseWriter, r *http.Request) {
 		workDeltaWeek(workTotalWeek(activeDate), activeDate), GetOvertimeHoursUntilDay(activeDate, activeDate))
 	err = component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render records: %v", err)
 		return
 	}
@@ -101,7 +101,7 @@ func RecordsHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	err := component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render records: %v", err)
 		return
 	}
@@ -110,7 +110,7 @@ func RecordsHandler(w http.ResponseWriter, r *http.Request) {
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	err := components.Projects(database.GetProjects()).Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render projects: %v", err)
 		return
 	}
@@ -126,7 +126,7 @@ func MonthlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	err := component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render monthly summary: %v", err)
 		return
 	}
@@ -153,7 +153,7 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	err := component.Render(r.Context(), w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render yearly summary: %v", err)
 		return
 	}

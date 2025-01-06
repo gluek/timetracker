@@ -111,9 +111,9 @@ func getlanternSysTray() {
 
 		go func() {
 			<-mQuitOrig.ClickedCh
-			fmt.Println("Requesting quit")
+			log.Println("Requesting quit")
 			systray.Quit()
-			fmt.Println("Finished quitting")
+			log.Println("Finished quitting")
 		}()
 
 		go func() {

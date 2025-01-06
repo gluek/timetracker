@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.6
+
+### Bugfix
+
+- Superfluous HTTP header error
+- fixed overtime calculation across years
+
+---
+
 ## v0.5.5
 
 ### Features

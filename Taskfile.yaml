@@ -36,6 +36,11 @@ tasks:
     deps: [css, gen, winres]
     cmds:
       - go build -ldflags "-w -s -H=windowsgui" .
+  build-debug:
+    desc: Run the application
+    deps: [css, gen, winres]
+    cmds:
+      - go build -ldflags "-H=windowsgui" .
   release:
     desc: Tag commit and push to remote
     cmds:

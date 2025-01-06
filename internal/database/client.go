@@ -275,6 +275,16 @@ func GetRecordsForDate(date time.Time) []Timeframe {
 	return timeframes
 }
 
+func GetRecordsUntilDay(day time.Time) []Timeframe {
+	statement := "SELECT * FROM timeframes WHERE date<=date(?);"
+	timeframes, err := getTimeframes(statement, day.Format("2006-01-02"))
+	if err != nil {
+		log.Printf("error GetRecordsForDate: %v", err)
+		return []Timeframe{}
+	}
+	return timeframes
+}
+
 func GetRecordsForProjectAndMonth(year int, month int, projectid int) []Timeframe {
 	statement := "SELECT * FROM timeframes WHERE year=? AND month=? AND projectid=?"
 	timeframes, err := getTimeframes(statement, year, month, projectid)
@@ -626,6 +636,34 @@ func GetLocationDaysForYear(year time.Time) []LocationDays {
 		locationDays = append(locationDays, location)
 	}
 	return locationDays
+}
+
+func GetYears() []int {
+	var years []int
+	statement, err := DB.Prepare("SELECT DISTINCT year FROM timeframes")
+	if err != nil {
+		log.Printf("could not prepare statement GetYears: %v", err)
+		return []int{}
+	}
+	defer statement.Close()
+
+	rows, err := statement.Query()
+	if err != nil {
+		log.Printf("could not query database GetYears: %v", err)
+		return []int{}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var year int
+		err = rows.Scan(&year)
+		if err != nil {
+			log.Printf("could not scan rows GetYears: %v", err)
+			return []int{}
+		}
+		years = append(years, year)
+	}
+	return years
 }
 
 func GetVersion() {
