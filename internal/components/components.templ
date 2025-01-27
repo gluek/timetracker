@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var version string = "v0.5.6"
+var version string = "v0.5.7"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -220,7 +220,9 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 						<div class="flex flex-row space-x-1">
 							<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
 								for _, project := range projectList {
-									<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+									if project.IsDeleted==0 {
+										<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+									}
 								}
 							</select>
 						</div>
@@ -292,7 +294,9 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 										if timeframe.ProjectID == project.ID {
 											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
 										} else {
-											<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+											if project.IsDeleted==0{
+												<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+											}
 										}
 									}
 								</select>
@@ -383,44 +387,46 @@ templ ProjectsList(projectList []database.Project) {
 		<div id="timetrackerList" class="card bg-base-300 shadow">
 			<div class="card-body">
 				for _, project := range projectList[4:] {
-					<form id={ "project" + strconv.Itoa(project.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
-						<div class="flex flex-row justify-center space-x-1">
-							<input
-								class="input input-sm rounded bg-neutral text-neutral-content"
-								type="text"
-								id="activity"
-								name="activity"
-								value={ project.Activity }
-								hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
-								hx-target="#projects"
-								hx-swap="none"
-								hx-trigger="change delay:100ms"
-							/>
-							<input
-								class="input input-sm rounded bg-neutral text-neutral-content"
-								type="text"
-								id="details"
-								name="details"
-								value={ project.Details }
-								hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
-								hx-target="#projects"
-								hx-swap="none"
-								hx-trigger="change delay:100ms"
-							/>
-							<input
-								class="input input-sm rounded bg-neutral text-neutral-content"
-								type="text"
-								id="projectName"
-								name="projectName"
-								value={ project.Name }
-								hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
-								hx-target="#projects"
-								hx-swap="none"
-								hx-trigger="change delay:100ms"
-							/>
-							<button class="btn btn-error btn-sm animate-none" hx-delete={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML settle:0ms">&#x2717;</button>
-						</div>
-					</form>
+					if project.IsDeleted == 0 {
+						<form id={ "project" + strconv.Itoa(project.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
+							<div class="flex flex-row justify-center space-x-1">
+								<input
+									class="input input-sm rounded bg-neutral text-neutral-content"
+									type="text"
+									id="activity"
+									name="activity"
+									value={ project.Activity }
+									hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+									hx-target="#projects"
+									hx-swap="none"
+									hx-trigger="change delay:100ms"
+								/>
+								<input
+									class="input input-sm rounded bg-neutral text-neutral-content"
+									type="text"
+									id="details"
+									name="details"
+									value={ project.Details }
+									hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+									hx-target="#projects"
+									hx-swap="none"
+									hx-trigger="change delay:100ms"
+								/>
+								<input
+									class="input input-sm rounded bg-neutral text-neutral-content"
+									type="text"
+									id="projectName"
+									name="projectName"
+									value={ project.Name }
+									hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+									hx-target="#projects"
+									hx-swap="none"
+									hx-trigger="change delay:100ms"
+								/>
+								<button class="btn btn-error btn-sm animate-none" hx-delete={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML settle:0ms">&#x2717;</button>
+							</div>
+						</form>
+					}
 				}
 			</div>
 		</div>

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.7
+
+### Features
+
+- Deleted projects are only hidden from projects page through is_deleted flag
+
 ## v0.5.6
 
 ### Bugfix

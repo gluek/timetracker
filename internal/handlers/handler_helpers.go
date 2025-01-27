@@ -237,23 +237,20 @@ func GetProjectsHoursOverview(month time.Time) []database.ProjectHoursLocationsD
 }
 
 func GetOvertimeHoursUntilDay(year time.Time, day time.Time) database.ProjectHours {
-	//projects := database.GetProjects()
 	total, err := time.ParseDuration("0s")
 	if err != nil {
 		log.Println(err)
 	}
-	//for _, project := range projects {
-	//records := database.GetRecordsForProjectAndYearUntilToday(year, day, project.ID)
+
 	records := database.GetRecordsUntilDay(day)
 	duration := workTotalForRecords(records)
 	total += duration
-	//}
+
 	workTotalTarget, err := time.ParseDuration(viper.GetString("worktime_per_week"))
 	if err != nil {
 		log.Println(err)
 	}
-	// TODO: Consider overtime offset only once
-	// TODO: Consider hours from previous year
+
 	// TODO: Write Work Hours per Day into Records? Extra days table?
 	offsetOvertime, err := time.ParseDuration(viper.GetString("offset_overtime"))
 	if err != nil {

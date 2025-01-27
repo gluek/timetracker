@@ -67,6 +67,26 @@ func Migrations() {
 		setDBVersion(2)
 		log.Println("Finished")
 		fallthrough
+	case 2:
+		log.Println("Starting Migration to Version 3")
+
+		addColumn, err := DB.Prepare("ALTER TABLE projects ADD is_deleted INT DEFAULT 0 NOT NULL;")
+		if err != nil {
+			DB.Close()
+			panic(err)
+		}
+		defer addColumn.Close()
+
+		_, err = addColumn.Exec()
+		if err != nil {
+			DB.Close()
+			log.Println("Migration aborted - Database may be corrupted")
+			panic(err)
+		}
+
+		setDBVersion(3)
+		log.Println("Finished")
+		fallthrough
 	default:
 		log.Printf("DB Version: %d", getDBVersion())
 	}

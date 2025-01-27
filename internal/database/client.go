@@ -11,7 +11,7 @@ import (
 )
 
 var DB *sql.DB
-var dbVersion int = 2
+var dbVersion int = 3
 var err error
 var (
 	pwd, _ = os.Getwd()
@@ -31,10 +31,11 @@ type Timeframe struct {
 }
 
 type Project struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Activity string `json:"activity"`
-	Details  string `json:"details"`
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Activity  string `json:"activity"`
+	Details   string `json:"details"`
+	IsDeleted int    `json:"isDeleted"`
 }
 
 type ProjectHours struct {
@@ -380,7 +381,7 @@ func GetProjectByID(id int) (Project, error) {
 	}
 
 	row := statement.QueryRow(id)
-	err = row.Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+	err = row.Scan(&project.ID, &project.Name, &project.Activity, &project.Details, &project.IsDeleted)
 	if err != nil {
 		return Project{}, err
 	}
@@ -392,7 +393,7 @@ func GetProjects() []Project {
 	var projects []Project = []Project{}
 	var project Project
 
-	statement, err := DB.Prepare("SELECT * FROM projects")
+	statement, err := DB.Prepare("SELECT * FROM projects;")
 	if err != nil {
 		log.Printf("could not prepare statement GetProjects: %v", err)
 		return []Project{}
@@ -408,7 +409,7 @@ func GetProjects() []Project {
 
 	for rows.Next() {
 		project = Project{}
-		err = rows.Scan(&project.ID, &project.Name, &project.Activity, &project.Details)
+		err = rows.Scan(&project.ID, &project.Name, &project.Activity, &project.Details, &project.IsDeleted)
 		if err != nil {
 			log.Printf("could not scan rows GetProjects: %v", err)
 			return []Project{}
@@ -433,8 +434,9 @@ func UpdateProject(project Project) error {
 	return nil
 }
 
+// TODO Modify function to hide project via flag instead of deletion --> preserve entries for old projects
 func DeleteProject(id int) error {
-	statement, err := DB.Prepare("DELETE FROM projects WHERE id=?")
+	statement, err := DB.Prepare("UPDATE projects SET is_deleted=1 WHERE id=?;")
 	if err != nil {
 		return err
 	}
