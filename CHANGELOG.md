@@ -6,6 +6,10 @@
 
 - Deleted projects are only hidden from projects page through is_deleted flag
 
+### Bugfix
+
+- Default decimal separator change to ',' to write a proper default config
+
 ## v0.5.6
 
 ### Bugfix

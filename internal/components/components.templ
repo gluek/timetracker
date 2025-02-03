@@ -124,7 +124,8 @@ templ PageHeader(contents templ.Component) {
 		</head>
 		<body>
 			<div class="flex flex-col">
-				<div class="navbar border-b shadow">
+				//default navbar
+				<div class="navbar hidden border-b shadow sm:block">
 					<div class="container mx-auto max-w-[1000px] grow">
 						<div class="hero-content h-20">
 							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
@@ -136,6 +137,23 @@ templ PageHeader(contents templ.Component) {
 						<div class="divider divider-horizontal"></div>
 						<button class="btn btn-ghost text-xl" hx-get="/month" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Month</button>
 						<button class="btn btn-ghost text-xl" hx-get="/year" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Year</button>
+					</div>
+				</div>
+				// mobile navbar
+				<div class="navbar block border-b shadow sm:hidden">
+					<div class="flex w-full flex-col">
+						<div class="hero-content h-14">
+							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
+							<br>
+							<p class="primary-content self-end">{ version }</p>
+						</div>
+						<div class="flex w-full flex-row">
+							<button class="btn btn-ghost flex-1 text-xl" hx-get="/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Rec</button>
+							<button class="btn btn-ghost flex-1 text-xl" hx-get="/projects" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Proj</button>
+							<div class="divider divider-horizontal"></div>
+							<button class="btn btn-ghost flex-1 text-xl" hx-get="/month" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Month</button>
+							<button class="btn btn-ghost flex-1 text-xl" hx-get="/year" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Year</button>
+						</div>
 					</div>
 				</div>
 				<div class="container mx-auto max-w-[1000px] grow">
@@ -291,6 +309,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 									hx-trigger="change delay:400ms"
 								>
 									for _, project := range projectList {
+										//TODO: Change color of deleted projects in drop down menu and throughtout other UI elements
 										if timeframe.ProjectID == project.ID {
 											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
 										} else {

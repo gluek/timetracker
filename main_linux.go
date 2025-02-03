@@ -67,7 +67,7 @@ func viperInit() {
 	viper.SetDefault("worktime_per_week", "39h0m0s")
 	viper.SetDefault("offset_overtime", "0h0m0s")
 	viper.SetDefault("logfile", false)
-	viper.SetDefault("decimal_separator", ".")
+	viper.SetDefault("decimal_separator", ",")
 
 	viper.SetConfigName("timetrackerconf")
 	viper.SetConfigType("yaml")
