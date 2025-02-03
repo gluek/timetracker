@@ -125,7 +125,7 @@ templ PageHeader(contents templ.Component) {
 		<body>
 			<div class="flex flex-col">
 				//default navbar
-				<div class="navbar hidden border-b shadow sm:block">
+				<div class="navbar hidden border-b shadow md:flex">
 					<div class="container mx-auto max-w-[1000px] grow">
 						<div class="hero-content h-20">
 							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
@@ -140,11 +140,10 @@ templ PageHeader(contents templ.Component) {
 					</div>
 				</div>
 				// mobile navbar
-				<div class="navbar block border-b shadow sm:hidden">
+				<div class="navbar flex border-b shadow md:hidden">
 					<div class="flex w-full flex-col">
 						<div class="hero-content h-14">
 							<a class="primary-content text-5xl font-bold" href="/">TimeTracker</a>
-							<br>
 							<p class="primary-content self-end">{ version }</p>
 						</div>
 						<div class="flex w-full flex-row">
@@ -156,8 +155,8 @@ templ PageHeader(contents templ.Component) {
 						</div>
 					</div>
 				</div>
-				<div class="container mx-auto max-w-[1000px] grow">
-					<section id="content-section">
+				<div class="flex justify-center">
+					<section class="grow" id="content-section">
 						@contents
 					</section>
 				</div>
@@ -194,10 +193,10 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, locat
 }
 
 templ CreateRecord(projectList []database.Project, locationList []database.Location, currentDate time.Time) {
-	<div class="card w-min justify-self-center bg-base-300 shadow" id="timetracker">
-		<div class="card-body">
+	<div class="bg-base-300 p-2 shadow sm:card" id="timetracker">
+		<div class="sm:card-body">
 			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
-				<div class="flex justify-center space-x-5">
+				<div class="flex justify-center gap-5">
 					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m-12 0L5 1m-4 4L5 9"></path>
@@ -218,24 +217,24 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 						</svg>
 					</button>
 				</div>
-				<div class="flex flex-row content-center justify-center space-x-1">
-					<label class="form-control w-full max-w-xs">
+				<div class="flex flex-row flex-wrap content-center justify-center gap-1">
+					<label class="form-control max-w-24">
 						<div class="label">
 							<span class="label-text">From:</span>
 						</div>
 						<input class="input rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
 					</label>
-					<label class="form-control w-full max-w-xs">
+					<label class="form-control max-w-24">
 						<div class="label">
 							<span class="label-text">To:</span>
 						</div>
 						<input class="input rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
 					</label>
-					<label class="form-control w-full max-w-xs">
+					<label class="form-control max-w-xs">
 						<div class="label">
 							<span class="label-text">Project:</span>
 						</div>
-						<div class="flex flex-row space-x-1">
+						<div class="flex flex-row gap-1">
 							<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
 								for _, project := range projectList {
 									if project.IsDeleted==0 {
@@ -245,17 +244,17 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 							</select>
 						</div>
 					</label>
-					<label class="form-control w-full max-w-xs">
+					<label class="form-control max-w-xs">
 						<div class="label">
 							<span class="label-text">Location:</span>
 						</div>
-						<div class="flex flex-row space-x-1">
+						<div class="flex flex-row gap-1">
 							<select class="select rounded bg-neutral text-neutral-content" id="location" name="location">
 								for _, location := range locationList {
 									<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
 								}
 							</select>
-							<button class="btn btn-success animate-none" type="submit" form="defaultRecord">&#x2713;</button>
+							<button class="btn btn-success w-32 animate-none md:w-fit" type="submit" form="defaultRecord">&#x2713;</button>
 						</div>
 					</label>
 				</div>
@@ -268,11 +267,11 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 templ RecordList(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location) {
 	<div id="record-list">
 		if len(tfList) > 0 {
-			<div class="card bg-base-300 shadow">
-				<div class="card-body">
+			<div class="bg-base-300 shadow sm:card">
+				<div class="flex flex-col gap-4 p-2 sm:card-body md:gap-1">
 					for _, timeframe := range tfList {
 						<form id={ "record" + strconv.Itoa(timeframe.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
-							<div class="flex flex-row justify-center space-x-1">
+							<div class="flex flex-row justify-center gap-1">
 								<input class="input input-sm rounded bg-neutral text-neutral-content" type="hidden" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
 								<input
 									class="input input-sm rounded bg-neutral text-neutral-content"
@@ -320,7 +319,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 									}
 								</select>
 								<select
-									class="select select-sm rounded bg-neutral text-neutral-content"
+									class="select select-sm hidden rounded bg-neutral text-neutral-content sm:block"
 									id="location"
 									name="location"
 									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
@@ -349,8 +348,8 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 
 templ dailySummary(workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	<div id="summary-day">
-		<div class="card bg-base-300 shadow">
-			<div class="card-body">
+		<div class="bg-base-300 p-2 shadow sm:card">
+			<div class="sm:card-body">
 				<div class="flex flex-col">
 					<div class="text-xl">Daily Summary:</div>
 					<table class="table">
@@ -388,14 +387,14 @@ templ Projects(projectList []database.Project) {
 }
 
 templ CreateProject() {
-	<div id="projecttracker" class="card bg-base-300 shadow">
-		<form id="defaultProject" class="card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
+	<div id="projecttracker" class="bg-base-300 p-2 shadow sm:card">
+		<form id="defaultProject" class="sm:card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
 			<div class="text-xl">Add New Project:</div>
-			<div class="flex flex-row justify-center space-x-1">
+			<div class="flex flex-row flex-wrap justify-center gap-1">
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" placeholder="Activity" required/>
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="details" name="details" placeholder="Details" required/>
 				<input class="input rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" placeholder="Identifier" required/>
-				<button class="btn btn-success animate-none" type="submit" form="defaultProject">&#x2713;</button>
+				<button class="btn btn-success w-64 animate-none md:w-fit" type="submit" form="defaultProject">&#x2713;</button>
 			</div>
 		</form>
 	</div>
@@ -403,14 +402,14 @@ templ CreateProject() {
 
 templ ProjectsList(projectList []database.Project) {
 	if len(projectList) > 4 {
-		<div id="timetrackerList" class="card bg-base-300 shadow">
-			<div class="card-body">
+		<div id="timetrackerList" class="bg-base-300 p-2 shadow sm:card">
+			<div class="flex flex-col gap-4 sm:card-body md:gap-1">
 				for _, project := range projectList[4:] {
 					if project.IsDeleted == 0 {
 						<form id={ "project" + strconv.Itoa(project.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
-							<div class="flex flex-row justify-center space-x-1">
+							<div class="flex flex-row justify-center gap-1">
 								<input
-									class="input input-sm rounded bg-neutral text-neutral-content"
+									class="input input-sm hidden rounded bg-neutral text-neutral-content sm:block"
 									type="text"
 									id="activity"
 									name="activity"
@@ -421,7 +420,7 @@ templ ProjectsList(projectList []database.Project) {
 									hx-trigger="change delay:100ms"
 								/>
 								<input
-									class="input input-sm rounded bg-neutral text-neutral-content"
+									class="input input-sm hidden rounded bg-neutral text-neutral-content sm:block"
 									type="text"
 									id="details"
 									name="details"
@@ -454,9 +453,9 @@ templ ProjectsList(projectList []database.Project) {
 
 templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursLocationsDaily, locations []database.LocationDays) {
 	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
-		<div class="card bg-base-300 shadow">
-			<div class="card-body">
-				<form class="flex flex-row justify-center space-x-1" hx-post="/api/monthlysummary" hx-target="#monthly-summary" hx-select="#monthly-summary" hx-swap="outerHTML">
+		<div class="w-screen bg-base-300 p-2 shadow sm:card sm:w-fit">
+			<div class="sm:card-body">
+				<form class="flex flex-row justify-center gap-1" hx-post="/api/monthlysummary" hx-target="#monthly-summary" hx-select="#monthly-summary" hx-swap="outerHTML">
 					<select
 						class="select rounded bg-neutral text-xl text-neutral-content"
 						id="month"
@@ -499,24 +498,24 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 				<div class="text-xl">Monthly Summary:</div>
 				<table id="monthly-summary-table" class="table">
 					<thead>
-						<td>Activity:</td>
-						<td>Details:</td>
+						<td class="hidden sm:inline">Activity:</td>
+						<td class="hidden sm:inline">Details:</td>
 						<td>Name:</td>
 						<td>Work Hours:</td>
 					</thead>
 					<tbody>
 						for _, project := range projects[:4] {
 							<tr class="bg-base-200">
-								<td>{ project.Activity }</td>
-								<td>{ project.Details }</td>
+								<td class="hidden sm:inline">{ project.Activity }</td>
+								<td class="hidden sm:inline">{ project.Details }</td>
 								<td>{ project.Name }</td>
 								<td>{ project.Hours }</td>
 							</tr>
 						}
 						for _, project := range projects[4:] {
 							<tr>
-								<td>{ project.Activity }</td>
-								<td>{ project.Details }</td>
+								<td class="hidden sm:inline">{ project.Activity }</td>
+								<td class="hidden sm:inline">{ project.Details }</td>
 								<td>{ project.Name }</td>
 								<td>{ project.Hours }</td>
 							</tr>
@@ -533,8 +532,8 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 }
 
 templ WorkDays(workdays int, total database.ProjectHours) {
-	<div id="work-days" class="card bg-base-300 shadow">
-		<div class="card-body">
+	<div id="work-days" class="bg-base-300 p-2 shadow sm:card">
+		<div class="p-2 sm:card-body">
 			<table
 				id="work-days-table"
 				class="table"
@@ -564,8 +563,8 @@ templ WorkDays(workdays int, total database.ProjectHours) {
 }
 
 templ LocationsCard(locations []database.LocationDays) {
-	<div id="locations" class="card bg-base-300 shadow">
-		<div class="card-body">
+	<div id="locations" class="bg-base-300 p-2 shadow sm:card">
+		<div class="sm:card-body">
 			@Locations(locations)
 		</div>
 	</div>
@@ -589,8 +588,8 @@ templ Locations(locations []database.LocationDays) {
 }
 
 templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
-	<div id="overview-records" class="card bg-base-300 shadow">
-		<div class="card-body">
+	<div id="overview-records" class="bg-base-300 p-2 shadow sm:card">
+		<div class="sm:card-body">
 			<table class="table table-xs">
 				<thead>
 					<td>Date:</td>
@@ -626,10 +625,10 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, overtime database.ProjectHours, locations []database.LocationDays) {
 	<div id="yearly-summary" class="flex justify-center gap-5 py-5">
 		@pieChart(projects[4:])
-		<div class="card w-full bg-base-300 shadow">
-			<div class="card-body flex-row">
-				<div id="piechart" class="h-[400px] w-[500px]"></div>
-				<div class="w-[400px] self-center">
+		<div class="w-screen bg-base-300 p-2 shadow sm:card sm:w-fit">
+			<div class="flex-row flex-wrap sm:card-body">
+				<div id="piechart" class="h-[400px] sm:w-[400px]"></div>
+				<div class="self-center sm:w-[400px]">
 					<form class="flex justify-center" hx-post="/api/yearlysummary" hx-target="#yearly-summary" hx-select="#yearly-summary" hx-swap="outerHTML">
 						<select
 							class="select rounded bg-neutral text-xl text-neutral-content"
