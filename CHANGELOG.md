@@ -5,6 +5,7 @@
 ### Features
 
 - Deleted projects are only hidden from projects page through is_deleted flag
+- First optimization for mobile design
 
 ### Bugfix
 
