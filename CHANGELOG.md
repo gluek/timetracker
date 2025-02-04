@@ -6,6 +6,7 @@
 
 - Deleted projects are only hidden from projects page through is_deleted flag
 - First optimization for mobile design
+- Included weekday in create record card
 
 ### Bugfix
 

@@ -193,8 +193,11 @@ templ Records(tfList []database.Timeframe, projectList []database.Project, locat
 }
 
 templ CreateRecord(projectList []database.Project, locationList []database.Location, currentDate time.Time) {
-	<div class="bg-base-300 p-2 shadow sm:card" id="timetracker">
-		<div class="sm:card-body">
+	<div class="bg-base-300 shadow sm:card" id="timetracker">
+		<div class="flex flex-col sm:card-body">
+			<div class="flex justify-center">
+				<div class="text-xl font-bold">{ currentDate.Weekday().String() }</div>
+			</div>
 			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
 				<div class="flex justify-center gap-5">
 					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
