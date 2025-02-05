@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var version string = "v0.5.7"
+var version string = "v0.5.8"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -221,13 +221,13 @@ templ CreateRecord(projectList []database.Project, locationList []database.Locat
 					</button>
 				</div>
 				<div class="flex flex-row flex-wrap content-center justify-center gap-1">
-					<label class="form-control max-w-24">
+					<label class="form-control max-w-36">
 						<div class="label">
 							<span class="label-text">From:</span>
 						</div>
 						<input class="input rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
 					</label>
-					<label class="form-control max-w-24">
+					<label class="form-control max-w-36">
 						<div class="label">
 							<span class="label-text">To:</span>
 						</div>
