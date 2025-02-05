@@ -2384,16 +2384,16 @@ html {
   margin-right: auto;
 }
 
-.inline {
-  display: inline;
-}
-
 .flex {
   display: flex;
 }
 
 .table {
   display: table;
+}
+
+.table-cell {
+  display: table-cell;
 }
 
 .grid {
@@ -2736,8 +2736,12 @@ input {
     display: block;
   }
 
-  .sm\:inline {
-    display: inline;
+  .sm\:table-cell {
+    display: table-cell;
+  }
+
+  .sm\:w-\[1000px\] {
+    width: 1000px;
   }
 
   .sm\:w-\[400px\] {
@@ -2747,6 +2751,14 @@ input {
   .sm\:w-fit {
     width: -moz-fit-content;
     width: fit-content;
+  }
+
+  .sm\:p-2 {
+    padding: 0.5rem;
+  }
+
+  .sm\:p-5 {
+    padding: 1.25rem;
   }
 }
 

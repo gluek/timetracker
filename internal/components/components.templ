@@ -456,7 +456,7 @@ templ ProjectsList(projectList []database.Project) {
 
 templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursLocationsDaily, locations []database.LocationDays) {
 	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
-		<div class="w-screen bg-base-300 p-2 shadow sm:card sm:w-fit">
+		<div class="w-max-[650px] w-screen bg-base-300 p-2 shadow sm:card sm:w-fit">
 			<div class="sm:card-body">
 				<form class="flex flex-row justify-center gap-1" hx-post="/api/monthlysummary" hx-target="#monthly-summary" hx-select="#monthly-summary" hx-swap="outerHTML">
 					<select
@@ -501,31 +501,31 @@ templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, wo
 				<div class="text-xl">Monthly Summary:</div>
 				<table id="monthly-summary-table" class="table">
 					<thead>
-						<td class="hidden sm:inline">Activity:</td>
-						<td class="hidden sm:inline">Details:</td>
+						<td class="hidden sm:table-cell">Activity:</td>
+						<td class="hidden sm:table-cell">Details:</td>
 						<td>Name:</td>
 						<td>Work Hours:</td>
 					</thead>
 					<tbody>
 						for _, project := range projects[:4] {
 							<tr class="bg-base-200">
-								<td class="hidden sm:inline">{ project.Activity }</td>
-								<td class="hidden sm:inline">{ project.Details }</td>
+								<td class="hidden sm:table-cell">{ project.Activity }</td>
+								<td class="hidden sm:table-cell">{ project.Details }</td>
 								<td>{ project.Name }</td>
 								<td>{ project.Hours }</td>
 							</tr>
 						}
 						for _, project := range projects[4:] {
 							<tr>
-								<td class="hidden sm:inline">{ project.Activity }</td>
-								<td class="hidden sm:inline">{ project.Details }</td>
+								<td class="hidden sm:table-cell">{ project.Activity }</td>
+								<td class="hidden sm:table-cell">{ project.Details }</td>
 								<td>{ project.Name }</td>
 								<td>{ project.Hours }</td>
 							</tr>
 						}
 					</tbody>
 				</table>
-				<button class="btn btn-success animate-none" type="button" hx-post="/api/clipboard" hx-swap="none">Summary to Clipboard</button>
+				<button class="btn btn-success w-full animate-none" type="button" hx-post="/api/clipboard" hx-swap="none">Summary to Clipboard</button>
 			</div>
 		</div>
 		@WorkDays(workdays, projects[len(projects)-1])
@@ -598,7 +598,7 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 					<td>Date:</td>
 					<td>Hours:</td>
 					<td>Projects:</td>
-					<td>Work Places:</td>
+					<td class="hidden sm:table-cell">Work Places:</td>
 				</thead>
 				<tbody>
 					for _, entry := range entries {
@@ -607,20 +607,20 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 								<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
 								<td>{ entry.Hours }</td>
 								<td>{ strings.Join(entry.Projects, ", ") }</td>
-								<td>{ strings.Join(entry.Locations, ", ") }</td>
+								<td class="hidden sm:table-cell">{ strings.Join(entry.Locations, ", ") }</td>
 							</tr>
 						} else {
 							<tr>
 								<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
 								<td>{ entry.Hours }</td>
 								<td>{ strings.Join(entry.Projects, ", ") }</td>
-								<td>{ strings.Join(entry.Locations, ", ") }</td>
+								<td class="hidden sm:table-cell">{ strings.Join(entry.Locations, ", ") }</td>
 							</tr>
 						}
 					}
 				</tbody>
 			</table>
-			<a class="btn btn-success" href="/api/monthlysummary/export" download>Export</a>
+			<a class="btn btn-success w-full" href="/api/monthlysummary/export" download>Export</a>
 		</div>
 	</div>
 }
@@ -628,10 +628,10 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, overtime database.ProjectHours, locations []database.LocationDays) {
 	<div id="yearly-summary" class="flex justify-center gap-5 py-5">
 		@pieChart(projects[4:])
-		<div class="w-screen bg-base-300 p-2 shadow sm:card sm:w-fit">
-			<div class="flex-row flex-wrap sm:card-body">
-				<div id="piechart" class="h-[400px] sm:w-[400px]"></div>
-				<div class="self-center sm:w-[400px]">
+		<div class="flex w-screen bg-base-300 shadow sm:card sm:w-[1000px] sm:p-2">
+			<div class="flex flex-row flex-wrap sm:p-5">
+				<div id="piechart" class="h-[400px] w-screen sm:w-[400px]"></div>
+				<div class="w-full p-2 sm:w-[400px]">
 					<form class="flex justify-center" hx-post="/api/yearlysummary" hx-target="#yearly-summary" hx-select="#yearly-summary" hx-swap="outerHTML">
 						<select
 							class="select rounded bg-neutral text-xl text-neutral-content"
