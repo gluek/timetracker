@@ -2731,21 +2731,105 @@ input {
     font-size: 1rem;
     line-height: 1.5rem;
   }
+}
 
+@media (min-width: 768px) {
+  .md\:card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--rounded-box, 1rem);
+  }
+
+  .md\:card:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .md\:card figure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .md\:card.image-full {
+    display: grid;
+  }
+
+  .md\:card.image-full:before {
+    position: relative;
+    content: "";
+    z-index: 10;
+    border-radius: var(--rounded-box, 1rem);
+    --tw-bg-opacity: 1;
+    background-color: var(--fallback-n,oklch(var(--n)/var(--tw-bg-opacity)));
+    opacity: 0.75;
+  }
+
+  .md\:card.image-full:before,.md\:card.image-full > * {
+    grid-column-start: 1;
+    grid-row-start: 1;
+  }
+
+  .md\:card.image-full > figure img {
+    height: 100%;
+    -o-object-fit: cover;
+       object-fit: cover;
+  }
+
+  .md\:card.image-full > .card-body {
+    position: relative;
+    z-index: 20;
+    --tw-text-opacity: 1;
+    color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
+  }
+
+  .md\:card :where(figure:first-child) {
+    overflow: hidden;
+    border-start-start-radius: inherit;
+    border-start-end-radius: inherit;
+    border-end-start-radius: unset;
+    border-end-end-radius: unset;
+  }
+
+  .md\:card :where(figure:last-child) {
+    overflow: hidden;
+    border-start-start-radius: unset;
+    border-start-end-radius: unset;
+    border-end-start-radius: inherit;
+    border-end-end-radius: inherit;
+  }
+
+  .md\:card:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .md\:card.bordered {
+    border-width: 1px;
+    --tw-border-opacity: 1;
+    border-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-border-opacity)));
+  }
+
+  .md\:card.compact .card-body {
+    padding: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .md\:card.image-full :where(figure) {
+    overflow: hidden;
+    border-radius: inherit;
+  }
+}
+
+@media (min-width: 640px) {
   .sm\:block {
     display: block;
   }
 
   .sm\:table-cell {
     display: table-cell;
-  }
-
-  .sm\:w-\[1000px\] {
-    width: 1000px;
-  }
-
-  .sm\:w-\[400px\] {
-    width: 400px;
   }
 
   .sm\:w-fit {
@@ -2755,10 +2839,6 @@ input {
 
   .sm\:p-2 {
     padding: 0.5rem;
-  }
-
-  .sm\:p-5 {
-    padding: 1.25rem;
   }
 }
 
@@ -2771,6 +2851,14 @@ input {
     display: none;
   }
 
+  .md\:w-\[1000px\] {
+    width: 1000px;
+  }
+
+  .md\:w-\[400px\] {
+    width: 400px;
+  }
+
   .md\:w-fit {
     width: -moz-fit-content;
     width: fit-content;
@@ -2778,5 +2866,9 @@ input {
 
   .md\:gap-1 {
     gap: 0.25rem;
+  }
+
+  .md\:p-5 {
+    padding: 1.25rem;
   }
 }

@@ -628,10 +628,10 @@ templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
 templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, overtime database.ProjectHours, locations []database.LocationDays) {
 	<div id="yearly-summary" class="flex justify-center gap-5 py-5">
 		@pieChart(projects[4:])
-		<div class="flex w-screen bg-base-300 shadow sm:card sm:w-[1000px] sm:p-2">
-			<div class="flex flex-row flex-wrap sm:p-5">
-				<div id="piechart" class="h-[400px] w-screen sm:w-[400px]"></div>
-				<div class="w-full p-2 sm:w-[400px]">
+		<div class="flex w-screen bg-base-300 shadow md:card sm:p-2 md:w-[1000px]">
+			<div class="flex flex-row flex-wrap md:p-5">
+				<div id="piechart" class="h-[400px] w-screen md:w-[400px]"></div>
+				<div class="w-full p-2 md:w-[400px]">
 					<form class="flex justify-center" hx-post="/api/yearlysummary" hx-target="#yearly-summary" hx-select="#yearly-summary" hx-swap="outerHTML">
 						<select
 							class="select rounded bg-neutral text-xl text-neutral-content"

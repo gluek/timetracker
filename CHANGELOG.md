@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.8
+
+### Bugfix
+
+- Layout fix for Chrome
+
 ## v0.5.7
 
 ### Features
