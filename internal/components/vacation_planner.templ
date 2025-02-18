@@ -1,0 +1,114 @@
+package components
+
+import (
+	"github.com/gluek/timetracker/internal/database"
+)
+
+templ plannerChart(records []database.Timeframe) {
+	@templ.JSONScript("recordData", records)
+	<script type="text/javascript">
+    var importData = JSON.parse(document.getElementById('recordData').textContent);
+    var dataArray = importData.slice(0,-1).map((record) => (record.date));
+    var activeYear;
+    dateNow = new Date();
+    if (dataArray.length === 0) {
+        activeYear = "" + dateNow.getFullYear()
+    } else {
+        activeYear = dataArray[0].split("-")[0]
+    };
+
+    console.log(importData);
+
+    function genData(year) {
+        const date = +echarts.time.parse(year + '-01-01');
+        const end = +echarts.time.parse(+year + 1 + '-01-01');
+        const dayTime = 3600 * 24 * 1000;
+        var data = [];
+        var entry = 0;
+        for (let time = date; time < end; time += dayTime) {
+            const dateString = echarts.time.format(time, '{yyyy}-{MM}-{dd}', false);
+            if (dataArray.includes(dateString)) {
+                entry = 1;
+            } else {
+                entry = 0;
+            };
+            data.push([
+                dateString,
+                entry
+            ]);
+        }
+        return data;
+    }
+
+    async function sendToBackend() {
+
+    }
+
+    var chartDom = document.getElementById('plannerchart');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // dark mode
+        var myChart = echarts.init(chartDom, 'dark');
+    } else {
+        var myChart = echarts.init(chartDom);
+    }
+    var option;
+    option = {
+        backgroundColor: "transparent",
+        tooltip: {},
+        visualMap: {
+            show: false,
+            type: 'piecewise',
+            min: 0,
+            max: 0.5,
+            calculable: false,
+            orient: 'vertical',
+            left: '670',
+            top: 'center',
+            inRange: {
+                color: ['#d5d8dc']
+            },
+            outOfRange: {
+                color: ['#2ecc71']
+            }
+        },
+        calendar: {
+            height: '70%',
+            width:'90%',
+            cellSize: [40, 40],
+            orient: 'horizontal',
+            range: '2024',
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    width: 3,
+                    color: 'rgba(255,255,255,1.0)'
+                }
+            },
+            dayLabel: {
+                firstDay: 1
+            },
+            yearLabel: {
+                show: false
+            },
+            itemStyle: {
+                borderWidth: 0.5
+            }
+        },
+        series: {
+            type: 'heatmap',
+            coordinateSystem: 'calendar',
+            label: {
+                show: true,
+                formatter: function (p) {
+                    const format = echarts.time.format(p.data[0], '{dd}', false);
+                    return format;
+                }
+            },
+            data: genData(activeYear)
+        }
+        
+    };
+
+    option && myChart.setOption(option);
+    </script>
+}

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var version string = "v0.5.8"
+var version string = "v0.6.0"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -137,6 +137,8 @@ templ PageHeader(contents templ.Component) {
 						<div class="divider divider-horizontal"></div>
 						<button class="btn btn-ghost text-xl" hx-get="/month" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Month</button>
 						<button class="btn btn-ghost text-xl" hx-get="/year" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Year</button>
+						<div class="divider divider-horizontal"></div>
+						<button class="btn btn-ghost text-xl" hx-get="/vacation" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Planner</button>
 					</div>
 				</div>
 				// mobile navbar
@@ -685,5 +687,13 @@ templ YearlySummary(activeYear time.Time, projects []database.ProjectHours, over
 templ Quickbar() {
 	<div class="flex flex-row pt-2">
 		<button class="btn btn-outline btn-sm w-min animate-none" hx-post="/api/quickbar/vacation" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Vacation</button>
+	</div>
+}
+
+
+templ PlannerPage(records []database.Timeframe) {
+	<div id="vacation-planner" class="flex justify-center gap-5 py-5">
+		@plannerChart(records)
+		<div id="plannerchart" class="h-[400px] w-[1400px]"></div>
 	</div>
 }

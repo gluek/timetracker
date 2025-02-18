@@ -159,6 +159,16 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PlannerPageHandler(w http.ResponseWriter, r *http.Request) {
+	records := database.GetRecordsForProjectAndYear(activeYearSummary, 2)
+	component := components.PlannerPage(records)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		log.Printf("error render planner page: %v", err)
+		return
+	}
+}
+
 func ChangeDate(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
