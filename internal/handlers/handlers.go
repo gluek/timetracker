@@ -385,6 +385,7 @@ func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {
 	datetimeDate, _ := time.Parse("2006-01-02", clickedDate)
 	vacationRecords := database.GetRecordsForProjectAndDate(datetimeDate, 2)
 	if len(vacationRecords) > 0 {
+		log.Println("Deleted Vacation Records:", len(vacationRecords))
 		for _, record := range vacationRecords {
 			database.DeleteRecord(record.ID)
 		}
@@ -413,6 +414,7 @@ func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Fatal(err)
 		}
+		log.Printf("Created Record - From: %s, To: %s, ProjectID: %d, LocationID: %d\n", timeframe.Start, timeframe.End, timeframe.ProjectID, timeframe.LocationID)
 	}
 	data := convertTimeframesForPlanner(database.GetRecordsForProjectAndYear(activeYearSummary, 2))
 	w.Header().Set("Content-Type", "application/json")
