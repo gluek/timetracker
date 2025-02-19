@@ -691,9 +691,9 @@ templ Quickbar() {
 }
 
 
-templ PlannerPage(records []database.Timeframe) {
+templ PlannerPage(entries []database.PlannerEntry) {
 	<div id="vacation-planner" class="flex justify-center gap-5 py-5">
-		@plannerChart(records)
+		@plannerChart(entries)
 		<div id="plannerchart" class="h-[400px] w-[1400px]"></div>
 	</div>
 }

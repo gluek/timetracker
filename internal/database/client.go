@@ -60,6 +60,11 @@ type LocationDays struct {
 	Days int `json:"days"`
 }
 
+type PlannerEntry struct {
+	Date    string `json:"date"`
+	DayType int    `json:"type"`
+}
+
 type Config struct {
 	DailyHours time.Duration
 }
@@ -279,6 +284,16 @@ func GetRecordsForDate(date time.Time) []Timeframe {
 func GetRecordsUntilDay(day time.Time) []Timeframe {
 	statement := "SELECT * FROM timeframes WHERE date<=date(?);"
 	timeframes, err := getTimeframes(statement, day.Format("2006-01-02"))
+	if err != nil {
+		log.Printf("error GetRecordsForDate: %v", err)
+		return []Timeframe{}
+	}
+	return timeframes
+}
+
+func GetRecordsForProjectAndDate(date time.Time, projectid int) []Timeframe {
+	statement := "SELECT * FROM timeframes WHERE date=? AND projectid=?;"
+	timeframes, err := getTimeframes(statement, date.Format("2006-01-02"), projectid)
 	if err != nil {
 		log.Printf("error GetRecordsForDate: %v", err)
 		return []Timeframe{}

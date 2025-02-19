@@ -4,45 +4,12 @@ import (
 	"github.com/gluek/timetracker/internal/database"
 )
 
-templ plannerChart(records []database.Timeframe) {
-	@templ.JSONScript("recordData", records)
+templ plannerChart(entries []database.PlannerEntry) {
+	@templ.JSONScript("recordData", entries)
 	<script type="text/javascript">
     var importData = JSON.parse(document.getElementById('recordData').textContent);
-    var dataArray = importData.slice(0,-1).map((record) => (record.date));
-    var activeYear;
-    dateNow = new Date();
-    if (dataArray.length === 0) {
-        activeYear = "" + dateNow.getFullYear()
-    } else {
-        activeYear = dataArray[0].split("-")[0]
-    };
-
-    console.log(importData);
-
-    function genData(year) {
-        const date = +echarts.time.parse(year + '-01-01');
-        const end = +echarts.time.parse(+year + 1 + '-01-01');
-        const dayTime = 3600 * 24 * 1000;
-        var data = [];
-        var entry = 0;
-        for (let time = date; time < end; time += dayTime) {
-            const dateString = echarts.time.format(time, '{yyyy}-{MM}-{dd}', false);
-            if (dataArray.includes(dateString)) {
-                entry = 1;
-            } else {
-                entry = 0;
-            };
-            data.push([
-                dateString,
-                entry
-            ]);
-        }
-        return data;
-    }
-
-    async function sendToBackend() {
-
-    }
+    var dataArray = importData.map((record) => ([record.date, record.type]));
+    var activeYear = dataArray[0][0];
 
     var chartDom = document.getElementById('plannerchart');
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -54,18 +21,22 @@ templ plannerChart(records []database.Timeframe) {
     var option;
     option = {
         backgroundColor: "transparent",
-        tooltip: {},
+        animation: false,
+        tooltip: {
+            show: false
+        },
         visualMap: {
             show: false,
             type: 'piecewise',
             min: 0,
-            max: 0.5,
+            max: 3,
+            splitNumber: 4,
             calculable: false,
             orient: 'vertical',
             left: '670',
             top: 'center',
             inRange: {
-                color: ['#d5d8dc']
+                color: ['#d5d8dc', '#2ecc71',  '#f1c40f' , '#808b96']
             },
             outOfRange: {
                 color: ['#2ecc71']
@@ -104,11 +75,23 @@ templ plannerChart(records []database.Timeframe) {
                     return format;
                 }
             },
-            data: genData(activeYear)
+            data: dataArray
         }
         
     };
 
+    async function sendToBackend(params) {
+        const url = "/vacation/" + params.value[0]
+        const requestOptions = {
+            method: 'POST'
+        }
+        const response = await fetch(url, requestOptions);
+        const data =  await response.json();
+        option.series.data = data.map((record) => ([record.date, record.type]));
+        myChart.setOption(option, true);
+    }
+
     option && myChart.setOption(option);
+    myChart.on('click', sendToBackend);
     </script>
 }
