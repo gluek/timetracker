@@ -161,8 +161,9 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PlannerPageHandler(w http.ResponseWriter, r *http.Request) {
-	entries := convertTimeframesForPlanner(database.GetRecordsForProjectAndYear(activeYearSummary, 2))
-	component := components.PlannerPage(entries)
+	vacations := database.GetRecordsForProjectAndYear(activeYearSummary, 2)
+	entries := convertTimeframesForPlanner(vacations)
+	component := components.PlannerPage(activeYearSummary, len(vacations), entries)
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		log.Printf("error render planner page: %v", err)
@@ -362,6 +363,21 @@ func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	clipboard.Write(clipboard.FmtText, []byte(out))
+}
+
+func PlannerChangeYear(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change year summary: %v", err)
+		return
+	}
+	activeYearSummary, err = time.Parse("2006", r.FormValue("year"))
+	log.Println("Year changed to:", activeYearSummary.Format("2006"))
+	if err != nil {
+		log.Println(err)
+	}
+	PlannerPageHandler(w, r)
 }
 
 func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {

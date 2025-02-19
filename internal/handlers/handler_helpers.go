@@ -151,7 +151,7 @@ func workDeltaWeek(workTotalDuration time.Duration, date time.Time) time.Duratio
 }
 
 func convertTimeframesForPlanner(timeframes []database.Timeframe) []database.PlannerEntry {
-	start := activeYearSummary
+	start, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", activeYearSummary.Year()))
 	end, _ := time.Parse("2006", fmt.Sprintf("%d", activeYearSummary.Year()+1))
 	dayTime := time.Hour * 24
 	dateStrings := []string{}

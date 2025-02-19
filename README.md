@@ -10,7 +10,7 @@ Tech Stack: Go, templ, htmx, SQLite, Tailwind+DaisyUI
 ### Task
 
 Using task to ease testing/building
-https://taskfile.dev/
+<https://taskfile.dev/>
 
 ``` bash
 go install github.com/go-task/task/v3/cmd/task@latest
@@ -18,7 +18,7 @@ go install github.com/go-task/task/v3/cmd/task@latest
 
 ### Templ
 
-https://templ.guide/
+<https://templ.guide/>
 
 ``` bash
 go install github.com/a-h/templ/cmd/templ@latest
@@ -28,25 +28,31 @@ Go templating package to generate HTML
 
 ### Tailwind CSS
 
-https://tailwindcss.com/docs/installation
+<https://tailwindcss.com/docs/installation>
 
 Provides CSS classes to format HTML elements
 
 ### DaisyUI
 
-https://daisyui.com/docs/install/
+<https://daisyui.com/docs/install/>
 
 Component library for Tailwind CSS (Buttons, Menus, ...)
 
 ### HTMX
 
-https://htmx.org/
+<https://htmx.org/>
 
 Provides means to create dynamic HTML webites with minimal javascript usage
 
+### Apache ECharts
+
+<https://echarts.apache.org/>
+
+Library for charts
+
 ## Go-Winres
 
-https://github.com/tc-hib/go-winres
+<https://github.com/tc-hib/go-winres>
 
 ``` bash
 go install github.com/tc-hib/go-winres@latest
@@ -57,10 +63,10 @@ Manifest/Icons for Windows
 ## Resources
 
 Go CRUD Tutorial:
-https://www.honeybadger.io/blog/how-to-create-crud-application-with-golang-and-mysql/
+<https://www.honeybadger.io/blog/how-to-create-crud-application-with-golang-and-mysql/>
 
 Go Web Examples:
-https://gowebexamples.com/
+<https://gowebexamples.com/>
 
 SQL Tutorial:
-https://www.w3schools.com/sql/default.asp
+<https://www.w3schools.com/sql/default.asp>

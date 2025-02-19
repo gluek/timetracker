@@ -9,14 +9,17 @@ templ plannerChart(entries []database.PlannerEntry) {
 	<script type="text/javascript">
     var importData = JSON.parse(document.getElementById('recordData').textContent);
     var dataArray = importData.map((record) => ([record.date, record.type]));
-    var activeYear = dataArray[0][0];
+    var activeYear = dataArray[0][0].split("-")[0];
+    var dayCounter = document.getElementById('planner-counter');
 
     var chartDom = document.getElementById('plannerchart');
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         // dark mode
         var myChart = echarts.init(chartDom, 'dark');
+        var splitLineColor = "#ffffff";
     } else {
         var myChart = echarts.init(chartDom);
+        var splitLineColor = "#363636";
     }
     var option;
     option = {
@@ -43,16 +46,18 @@ templ plannerChart(entries []database.PlannerEntry) {
             }
         },
         calendar: {
-            height: '70%',
-            width:'90%',
+            top: '20px',
+            left: '30px',
+            right:'30px',
+            bottom: '30px',
             cellSize: [40, 40],
             orient: 'horizontal',
-            range: '2024',
+            range: activeYear,
             splitLine: {
                 show: true,
                 lineStyle: {
-                    width: 3,
-                    color: 'rgba(255,255,255,1.0)'
+                    width: 2,
+                    color: splitLineColor
                 }
             },
             dayLabel: {
@@ -81,12 +86,19 @@ templ plannerChart(entries []database.PlannerEntry) {
     };
 
     async function sendToBackend(params) {
-        const url = "/vacation/" + params.value[0]
+        const url = "/api/vacation/" + params.value[0]
         const requestOptions = {
             method: 'POST'
         }
         const response = await fetch(url, requestOptions);
         const data =  await response.json();
+
+        var countVacation = 0;
+        data.forEach((record) => {
+            if (record.type == 1){countVacation += 1}
+        });
+        dayCounter.innerText = "Planned Vacation: " + countVacation;
+
         option.series.data = data.map((record) => ([record.date, record.type]));
         myChart.setOption(option, true);
     }
