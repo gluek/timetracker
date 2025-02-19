@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -155,6 +156,17 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("error render yearly summary: %v", err)
+		return
+	}
+}
+
+func PlannerPageHandler(w http.ResponseWriter, r *http.Request) {
+	vacations := database.GetRecordsForProjectAndYear(activeYearSummary, 2)
+	entries := convertTimeframesForPlanner(vacations)
+	component := components.PlannerPage(activeYearSummary, len(vacations), entries)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		log.Printf("error render planner page: %v", err)
 		return
 	}
 }
@@ -351,6 +363,61 @@ func MonthlySummaryToClipboard(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	clipboard.Write(clipboard.FmtText, []byte(out))
+}
+
+func PlannerChangeYear(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("error change year summary: %v", err)
+		return
+	}
+	activeYearSummary, err = time.Parse("2006", r.FormValue("year"))
+	log.Println("Year changed to:", activeYearSummary.Format("2006"))
+	if err != nil {
+		log.Println(err)
+	}
+	PlannerPageHandler(w, r)
+}
+
+func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {
+	clickedDate := r.PathValue("date")
+	datetimeDate, _ := time.Parse("2006-01-02", clickedDate)
+	vacationRecords := database.GetRecordsForProjectAndDate(datetimeDate, 2)
+	if len(vacationRecords) > 0 {
+		for _, record := range vacationRecords {
+			database.DeleteRecord(record.ID)
+		}
+	} else {
+		start, err := time.Parse("15:04", "08:00")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error parse time ToggleVacation: %v", err)
+			return
+		}
+		end := start.Add(durationOneWorkday())
+		var timeframe = database.Timeframe{
+			ID:         0, // not used
+			Date:       datetimeDate.Format("2006-01-02"),
+			Year:       datetimeDate.Year(),
+			Month:      int(datetimeDate.Month()),
+			Day:        datetimeDate.Day(),
+			Start:      start.Format("15:04"),
+			End:        end.Format("15:04"),
+			Duration:   "",
+			ProjectID:  2,
+			LocationID: 1,
+		}
+		err = database.CreateRecord(timeframe)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Fatal(err)
+		}
+	}
+	data := convertTimeframesForPlanner(database.GetRecordsForProjectAndYear(activeYearSummary, 2))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(data)
 }
 
 func Quickbar(w http.ResponseWriter, r *http.Request) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.0
+
+### Features
+
+- New vacation days planner
+
 ## v0.5.8
 
 ### Bugfix

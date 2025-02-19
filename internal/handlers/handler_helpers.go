@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"time"
 
@@ -147,6 +148,33 @@ func workDeltaWeek(workTotalDuration time.Duration, date time.Time) time.Duratio
 		log.Println(err)
 	}
 	return workDelta
+}
+
+func convertTimeframesForPlanner(timeframes []database.Timeframe) []database.PlannerEntry {
+	start, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", activeYearSummary.Year()))
+	end, _ := time.Parse("2006", fmt.Sprintf("%d", activeYearSummary.Year()+1))
+	dayTime := time.Hour * 24
+	dateStrings := []string{}
+	returnArray := []database.PlannerEntry{}
+
+	for _, tf := range timeframes {
+		dateStrings = append(dateStrings, tf.Date)
+	}
+
+	for cur := start; cur.Before(end); cur = cur.Add(dayTime) {
+		isHoliday, _, _ := calendar.IsHoliday(cur)
+		if slices.Contains(dateStrings, cur.Format("2006-01-02")) {
+			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 1})
+		} else if isHoliday {
+			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 2})
+		} else if cal.IsWeekend(cur) {
+			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 3})
+		} else {
+			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 0})
+		}
+
+	}
+	return returnArray
 }
 
 // Returns duration in hours for all project in month, including base projects

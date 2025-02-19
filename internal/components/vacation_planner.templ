@@ -1,0 +1,109 @@
+package components
+
+import (
+	"github.com/gluek/timetracker/internal/database"
+)
+
+templ plannerChart(entries []database.PlannerEntry) {
+	@templ.JSONScript("recordData", entries)
+	<script type="text/javascript">
+    var importData = JSON.parse(document.getElementById('recordData').textContent);
+    var dataArray = importData.map((record) => ([record.date, record.type]));
+    var activeYear = dataArray[0][0].split("-")[0];
+    var dayCounter = document.getElementById('planner-counter');
+
+    var chartDom = document.getElementById('plannerchart');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // dark mode
+        var myChart = echarts.init(chartDom, 'dark');
+        var splitLineColor = "#ffffff";
+    } else {
+        var myChart = echarts.init(chartDom);
+        var splitLineColor = "#363636";
+    }
+    var option;
+    option = {
+        backgroundColor: "transparent",
+        animation: false,
+        tooltip: {
+            show: false
+        },
+        visualMap: {
+            show: false,
+            type: 'piecewise',
+            min: 0,
+            max: 3,
+            splitNumber: 4,
+            calculable: false,
+            orient: 'vertical',
+            left: '670',
+            top: 'center',
+            inRange: {
+                color: ['#d5d8dc', '#2ecc71',  '#f1c40f' , '#808b96']
+            },
+            outOfRange: {
+                color: ['#2ecc71']
+            }
+        },
+        calendar: {
+            top: '20px',
+            left: '30px',
+            right:'30px',
+            bottom: '30px',
+            cellSize: [40, 40],
+            orient: 'horizontal',
+            range: activeYear,
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    width: 2,
+                    color: splitLineColor
+                }
+            },
+            dayLabel: {
+                firstDay: 1
+            },
+            yearLabel: {
+                show: false
+            },
+            itemStyle: {
+                borderWidth: 0.5
+            }
+        },
+        series: {
+            type: 'heatmap',
+            coordinateSystem: 'calendar',
+            label: {
+                show: true,
+                formatter: function (p) {
+                    const format = echarts.time.format(p.data[0], '{dd}', false);
+                    return format;
+                }
+            },
+            data: dataArray
+        }
+        
+    };
+
+    async function sendToBackend(params) {
+        const url = "/api/vacation/" + params.value[0]
+        const requestOptions = {
+            method: 'POST'
+        }
+        const response = await fetch(url, requestOptions);
+        const data =  await response.json();
+
+        var countVacation = 0;
+        data.forEach((record) => {
+            if (record.type == 1){countVacation += 1}
+        });
+        dayCounter.innerText = "Planned Vacation: " + countVacation;
+
+        option.series.data = data.map((record) => ([record.date, record.type]));
+        myChart.setOption(option, true);
+    }
+
+    option && myChart.setOption(option);
+    myChart.on('click', sendToBackend);
+    </script>
+}
