@@ -32,14 +32,14 @@ templ plannerChart(entries []database.PlannerEntry) {
             show: false,
             type: 'piecewise',
             min: 0,
-            max: 3,
-            splitNumber: 4,
+            max: 4,
+            splitNumber: 5,
             calculable: false,
             orient: 'vertical',
             left: '670',
             top: 'center',
             inRange: {
-                color: ['#d5d8dc', '#2ecc71',  '#f1c40f' , '#808b96']
+                color: ['#d5d8dc', '#2ecc71',  '#abebc6', '#f1c40f' , '#808b96']
             },
             outOfRange: {
                 color: ['#2ecc71']
@@ -85,7 +85,7 @@ templ plannerChart(entries []database.PlannerEntry) {
         
     };
 
-    async function sendToBackend(params) {
+    async function toggleWholeDay(params) {
         const url = "/api/vacation/" + params.value[0]
         const requestOptions = {
             method: 'POST'
@@ -96,6 +96,26 @@ templ plannerChart(entries []database.PlannerEntry) {
         var countVacation = 0;
         data.forEach((record) => {
             if (record.type == 1){countVacation += 1}
+            if (record.type == 2){countVacation += 0.5}
+        });
+        dayCounter.innerText = "Planned Vacation: " + countVacation;
+
+        option.series.data = data.map((record) => ([record.date, record.type]));
+        myChart.setOption(option, true);
+    }
+
+    async function toggleHalfDay(params) {
+        const url = "/api/vacationhalf/" + params.value[0]
+        const requestOptions = {
+            method: 'POST'
+        }
+        const response = await fetch(url, requestOptions);
+        const data =  await response.json();
+
+        var countVacation = 0;
+        data.forEach((record) => {
+            if (record.type == 1){countVacation += 1}
+            if (record.type == 2){countVacation += 0.5}
         });
         dayCounter.innerText = "Planned Vacation: " + countVacation;
 
@@ -104,6 +124,7 @@ templ plannerChart(entries []database.PlannerEntry) {
     }
 
     option && myChart.setOption(option);
-    myChart.on('click', sendToBackend);
+    myChart.on('click', toggleWholeDay);
+    myChart.on('contextmenu', toggleHalfDay);
     </script>
 }

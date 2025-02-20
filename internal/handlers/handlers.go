@@ -380,7 +380,7 @@ func PlannerChangeYear(w http.ResponseWriter, r *http.Request) {
 	PlannerPageHandler(w, r)
 }
 
-func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {
+func PlannerToggleVacation(w http.ResponseWriter, r *http.Request, divider float32) {
 	clickedDate := r.PathValue("date")
 	datetimeDate, _ := time.Parse("2006-01-02", clickedDate)
 	vacationRecords := database.GetRecordsForProjectAndDate(datetimeDate, 2)
@@ -396,7 +396,7 @@ func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {
 			log.Printf("error parse time ToggleVacation: %v", err)
 			return
 		}
-		end := start.Add(durationOneWorkday())
+		end := start.Add(durationOneWorkday() / time.Duration(divider))
 		var timeframe = database.Timeframe{
 			ID:         0, // not used
 			Date:       datetimeDate.Format("2006-01-02"),
@@ -420,6 +420,14 @@ func PlannerToggleVacation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
+}
+
+func PlannerToggleVacationWhole(w http.ResponseWriter, r *http.Request) {
+	PlannerToggleVacation(w, r, 1)
+}
+
+func PlannerToggleVacationHalf(w http.ResponseWriter, r *http.Request) {
+	PlannerToggleVacation(w, r, 2)
 }
 
 func Quickbar(w http.ResponseWriter, r *http.Request) {

@@ -38,6 +38,18 @@ func findIDTimeframe(id int) int {
 	return -1
 }
 
+func timeframeDuration(tf database.Timeframe) (time.Duration, error) {
+	timeStart, err := time.Parse("15:04", tf.Start)
+	if err != nil {
+		return -1, err
+	}
+	timeEnd, err := time.Parse("15:04", tf.End)
+	if err != nil {
+		return -1, err
+	}
+	return timeEnd.Sub(timeStart), nil
+}
+
 func durationOneWorkday() time.Duration {
 	workHoursPerWeek, err := time.ParseDuration(viper.GetString("worktime_per_week"))
 	if err != nil {
@@ -154,21 +166,33 @@ func convertTimeframesForPlanner(timeframes []database.Timeframe) []database.Pla
 	start, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", activeYearSummary.Year()))
 	end, _ := time.Parse("2006", fmt.Sprintf("%d", activeYearSummary.Year()+1))
 	dayTime := time.Hour * 24
-	dateStrings := []string{}
+	dateStringsWhole := []string{}
+	dateStringsHalf := []string{}
 	returnArray := []database.PlannerEntry{}
 
 	for _, tf := range timeframes {
-		dateStrings = append(dateStrings, tf.Date)
+		diffTime, err := timeframeDuration(tf)
+		if err != nil {
+			log.Println(err)
+		}
+
+		if diffTime < durationOneWorkday() {
+			dateStringsHalf = append(dateStringsHalf, tf.Date)
+		} else {
+			dateStringsWhole = append(dateStringsWhole, tf.Date)
+		}
 	}
 
 	for cur := start; cur.Before(end); cur = cur.Add(dayTime) {
 		isHoliday, _, _ := calendar.IsHoliday(cur)
-		if slices.Contains(dateStrings, cur.Format("2006-01-02")) {
+		if slices.Contains(dateStringsWhole, cur.Format("2006-01-02")) {
 			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 1})
-		} else if isHoliday {
+		} else if slices.Contains(dateStringsHalf, cur.Format("2006-01-02")) {
 			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 2})
-		} else if cal.IsWeekend(cur) {
+		} else if isHoliday {
 			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 3})
+		} else if cal.IsWeekend(cur) {
+			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 4})
 		} else {
 			returnArray = append(returnArray, database.PlannerEntry{Date: cur.Format("2006-01-02"), DayType: 0})
 		}

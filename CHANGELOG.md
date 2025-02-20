@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.1
+
+### Features
+
+- Half day vacation option for planner
+
 ## v0.6.0
 
 ### Features

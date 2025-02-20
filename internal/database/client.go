@@ -93,7 +93,7 @@ func Connect() {
 		log.Println("New table, set db version")
 		setDBVersion(dbVersion)
 	}
-
+	// TODO: contraint to only one vacation entry per date
 	tableVars := `(
 		id INTEGER PRIMARY KEY NOT NULL,
 		date STRING NOT NULL,

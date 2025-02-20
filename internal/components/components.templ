@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var version string = "v0.6.0"
+var version string = "v0.6.1"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -719,12 +719,13 @@ templ PlannerPage(activeYear time.Time, plannedVacation int, entries []database.
 			<div class="prevent-select mb-2 ml-[30px] mr-[30px] mt-5 flex flex-row justify-center gap-2">
 				<p id="planner-counter" class="p-1 font-bold" >Planned Vacation: { strconv.Itoa(plannedVacation) }</p>
 				<p class="grow"></p>
+				<p class="p-1">leftclick: one day, rightclick: half day</p>
 				<p class="p-1 text-black" style="background-color: #d5d8dc;">Weekday</p>
 				<p class="p-1 text-black" style="background-color: #808b96;">Weekend</p>
 				<p class="p-1 text-black" style="background-color: #2ecc71;">Vacation</p>
 				<p class="p-1 text-black" style="background-color: #f1c40f;">Holiday</p>
 			</div>
-			<div id="plannerchart" class="h-[300px] w-[1200px]"></div>
+			<div id="plannerchart" class="h-[300px] w-[1200px]" oncontextmenu="return false;"></div>
 		</div>
 	</div>
 }

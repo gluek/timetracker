@@ -17,7 +17,8 @@ func RegisterOtherRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/clipboard", handlers.MonthlySummaryToClipboard)
 	mux.HandleFunc("POST /api/quickbar/{name}", handlers.Quickbar)
 	mux.HandleFunc("GET /vacation", handlers.PlannerPageHandler)
-	mux.HandleFunc("POST /api/vacation/{date}", handlers.PlannerToggleVacation)
+	mux.HandleFunc("POST /api/vacation/{date}", handlers.PlannerToggleVacationWhole)
+	mux.HandleFunc("POST /api/vacationhalf/{date}", handlers.PlannerToggleVacationHalf)
 	mux.HandleFunc("POST /api/vacation", handlers.PlannerChangeYear)
 }
 
