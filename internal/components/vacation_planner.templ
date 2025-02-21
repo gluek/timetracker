@@ -12,6 +12,13 @@ templ plannerChart(entries []database.PlannerEntry) {
     var activeYear = dataArray[0][0].split("-")[0];
     var dayCounter = document.getElementById('planner-counter');
 
+    var countVacation = 0;
+    importData.forEach((record) => {
+        if (record.type == 1){countVacation += 1}
+        if (record.type == 2){countVacation += 0.5}
+    });
+    dayCounter.innerText = "Planned Vacation: " + countVacation;
+
     var chartDom = document.getElementById('plannerchart');
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         // dark mode
@@ -49,7 +56,7 @@ templ plannerChart(entries []database.PlannerEntry) {
             top: '20px',
             left: '30px',
             right:'30px',
-            bottom: '30px',
+            bottom: '8px',
             cellSize: [40, 40],
             orient: 'horizontal',
             range: activeYear,

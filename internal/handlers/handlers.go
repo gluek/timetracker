@@ -163,7 +163,7 @@ func YearlySummaryHandler(w http.ResponseWriter, r *http.Request) {
 func PlannerPageHandler(w http.ResponseWriter, r *http.Request) {
 	vacations := database.GetRecordsForProjectAndYear(activeYearSummary, 2)
 	entries := convertTimeframesForPlanner(vacations)
-	component := components.PlannerPage(activeYearSummary, len(vacations), entries)
+	component := components.PlannerPage(activeYearSummary, entries)
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		log.Printf("error render planner page: %v", err)

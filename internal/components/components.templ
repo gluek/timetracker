@@ -691,7 +691,7 @@ templ Quickbar() {
 }
 
 
-templ PlannerPage(activeYear time.Time, plannedVacation int, entries []database.PlannerEntry) {
+templ PlannerPage(activeYear time.Time, entries []database.PlannerEntry) {
 	<div id="vacation-planner" class="flex justify-center gap-5 py-5">
 		@plannerChart(entries)
 		<div class="card bg-base-300 p-2 shadow">
@@ -717,15 +717,18 @@ templ PlannerPage(activeYear time.Time, plannedVacation int, entries []database.
 				</select>
 			</form>
 			<div class="prevent-select mb-2 ml-[30px] mr-[30px] mt-5 flex flex-row justify-center gap-2">
-				<p id="planner-counter" class="p-1 font-bold" >Planned Vacation: { strconv.Itoa(plannedVacation) }</p>
+				<p id="planner-counter" class="p-1 font-bold" ></p>
 				<p class="grow"></p>
-				<p class="p-1">leftclick: one day, rightclick: half day</p>
 				<p class="p-1 text-black" style="background-color: #d5d8dc;">Weekday</p>
 				<p class="p-1 text-black" style="background-color: #808b96;">Weekend</p>
 				<p class="p-1 text-black" style="background-color: #2ecc71;">Vacation</p>
 				<p class="p-1 text-black" style="background-color: #f1c40f;">Holiday</p>
 			</div>
 			<div id="plannerchart" class="h-[300px] w-[1200px]" oncontextmenu="return false;"></div>
+			<div class="mr-[30px] flex flex-row">
+				<p class="grow"></p>
+				<p>leftclick: one day, rightclick: half day</p>
+			</div>
 		</div>
 	</div>
 }
