@@ -5,7 +5,9 @@
     }
   ],
   "settings": {
-    "prettier.documentSelectors": ["**/*.svelte"],
+    "prettier.documentSelectors": [
+      "**/*.svelte"
+    ],
     "cSpell.words": [
       "atoi",
       "currentdate",
@@ -17,13 +19,16 @@
       "modernc",
       "monthlysummary",
       "parentalleave",
+      "Println",
       "projectid",
       "projectids",
       "rickar",
       "sickdays",
+      "Sprintf",
       "sqlite",
       "SQLITE",
       "strconv",
+      "stylesheet",
       "timefr",
       "timeframe",
       "Timeframe",

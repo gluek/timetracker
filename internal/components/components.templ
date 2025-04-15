@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var version string = "v0.6.1"
+var version string = "v0.6.2"
 
 func yearSelectList() []int {
 	currentYear := time.Now().Year()
@@ -181,16 +181,16 @@ templ DarkModeSwitch() {
 }
 
 templ HomePage(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
-	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
-	@PageHeader(Records(tfList, projectList, locationList, currentDate, workDurationDaily, workDeltaWeek, overtime))
+	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours, isWorkday bool) {
+	@PageHeader(Records(tfList, projectList, locationList, currentDate, workDurationDaily, workDeltaWeek, overtime, isWorkday))
 }
 
 templ Records(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
-	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
+	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours, isWorkday bool) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
 		@CreateRecord(projectList, locationList, currentDate)
 		@RecordList(tfList, projectList, locationList)
-		@dailySummary(workDurationDaily, workDeltaWeek, overtime)
+		@dailySummary(isWorkday, workDurationDaily, workDeltaWeek, overtime)
 	</div>
 }
 
@@ -351,7 +351,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 	</div>
 }
 
-templ dailySummary(workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
+templ dailySummary(isWorkday bool, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
 	<div id="summary-day">
 		<div class="bg-base-300 p-2 shadow sm:card">
 			<div class="sm:card-body">
@@ -362,7 +362,11 @@ templ dailySummary(workDurationDaily time.Duration, workDeltaWeek time.Duration,
 						<tbody>
 							<tr>
 								<td>Total Work / Delta:</td>
-								<td>{ fmtDuration(workDurationDaily) } / { fmtDuration(workHoursDailyDelta(workDurationDaily)) }</td>
+								if isWorkday {
+									<td>{ fmtDuration(workDurationDaily) } / { fmtDuration(workHoursDailyDelta(workDurationDaily)) }</td>
+								} else {
+									<td><p class="text-success">Holiday / Weekend</p></td>
+								}
 							</tr>
 							<tr>
 								<td>Delta Week:</td>

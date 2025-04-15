@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.2
+
+### Features
+
+- Show holiday in daily summary
+
 ## v0.6.1
 
 ### Features
