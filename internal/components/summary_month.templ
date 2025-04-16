@@ -1,0 +1,180 @@
+package components
+
+import (
+	"fmt"
+	"github.com/gluek/timetracker/internal/database"
+	"strconv"
+	"strings"
+	"time"
+)
+
+templ MonthlySummary(activeMonth time.Time, projects []database.ProjectHours, workdays int, entries []database.ProjectHoursLocationsDaily, locations []database.LocationDays) {
+	<div id="monthly-summary" class="grid justify-center space-y-5 py-5">
+		<div class="w-max-[650px] w-screen bg-base-300 p-2 shadow sm:card sm:w-fit">
+			<div class="sm:card-body">
+				<form class="flex flex-row justify-center gap-1" hx-post="/api/monthlysummary" hx-target="#monthly-summary" hx-select="#monthly-summary" hx-swap="outerHTML">
+					<select
+						class="select rounded bg-neutral text-xl text-neutral-content"
+						id="month"
+						name="month"
+						hx-post="/api/monthlysummary"
+						hx-target="#monthly-summary"
+						hx-select="#monthly-summary"
+						hx-swap="outerHTML"
+						hx-trigger="change delay:100ms"
+						hx-preserve="true"
+					>
+						for _, month := range monthSelectList() {
+							if month == activeMonth.Month().String() {
+								<option selected>{ month }</option>
+							} else {
+								<option>{ month }</option>
+							}
+						}
+					</select>
+					<select
+						class="select rounded bg-neutral text-xl text-neutral-content"
+						id="year"
+						name="year"
+						hx-post="/api/monthlysummary"
+						hx-target="#monthly-summary"
+						hx-select="#monthly-summary"
+						hx-swap="outerHTML"
+						hx-trigger="change delay:100ms"
+						hx-preserve="true"
+					>
+						for _, year := range yearSelectList() {
+							if year == activeMonth.Year() {
+								<option selected>{ strconv.Itoa(year) }</option>
+							} else {
+								<option>{ strconv.Itoa(year) }</option>
+							}
+						}
+					</select>
+				</form>
+				<div class="text-xl">Monthly Summary:</div>
+				<table id="monthly-summary-table" class="table">
+					<thead>
+						<td class="hidden sm:table-cell">Activity:</td>
+						<td class="hidden sm:table-cell">Details:</td>
+						<td>Name:</td>
+						<td>Work Hours:</td>
+					</thead>
+					<tbody>
+						for _, project := range projects[:4] {
+							<tr class="bg-base-200">
+								<td class="hidden sm:table-cell">{ project.Activity }</td>
+								<td class="hidden sm:table-cell">{ project.Details }</td>
+								<td>{ project.Name }</td>
+								<td>{ project.Hours }</td>
+							</tr>
+						}
+						for _, project := range projects[4:] {
+							<tr>
+								<td class="hidden sm:table-cell">{ project.Activity }</td>
+								<td class="hidden sm:table-cell">{ project.Details }</td>
+								<td>{ project.Name }</td>
+								<td>{ project.Hours }</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+				<button class="btn btn-success w-full animate-none" type="button" hx-post="/api/clipboard" hx-swap="none">Summary to Clipboard</button>
+			</div>
+		</div>
+		@WorkDays(workdays, projects[len(projects)-1])
+		@LocationsCard(locations)
+		@OverviewRecords(entries)
+	</div>
+}
+
+templ WorkDays(workdays int, total database.ProjectHours) {
+	<div id="work-days" class="bg-base-300 p-2 shadow sm:card">
+		<div class="p-2 sm:card-body">
+			<table
+				id="work-days-table"
+				class="table"
+			>
+				<thead></thead>
+				<tbody>
+					<tr>
+						<td>Work Days:</td>
+						<td>{ fmt.Sprintf("%d", workdays) }</td>
+					</tr>
+					<tr>
+						<td>Work Hours Month:</td>
+						<td>{ fmt.Sprintf("%.2f", workHoursMonth(workdays)) }</td>
+					</tr>
+					<tr>
+						<td>Delta Work Hours Month:</td>
+						if workHoursMonthDelta(workdays, total).Hours() < 0 {
+							<td class="text-error">{ fmt.Sprintf("%.2f", workHoursMonthDelta(workdays, total).Hours()) }</td>
+						} else {
+							<td class="text-success">{ fmt.Sprintf("%.2f", workHoursMonthDelta(workdays, total).Hours()) }</td>
+						}
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+templ LocationsCard(locations []database.LocationDays) {
+	<div id="locations" class="bg-base-300 p-2 shadow sm:card">
+		<div class="sm:card-body">
+			@Locations(locations)
+		</div>
+	</div>
+}
+
+templ Locations(locations []database.LocationDays) {
+	<table id="locations-table" class="table">
+		<thead>
+			<td>Work Place:</td>
+			<td>Days:</td>
+		</thead>
+		<tbody>
+			for _, location := range locations {
+				<tr>
+					<td>{ location.Name }</td>
+					<td>{ fmt.Sprintf("%d", location.Days) }</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+templ OverviewRecords(entries []database.ProjectHoursLocationsDaily) {
+	<div id="overview-records" class="bg-base-300 p-2 shadow sm:card">
+		<div class="sm:card-body">
+			<table class="table table-xs">
+				<thead>
+					<td>Date:</td>
+					<td>Hours:</td>
+					<td>Projects:</td>
+					<td class="hidden sm:table-cell">Work Places:</td>
+				</thead>
+				<tbody>
+					for _, entry := range entries {
+						if strings.Contains(entry.Date, "Sat") || strings.Contains(entry.Date, "Sun") {
+							<tr class="bg-base-200">
+								<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
+								<td>{ entry.Hours }</td>
+								<td>{ strings.Join(entry.Projects, ", ") }</td>
+								<td class="hidden sm:table-cell">{ strings.Join(entry.Locations, ", ") }</td>
+							</tr>
+						} else {
+							<tr>
+								<td><a class="link" hx-get={ "/timeframes/" + reformateDateString(entry.Date) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">{ entry.Date }</a></td>
+								<td>{ entry.Hours }</td>
+								<td>{ strings.Join(entry.Projects, ", ") }</td>
+								<td class="hidden sm:table-cell">{ strings.Join(entry.Locations, ", ") }</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+			<a class="btn btn-success w-full" href="/api/monthlysummary/export" download>Export</a>
+		</div>
+	</div>
+}

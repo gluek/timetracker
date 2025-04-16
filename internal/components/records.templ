@@ -1,0 +1,220 @@
+
+package components
+
+import (
+	"github.com/gluek/timetracker/internal/database"
+	"strconv"
+	"time"
+)
+
+
+
+templ Records(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
+	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours, isWorkday bool) {
+	<div id="records" class="grid justify-center space-y-5 py-5">
+		@CreateRecord(projectList, locationList, currentDate)
+		@RecordList(tfList, projectList, locationList)
+		@dailySummary(isWorkday, workDurationDaily, workDeltaWeek, overtime)
+	</div>
+}
+
+templ CreateRecord(projectList []database.Project, locationList []database.Location, currentDate time.Time) {
+	<div class="bg-base-300 shadow sm:card" id="timetracker">
+		<div class="flex flex-col sm:card-body">
+			<div class="flex justify-center">
+				<div class="text-xl font-bold">{ currentDate.Weekday().String() }</div>
+			</div>
+			<form id="defaultRecord" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+				<div class="flex justify-center gap-5">
+					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/left" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m-12 0L5 1m-4 4L5 9"></path>
+						</svg>
+					</button>
+					<input
+						class="input input-lg bg-neutral text-neutral-content"
+						hx-post="/api/currentdate"
+						hx-trigger="change delay:1000ms"
+						type="date"
+						name="dateofrecord"
+						id="dateofrecord"
+						value={ currentDate.Format("2006-01-02") }
+					/>
+					<button class="btn btn-neutral animate-none self-center" hx-post="/api/currentdate/right" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+						<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"></path>
+						</svg>
+					</button>
+				</div>
+				<div class="flex flex-row flex-wrap content-center justify-center gap-1">
+					<label class="form-control max-w-36">
+						<div class="label">
+							<span class="label-text">From:</span>
+						</div>
+						<input class="input rounded bg-neutral text-neutral-content" type="time" name="start" id="start" value="08:00"/>
+					</label>
+					<label class="form-control max-w-36">
+						<div class="label">
+							<span class="label-text">To:</span>
+						</div>
+						<input class="input rounded bg-neutral text-neutral-content" type="time" name="end" id="end" value="17:00"/>
+					</label>
+					<label class="form-control max-w-xs">
+						<div class="label">
+							<span class="label-text">Project:</span>
+						</div>
+						<div class="flex flex-row gap-1">
+							<select class="select rounded bg-neutral text-neutral-content" id="project" name="project">
+								for _, project := range projectList {
+									if project.IsDeleted==0 {
+										<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+									}
+								}
+							</select>
+						</div>
+					</label>
+					<label class="form-control max-w-xs">
+						<div class="label">
+							<span class="label-text">Location:</span>
+						</div>
+						<div class="flex flex-row gap-1">
+							<select class="select rounded bg-neutral text-neutral-content" id="location" name="location">
+								for _, location := range locationList {
+									<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
+								}
+							</select>
+							<button class="btn btn-success w-32 animate-none md:w-fit" type="submit" form="defaultRecord">&#x2713;</button>
+						</div>
+					</label>
+				</div>
+			</form>
+			@Quickbar()
+		</div>
+	</div>
+}
+
+templ RecordList(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location) {
+	<div id="record-list">
+		if len(tfList) > 0 {
+			<div class="bg-base-300 shadow sm:card">
+				<div class="flex flex-col gap-4 p-2 sm:card-body md:gap-1">
+					for _, timeframe := range tfList {
+						<form id={ "record" + strconv.Itoa(timeframe.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/timeframes" hx-target="#content-section" hx-swap="innerHTML settle:0ms">
+							<div class="flex flex-row justify-center gap-1">
+								<input class="input input-sm rounded bg-neutral text-neutral-content" type="hidden" name="dateofrecord" id="dateofrecord" value={ timeframe.Date }/>
+								<input
+									class="input input-sm rounded bg-neutral text-neutral-content"
+									type="time"
+									name="start"
+									id="start"
+									value={ timeframe.Start }
+									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="outerHTML"
+									hx-trigger="change delay:400ms"
+								/>
+								<input
+									class="input input-sm rounded bg-neutral text-neutral-content"
+									type="time"
+									name="end"
+									id="end"
+									value={ timeframe.End }
+									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="outerHTML"
+									hx-trigger="change delay:400ms"
+								/>
+								<select
+									class="select select-sm rounded bg-neutral text-neutral-content"
+									id="project"
+									name="project"
+									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="none"
+									hx-trigger="change delay:400ms"
+								>
+									for _, project := range projectList {
+										//TODO: Change color of deleted projects in drop down menu and throughtout other UI elements
+										if timeframe.ProjectID == project.ID {
+											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
+										} else {
+											if project.IsDeleted==0{
+												<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
+											}
+										}
+									}
+								</select>
+								<select
+									class="select select-sm hidden rounded bg-neutral text-neutral-content sm:block"
+									id="location"
+									name="location"
+									hx-put={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) }
+									hx-target="#summary-day"
+									hx-select="#summary-day"
+									hx-swap="none"
+									hx-trigger="change delay:400ms"
+								>
+									for _, location := range locationList {
+										if timeframe.LocationID == location.ID {
+											<option value={ strconv.Itoa(location.ID) } selected>{ location.Name }</option>
+										} else {
+											<option value={ strconv.Itoa(location.ID) }>{ location.Name }</option>
+										}
+									}
+								</select>
+								<button class="btn btn-error btn-sm animate-none" hx-delete={ "/api/timeframes/" + strconv.Itoa(timeframe.ID) } hx-target="#content-section" hx-swap="innerHTML settle:0ms">&#x2717;</button>
+							</div>
+						</form>
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ dailySummary(isWorkday bool, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours) {
+	<div id="summary-day">
+		<div class="bg-base-300 p-2 shadow sm:card">
+			<div class="sm:card-body">
+				<div class="flex flex-col">
+					<div class="text-xl">Daily Summary:</div>
+					<table class="table">
+						<thead></thead>
+						<tbody>
+							<tr>
+								<td>Total Work / Delta:</td>
+								if isWorkday {
+									<td>{ fmtDuration(workDurationDaily) } / { fmtDuration(workHoursDailyDelta(workDurationDaily)) }</td>
+								} else {
+									<td><p class="text-success">Holiday / Weekend</p></td>
+								}
+							</tr>
+							<tr>
+								<td>Delta Week:</td>
+								if workDeltaWeek.Hours() < 0 {
+									<td class="text-error">{ fmtDuration(workDeltaWeek) }</td>
+								} else {
+									<td class="text-success">{ fmtDuration(workDeltaWeek) }</td>
+								}
+							</tr>
+							<tr>
+								<td>Overtime:</td>
+								<td>{ overtime.Hours }</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+
+templ Quickbar() {
+	<div class="flex flex-row pt-2">
+		<button class="btn btn-outline btn-sm w-min animate-none" hx-post="/api/quickbar/vacation" hx-target="#content-section" hx-swap="innerHTML settle:0ms">Vacation</button>
+	</div>
+}

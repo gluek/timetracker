@@ -2,7 +2,51 @@ package components
 
 import (
 	"github.com/gluek/timetracker/internal/database"
+	"strconv"
+	"time"
 )
+
+templ PlannerPage(activeYear time.Time, entries []database.PlannerEntry) {
+	<div id="vacation-planner" class="flex justify-center gap-5 py-5">
+		@plannerChart(entries)
+		<div class="card bg-base-300 p-2 shadow">
+			<form class="mt-[22px] flex justify-center" hx-post="/api/vacation" hx-target="#vacation-planner" hx-select="#vacation-planner" hx-swap="outerHTML">
+				<select
+					class="select rounded bg-neutral text-xl text-neutral-content"
+					id="yearPlanner"
+					name="year"
+					hx-post="/api/vacation"
+					hx-target="#vacation-planner"
+					hx-select="#vacation-planner"
+					hx-swap="outerHTML"
+					hx-trigger="change delay:100ms"
+					hx-preserve="true"
+				>
+					for _, year := range yearSelectList() {
+						if year == activeYear.Year() {
+							<option selected>{ strconv.Itoa(year) }</option>
+						} else {
+							<option>{ strconv.Itoa(year) }</option>
+						}
+					}
+				</select>
+			</form>
+			<div class="prevent-select mb-2 ml-[30px] mr-[30px] mt-5 flex flex-row justify-center gap-2">
+				<p id="planner-counter" class="p-1 font-bold"></p>
+				<p class="grow"></p>
+				<p class="p-1 text-black" style="background-color: #d5d8dc;">Weekday</p>
+				<p class="p-1 text-black" style="background-color: #808b96;">Weekend</p>
+				<p class="p-1 text-black" style="background-color: #2ecc71;">Vacation</p>
+				<p class="p-1 text-black" style="background-color: #f1c40f;">Holiday</p>
+			</div>
+			<div id="plannerchart" class="h-[300px] w-[1200px]" oncontextmenu="return false;"></div>
+			<div class="mr-[30px] flex flex-row">
+				<p class="grow"></p>
+				<p>leftclick: one day, rightclick: half day</p>
+			</div>
+		</div>
+	</div>
+}
 
 templ plannerChart(entries []database.PlannerEntry) {
 	@templ.JSONScript("recordData", entries)

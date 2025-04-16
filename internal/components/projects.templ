@@ -1,0 +1,79 @@
+
+package components
+
+import (
+	"github.com/gluek/timetracker/internal/database"
+	"strconv"
+)
+
+templ Projects(projectList []database.Project) {
+	<div id="projects" class="grid justify-center space-y-5 py-5">
+		@CreateProject()
+		@ProjectsList(projectList)
+	</div>
+}
+
+templ CreateProject() {
+	<div id="projecttracker" class="bg-base-300 p-2 shadow sm:card">
+		<form id="defaultProject" class="sm:card-body" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
+			<div class="text-xl">Add New Project:</div>
+			<div class="flex flex-row flex-wrap justify-center gap-1">
+				<input class="input rounded bg-neutral text-neutral-content" type="text" id="activity" name="activity" placeholder="Activity" required/>
+				<input class="input rounded bg-neutral text-neutral-content" type="text" id="details" name="details" placeholder="Details" required/>
+				<input class="input rounded bg-neutral text-neutral-content" type="text" id="projectName" name="projectName" placeholder="Identifier" required/>
+				<button class="btn btn-success w-64 animate-none md:w-fit" type="submit" form="defaultProject">&#x2713;</button>
+			</div>
+		</form>
+	</div>
+}
+
+templ ProjectsList(projectList []database.Project) {
+	if len(projectList) > 4 {
+		<div id="timetrackerList" class="bg-base-300 p-2 shadow sm:card">
+			<div class="flex flex-col gap-4 sm:card-body md:gap-1">
+				for _, project := range projectList[4:] {
+					if project.IsDeleted == 0 {
+						<form id={ "project" + strconv.Itoa(project.ID) } onkeypress="return event.keyCode != 13;" hx-post="/api/projects" hx-target="#projects" hx-swap="outerHTML settle:0ms">
+							<div class="flex flex-row justify-center gap-1">
+								<input
+									class="input input-sm hidden rounded bg-neutral text-neutral-content sm:block"
+									type="text"
+									id="activity"
+									name="activity"
+									value={ project.Activity }
+									hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+									hx-target="#projects"
+									hx-swap="none"
+									hx-trigger="change delay:100ms"
+								/>
+								<input
+									class="input input-sm hidden rounded bg-neutral text-neutral-content sm:block"
+									type="text"
+									id="details"
+									name="details"
+									value={ project.Details }
+									hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+									hx-target="#projects"
+									hx-swap="none"
+									hx-trigger="change delay:100ms"
+								/>
+								<input
+									class="input input-sm rounded bg-neutral text-neutral-content"
+									type="text"
+									id="projectName"
+									name="projectName"
+									value={ project.Name }
+									hx-put={ "/api/projects/" + strconv.Itoa(project.ID) }
+									hx-target="#projects"
+									hx-swap="none"
+									hx-trigger="change delay:100ms"
+								/>
+								<button class="btn btn-error btn-sm animate-none" hx-delete={ "/api/projects/" + strconv.Itoa(project.ID) } hx-target="#projects" hx-swap="outerHTML settle:0ms">&#x2717;</button>
+							</div>
+						</form>
+					}
+				}
+			</div>
+		</div>
+	}
+}
