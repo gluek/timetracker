@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-
-
 templ Records(tfList []database.Timeframe, projectList []database.Project, locationList []database.Location,
 	currentDate time.Time, workDurationDaily time.Duration, workDeltaWeek time.Duration, overtime database.ProjectHours, isWorkday bool) {
 	<div id="records" class="grid justify-center space-y-5 py-5">
@@ -141,7 +139,7 @@ templ RecordList(tfList []database.Timeframe, projectList []database.Project, lo
 										if timeframe.ProjectID == project.ID {
 											<option value={ strconv.Itoa(project.ID) } selected>{ project.Name }</option>
 										} else {
-											if project.IsDeleted==0{
+											if project.IsDeleted==0 {
 												<option value={ strconv.Itoa(project.ID) }>{ project.Name }</option>
 											}
 										}
@@ -189,7 +187,7 @@ templ dailySummary(isWorkday bool, workDurationDaily time.Duration, workDeltaWee
 								if isWorkday {
 									<td>{ fmtDuration(workDurationDaily) } / { fmtDuration(workHoursDailyDelta(workDurationDaily)) }</td>
 								} else {
-									<td><p class="text-success">Holiday / Weekend</p></td>
+									<td><p style="color: #f1c40f;">Holiday / Weekend</p></td>
 								}
 							</tr>
 							<tr>
@@ -211,7 +209,6 @@ templ dailySummary(isWorkday bool, workDurationDaily time.Duration, workDeltaWee
 		</div>
 	</div>
 }
-
 
 templ Quickbar() {
 	<div class="flex flex-row pt-2">
