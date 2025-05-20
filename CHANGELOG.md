@@ -6,6 +6,7 @@
 
 - Show holiday in daily summary
 - Reject invalid routes and throw 404
+- Server timeouts
 
 ## v0.6.1
 
