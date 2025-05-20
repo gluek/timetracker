@@ -7,6 +7,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gluek/timetracker/internal/database"
 	"github.com/gluek/timetracker/internal/handlers"
@@ -55,9 +56,18 @@ func main() {
 		log.Printf("error add mime: %v", err)
 	}
 
+	server := &http.Server{
+		ReadTimeout:       1 * time.Second,
+		WriteTimeout:      1 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+		Handler:           mux,
+		Addr:              fmt.Sprintf("localhost:%d", viper.GetInt("port")),
+	}
+
 	log.Printf("Running in DEBUG Mode")
 	log.Printf("Listening on http://localhost:%d\n", viper.GetInt("port"))
-	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", viper.GetInt("port")), mux); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Printf("error listening: %v", err)
 	}
 }

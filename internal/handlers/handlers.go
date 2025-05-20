@@ -39,6 +39,11 @@ func HandlerInit() {
 }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "404 - Page not found")
+		return
+	}
 	component := components.HomePage(
 		database.GetRecordsForDate(activeDate),
 		database.GetProjects(),

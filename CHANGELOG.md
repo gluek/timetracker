@@ -5,6 +5,7 @@
 ### Features
 
 - Show holiday in daily summary
+- Reject invalid routes and throw 404
 
 ## v0.6.1
 
