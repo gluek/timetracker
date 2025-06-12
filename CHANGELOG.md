@@ -7,6 +7,7 @@
 - Show holiday in daily summary
 - Reject invalid routes and throw 404
 - Server timeouts
+- Planner: mark current day
 
 ## v0.6.1
 

@@ -6,6 +6,7 @@
 *.code-workspace
 *_templ.go
 *.json
+!.markdownlint.json
 timetracker.yaml
 timetrackerconf.yaml
 *.syso
