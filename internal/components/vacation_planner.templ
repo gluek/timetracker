@@ -50,8 +50,10 @@ templ PlannerPage(activeYear time.Time, entries []database.PlannerEntry) {
 
 templ plannerChart(entries []database.PlannerEntry) {
 	@templ.JSONScript("recordData", entries)
+	@templ.JSONScript("currentDate", time.Now().Format("2006-01-02"))
 	<script type="text/javascript">
     var importData = JSON.parse(document.getElementById('recordData').textContent);
+    var currentDay = JSON.parse(document.getElementById('currentDate').textContent);
     var dataArray = importData.map((record) => ([record.date, record.type]));
     var activeYear = dataArray[0][0].split("-")[0];
     var dayCounter = document.getElementById('planner-counter');
@@ -131,7 +133,21 @@ templ plannerChart(entries []database.PlannerEntry) {
                     return format;
                 }
             },
-            data: dataArray
+            data: dataArray,
+            markPoint: {
+                symbol: 'rect',
+                symbolSize: 10,
+                symbolOffset: [-5, -14],
+                silent: true,
+                itemStyle: {
+                    color: 'red',
+                    opacity: 0.9,
+                },
+                data: [
+                    {coord: [currentDay]}
+                ]
+            }
+            
         }
         
     };
