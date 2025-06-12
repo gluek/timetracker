@@ -136,12 +136,12 @@ templ plannerChart(entries []database.PlannerEntry) {
             data: dataArray,
             markPoint: {
                 symbol: 'rect',
-                symbolSize: 10,
-                symbolOffset: [-5, -14],
+                symbolSize: [18, 34],
                 silent: true,
                 itemStyle: {
-                    color: 'red',
-                    opacity: 0.9,
+                    color: '#ffffff00',
+                    borderWidth: 1.5,
+                    borderColor: 'red',
                 },
                 data: [
                     {coord: [currentDay]}
