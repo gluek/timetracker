@@ -55,7 +55,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	err := component.Render(r.Context(), w)
 	if err != nil {
 		//w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("error render homepage: %v", err)
+		fmt.Printf("error render homepage: %v", err)
 	}
 }
 
